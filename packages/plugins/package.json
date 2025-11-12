@@ -1,9 +1,10 @@
 {
-	"name": "@appinit/ui",
+	"name": "@appinit/plugins",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
-	"private": false,
+	"private": true,
+	"devDependencies": {},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},

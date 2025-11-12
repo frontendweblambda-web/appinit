@@ -1,5 +1,7 @@
 # Ignore artifacts:
+node_modules
+dist
 build
 coverage
-user.json
-space.json
+.next
+templates

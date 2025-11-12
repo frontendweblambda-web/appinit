@@ -4,6 +4,7 @@
 	"description": "🚀 Codex CLI – The unified, framework-agnostic app generator for React, Next.js, Vue, Svelte, and Node.",
 	"main": "index.js",
 	"packageManager": "pnpm@10.21.0",
+	"private": true,
 	"scripts": {
 		"start": "node dist/cli/index.js",
 		"preinstall": "node -e \"if (!process.env.npm_config_user_agent?.includes('pnpm')) { console.error('\\n🚫 This project uses pnpm only.'); console.error('👉 Please use pnpm instead of npm or yarn.\\n'); process.exit(1); }\"",
@@ -13,7 +14,8 @@
 		"test": "turbo run test",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"release": "turbo run build && changeset publish",
-		"bootstrap": "tsx scripts/bootstrap.ts"
+		"bootstrap": "tsx scripts/bootstrap.ts",
+		"prepare": "husky"
 	},
 	"repository": {
 		"type": "git",
@@ -37,8 +39,11 @@
 		"boilerplate",
 		"fullstack"
 	],
+	"lint-staged": {
+		"**/*": "prettier --write --ignore-unknown"
+	},
 	"author": {
-		"name": "frontendweb-sg",
+		"name": "codeverse-pk",
 		"email": "frontendweb.ak@gmail.com",
 		"url": "https://github.com/frontendweblambda-web"
 	},
@@ -56,8 +61,14 @@
 	"devDependencies": {
 		"@changesets/cli": "2.29.7",
 		"@types/node": "^24.10.1",
+		"husky": "9.1.7",
+		"lint-staged": "16.2.6",
+		"prettier": "3.6.2",
 		"tsx": "^4.20.6",
 		"turbo": "2.6.1",
 		"typescript": "^5.9.3"
-	}
+	},
+	"workspaces": [
+		"packages/plugins"
+	]
 }

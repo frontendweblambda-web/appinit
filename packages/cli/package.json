@@ -1,28 +1,49 @@
 {
-  "name": "@appinit/cli",
-  "version": "1.0.0",
-  "description": "The command-line interface for Forge AI, driving scaffolding and management.",
-  "private": false,
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "forge": "./bin/cli.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsx src/index.ts",
-    "start": "node dist/index.js",
-    "clean": "rm -rf dist"
-  },
-  "keywords": [],
-  "author": "frontendweb-sg",
-  "license": "ISC",
-  "dependencies": {
-    "@appinit/engine": "workspace:*",
-    "@appinit/ui": "workspace:*"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@appinit/cli",
+	"version": "1.0.0",
+	"description": "The command-line interface for Forge AI, driving scaffolding and management.",
+	"private": false,
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"bin": {
+		"forge": "./bin/cli.js"
+	},
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsx src/index.ts",
+		"start": "node dist/index.js",
+		"clean": "rm -rf dist"
+	},
+	"keywords": [],
+	"author": "frontendweb-sg",
+	"license": "ISC",
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@octokit/auth-oauth-device": "^8.0.3",
+		"@octokit/rest": "^22.0.1",
+		"boxen": "^8.0.1",
+		"chalk": "^5.6.2",
+		"chalk-table": "^1.0.2",
+		"cli-progress": "^3.12.0",
+		"commander": "^14.0.2",
+		"deepmerge": "^4.3.1",
+		"dotenv": "^17.2.3",
+		"ejs": "^3.1.10",
+		"execa": "^9.6.0",
+		"fs-extra": "^11.3.2",
+		"globby": "^15.0.0",
+		"inquirer": "^12.11.0",
+		"json5": "^2.2.3",
+		"node-fetch": "^3.3.2",
+		"openai": "^6.8.1",
+		"ora": "^9.0.0",
+		"semver": "^7.7.3",
+		"simple-git": "^3.30.0",
+		"validate-npm-package-name": "^7.0.0",
+		"which": "^6.0.0",
+		"yaml": "^2.8.1"
+	}
 }
