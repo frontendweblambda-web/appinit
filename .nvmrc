@@ -4,4 +4,13 @@
 echo "# Stop npm from being used as the installer.
 # The following was added to package.json
 # { \"engines\": { \"npm\": \"Use pnpm instead of npm.\" } }
-engine-strict=true" > .npmrc
+
+# Force pnpm usage and ensure consistency
+engine-strict=true
+
+# Allow installing dev tools (like prettier, eslint) in workspace root
+ignore-workspace-root-check=true
+
+# Optional: speed up installs
+strict-peer-dependencies=false
+auto-install-peers=true
