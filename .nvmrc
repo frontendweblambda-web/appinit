@@ -1,16 +1,19 @@
-# .nvmrc
-20.11.0 # Or whatever stable LTS version you choose
-
-echo "# Stop npm from being used as the installer.
-# The following was added to package.json
-# { \"engines\": { \"npm\": \"Use pnpm instead of npm.\" } }
-
-# Force pnpm usage and ensure consistency
+# 🚫 Prevent developers from accidentally using npm or yarn
 engine-strict=true
 
-# Allow installing dev tools (like prettier, eslint) in workspace root
+# Allow workspace-level scripts (prettier, eslint, etc.)
 ignore-workspace-root-check=true
 
-# Optional: speed up installs
-strict-peer-dependencies=false
+# Speed up install & ensure reproducibility
+shared-workspace-lockfile=true
+link-workspace-packages=true
+
+# Avoid "peer dep missing" errors (pnpm will auto install them)
 auto-install-peers=true
+strict-peer-dependencies=false
+
+# Optional — ensure all workspace packages share a single lockfile
+save-workspace-protocol=true
+
+# Optional — cleaner output
+reporter=silent

@@ -1,0 +1,25 @@
+{
+	"name": "@appinit/types",
+	"version": "1.0.0",
+	"description": "Shared TypeScript definitions for the Appinit ecosystem.",
+	"private": false,
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"clean": "rimraf dist"
+	},
+	"devDependencies": {
+		"typescript": "^5.4.0"
+	}
+}

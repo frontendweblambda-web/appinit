@@ -1,5 +1,5 @@
+import { Answers } from "@appinit/types";
 import inquirer from "inquirer";
-import { Answers } from "src/types/answers.js";
 
 export function isFlat(structure: string) {
 	return structure === "flat";

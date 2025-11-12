@@ -1,5 +1,8 @@
 packages:
-  - "packages/*"
-  - "apps/*"
-  - "templates/*"
-  - "scripts/*"
+  - packages/*
+  - apps/*
+  - templates/*
+  - scripts/*
+
+ignoredBuiltDependencies:
+  - esbuild

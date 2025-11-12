@@ -6,13 +6,26 @@ settings:
 
 importers:
   .:
+    dependencies:
+      "@octokit/auth-oauth-device":
+        specifier: ^8.0.3
+        version: 8.0.3
+      "@octokit/rest":
+        specifier: ^22.0.1
+        version: 22.0.1
     devDependencies:
       "@changesets/cli":
         specifier: 2.29.7
         version: 2.29.7(@types/node@24.10.1)
+      "@types/fs-extra":
+        specifier: 11.0.4
+        version: 11.0.4
       "@types/node":
         specifier: ^24.10.1
         version: 24.10.1
+      "@types/which":
+        specifier: 3.0.4
+        version: 3.0.4
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -38,6 +51,12 @@ importers:
 
   packages/cli:
     dependencies:
+      "@appinit/engine":
+        specifier: workspace:*
+        version: link:../engine
+      "@appinit/types":
+        specifier: workspace:*
+        version: link:../types
       "@octokit/auth-oauth-device":
         specifier: ^8.0.3
         version: 8.0.3
@@ -88,7 +107,7 @@ importers:
         version: 3.3.2
       openai:
         specifier: ^6.8.1
-        version: 6.8.1
+        version: 6.8.1(zod@4.1.12)
       ora:
         specifier: ^9.0.0
         version: 9.0.0
@@ -116,18 +135,39 @@ importers:
 
   packages/engine:
     dependencies:
+      "@appinit/types":
+        specifier: workspace:*
+        version: link:../types
       chalk:
-        specifier: ^5.3.0
+        specifier: ^5.6.2
         version: 5.6.2
+      deepmerge:
+        specifier: ^4.3.1
+        version: 4.3.1
+      execa:
+        specifier: ^9.6.0
+        version: 9.6.0
       fs-extra:
-        specifier: ^11.2.0
+        specifier: ^11.3.2
         version: 11.3.2
       ora:
-        specifier: ^8.0.1
-        version: 8.2.0
+        specifier: ^9.0.0
+        version: 9.0.0
+      path:
+        specifier: 0.12.7
+        version: 0.12.7
+      which:
+        specifier: ^6.0.0
+        version: 6.0.0
+      zod:
+        specifier: ^4.1.12
+        version: 4.1.12
     devDependencies:
+      "@types/node":
+        specifier: ^24.10.1
+        version: 24.10.1
       rimraf:
-        specifier: ^6.0.1
+        specifier: ^6.1.0
         version: 6.1.0
       typescript:
         specifier: ^5.9.3
@@ -142,6 +182,12 @@ importers:
   packages/registry: {}
 
   packages/security: {}
+
+  packages/types:
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
 
   packages/ui: {}
 
@@ -866,6 +912,18 @@ packages:
       }
     engines: { node: ">=18" }
 
+  "@types/fs-extra@11.0.4":
+    resolution:
+      {
+        integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==,
+      }
+
+  "@types/jsonfile@6.1.4":
+    resolution:
+      {
+        integrity: sha512-D5qGUYwjvnNNextdU59/+fI+spnwtTFmyQP0h+PfIOSkNfpU6AOICUOkm4i0OnSk+NyjdPJrxCDro0sJsWlRpQ==,
+      }
+
   "@types/node@12.20.55":
     resolution:
       {
@@ -876,6 +934,12 @@ packages:
     resolution:
       {
         integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==,
+      }
+
+  "@types/which@3.0.4":
+    resolution:
+      {
+        integrity: sha512-liyfuo/106JdlgSchJzXEQCVArk0CvevqPote8F8HgWgJ3dRCcTHgJIsLDuee0kxk/mhbInzIZk3QWSZJ8R+2w==,
       }
 
   ansi-align@3.0.1:
@@ -1058,13 +1122,6 @@ packages:
         integrity: sha512-tRkV3HJ1ASwm19THiiLIXLO7Im7wlTuKnvkYaTkyoAPefqjNg7W7DHKUlGRxy9vxDvbyCYQkQozvptuMkGCg8A==,
       }
     engines: { node: ">=4" }
-
-  cli-spinners@2.9.2:
-    resolution:
-      {
-        integrity: sha512-ywqV+5MmyL4E7ybXgKys4DugZbX0FC6LnwrhjuykIjnK9k8OQacQ7axGKnjDXWNhns0xot3bZI5h55H8yo9cJg==,
-      }
-    engines: { node: ">=6" }
 
   cli-spinners@3.3.0:
     resolution:
@@ -1468,6 +1525,12 @@ packages:
       }
     engines: { node: ">= 4" }
 
+  inherits@2.0.3:
+    resolution:
+      {
+        integrity: sha512-x00IRNXNy63jwGkJmzPigoySHbaqpNuzKbBOmzK+g2OdZpQ9w+sxCN+VSB3ja7IAge2OP2qpfxTjeNcyjmW1uw==,
+      }
+
   inquirer@12.11.0:
     resolution:
       {
@@ -1542,13 +1605,6 @@ packages:
         integrity: sha512-2AT6j+gXe/1ueqbW6fLZJiIw3F8iXGJtt0yDrZaBhAZEG1raiTxKWU+IPqMCzQAXOUCKdA4UDMgacKH25XG2Cw==,
       }
     engines: { node: ">=4" }
-
-  is-unicode-supported@1.3.0:
-    resolution:
-      {
-        integrity: sha512-43r2mRvz+8JRIKnWJ+3j8JtjRKZ6GmjzfaE/qiBJnikNnYv/6bagRJ1kUhNk8R5EX/GkobD+r+sfxCPJsiKBLQ==,
-      }
-    engines: { node: ">=12" }
 
   is-unicode-supported@2.1.0:
     resolution:
@@ -1646,13 +1702,6 @@ packages:
       {
         integrity: sha512-+WKqsK294HMSc2jEbNgpHpd0JfIBhp7rEV4aqXWqFr6AlXov+SlcgB1Fv01y2kGe3Gc8nMW7VA0SrGuSkRfIEg==,
       }
-
-  log-symbols@6.0.0:
-    resolution:
-      {
-        integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==,
-      }
-    engines: { node: ">=18" }
 
   log-symbols@7.0.1:
     resolution:
@@ -1788,13 +1837,6 @@ packages:
       zod:
         optional: true
 
-  ora@8.2.0:
-    resolution:
-      {
-        integrity: sha512-weP+BZ8MVNnlCm8c0Qdc1WSWq4Qn7I+9CJGm7Qali6g44e/PUzbjNqJX5NJ9ljlNMosfJvg1fKEGILklK9cwnw==,
-      }
-    engines: { node: ">=18" }
-
   ora@9.0.0:
     resolution:
       {
@@ -1904,6 +1946,12 @@ packages:
       }
     engines: { node: ">=18" }
 
+  path@0.12.7:
+    resolution:
+      {
+        integrity: sha512-aXXC6s+1w7otVF9UletFkFcDsJeO7lSZBPUQhtb5O0xJe8LtYhj/GxldoL09bBj9+ZmE2hNoHqQSFMN5fikh4Q==,
+      }
+
   picocolors@1.1.1:
     resolution:
       {
@@ -1954,6 +2002,13 @@ packages:
         integrity: sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==,
       }
     engines: { node: ">=18" }
+
+  process@0.11.10:
+    resolution:
+      {
+        integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==,
+      }
+    engines: { node: ">= 0.6.0" }
 
   quansync@0.2.11:
     resolution:
@@ -2323,6 +2378,12 @@ packages:
       }
     engines: { node: ">= 10.0.0" }
 
+  util@0.10.4:
+    resolution:
+      {
+        integrity: sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==,
+      }
+
   validate-npm-package-name@7.0.0:
     resolution:
       {
@@ -2409,6 +2470,12 @@ packages:
         integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==,
       }
     engines: { node: ">=18" }
+
+  zod@4.1.12:
+    resolution:
+      {
+        integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==,
+      }
 
 snapshots:
   "@babel/runtime@7.28.4": {}
@@ -2893,11 +2960,22 @@ snapshots:
 
   "@sindresorhus/merge-streams@4.0.0": {}
 
+  "@types/fs-extra@11.0.4":
+    dependencies:
+      "@types/jsonfile": 6.1.4
+      "@types/node": 24.10.1
+
+  "@types/jsonfile@6.1.4":
+    dependencies:
+      "@types/node": 24.10.1
+
   "@types/node@12.20.55": {}
 
   "@types/node@24.10.1":
     dependencies:
       undici-types: 7.16.0
+
+  "@types/which@3.0.4": {}
 
   ansi-align@3.0.1:
     dependencies:
@@ -2988,8 +3066,6 @@ snapshots:
   cli-progress@3.12.0:
     dependencies:
       string-width: 4.2.3
-
-  cli-spinners@2.9.2: {}
 
   cli-spinners@3.3.0: {}
 
@@ -3235,6 +3311,8 @@ snapshots:
 
   ignore@7.0.5: {}
 
+  inherits@2.0.3: {}
+
   inquirer@12.11.0(@types/node@24.10.1):
     dependencies:
       "@inquirer/ansi": 1.0.2
@@ -3270,8 +3348,6 @@ snapshots:
   is-subdir@1.2.0:
     dependencies:
       better-path-resolve: 1.0.0
-
-  is-unicode-supported@1.3.0: {}
 
   is-unicode-supported@2.1.0: {}
 
@@ -3333,11 +3409,6 @@ snapshots:
 
   lodash.startcase@4.4.0: {}
 
-  log-symbols@6.0.0:
-    dependencies:
-      chalk: 5.6.2
-      is-unicode-supported: 1.3.0
-
   log-symbols@7.0.1:
     dependencies:
       is-unicode-supported: 2.1.0
@@ -3397,19 +3468,9 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
-  openai@6.8.1: {}
-
-  ora@8.2.0:
-    dependencies:
-      chalk: 5.6.2
-      cli-cursor: 5.0.0
-      cli-spinners: 2.9.2
-      is-interactive: 2.0.0
-      is-unicode-supported: 2.1.0
-      log-symbols: 6.0.0
-      stdin-discarder: 0.2.2
-      string-width: 7.2.0
-      strip-ansi: 7.1.2
+  openai@6.8.1(zod@4.1.12):
+    optionalDependencies:
+      zod: 4.1.12
 
   ora@9.0.0:
     dependencies:
@@ -3464,6 +3525,11 @@ snapshots:
 
   path-type@6.0.0: {}
 
+  path@0.12.7:
+    dependencies:
+      process: 0.11.10
+      util: 0.10.4
+
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -3479,6 +3545,8 @@ snapshots:
   pretty-ms@9.3.0:
     dependencies:
       parse-ms: 4.0.0
+
+  process@0.11.10: {}
 
   quansync@0.2.11: {}
 
@@ -3658,6 +3726,10 @@ snapshots:
 
   universalify@2.0.1: {}
 
+  util@0.10.4:
+    dependencies:
+      inherits: 2.0.3
+
   validate-npm-package-name@7.0.0: {}
 
   web-streams-polyfill@3.3.3: {}
@@ -3703,3 +3775,5 @@ snapshots:
   yoctocolors-cjs@2.1.3: {}
 
   yoctocolors@2.1.2: {}
+
+  zod@4.1.12: {}

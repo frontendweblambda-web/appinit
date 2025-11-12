@@ -1,5 +1,5 @@
 {
-	"name": "@appinit/ai",
+	"name": "@appinit/agent-sdk",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
