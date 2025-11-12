@@ -7,10 +7,13 @@
 	"scripts": {
 		"start": "node dist/cli/index.js",
 		"preinstall": "node -e \"if (!process.env.npm_config_user_agent?.includes('pnpm')) { console.error('\\n🚫 This project uses pnpm only.'); console.error('👉 Please use pnpm instead of npm or yarn.\\n'); process.exit(1); }\"",
-		"dev": "tsx src/cli/index.ts",
-		"build": "tsc -p .",
-		"prepare": "npm run build",
-		"prepublishOnly": "npm run build"
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"test": "turbo run test",
+		"clean": "turbo run clean && rm -rf node_modules",
+		"release": "turbo run build && changeset publish",
+		"bootstrap": "tsx scripts/bootstrap.ts"
 	},
 	"repository": {
 		"type": "git",
