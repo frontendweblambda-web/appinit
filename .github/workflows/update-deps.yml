@@ -1,0 +1,25 @@
+name: Update Dependencies
+on:
+  schedule:
+    - cron: "0 5 * * 1" # every Monday at 5am UTC
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - name: Install deps
+        run: pnpm install
+      - name: Update dependencies
+        run: pnpm update -r --latest
+      - name: Fix mismatches
+        run: pnpm run deps:fix
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "🔄 Weekly Dependency Update"
+          branch: deps/update

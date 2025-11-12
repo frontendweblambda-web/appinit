@@ -1,0 +1,16 @@
+{
+  "name": "@appinit/templates",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "files": ["react", "next", "vue"],
+  "description": "Official template collection for Appinit CLI",
+ "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": ["appinit", "template", "scaffold"],
+  "author": "frontendweb-sg",
+  "dependencies": {
+    "@appinit/config":"workspace:*",
+    "@appinit/types":"workspace:*"
+  }
+}

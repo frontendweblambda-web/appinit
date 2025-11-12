@@ -3,9 +3,10 @@ import path from "path";
 import chalk from "chalk";
 import { execa } from "execa";
 
-import { copyTemplate } from "./copy.js";
-import { detectPackageManager } from "./package-manager.js";
-import { mergePackageJson } from "./merge-package-json.js";
+import { copyTemplate } from "./common/copy.js";
+import { detectPackageManager } from "./common/package-manager.js";
+import { mergePackageJson } from "./common/merge-package-json.js";
+import { resolveTemplate } from "./common/template-resolver.js";
 
 /**
  * Generates a fully configured React template.
@@ -20,6 +21,8 @@ export const generateReactTemplate = async (targetDir: string, ui: string) => {
 	// === Step 1: Apply UI template if selected ===
 	if (ui && ui !== "none") {
 		console.log(chalk.cyan(`🎨 Applying ${ui} UI configuration...`));
+		const templatePath = await resolveTemplate(answers.framework + "/base");
+		await copyTemplate(templatePath, targetDir);
 		await copyTemplate(`react/ui/${ui}`, targetDir);
 
 		const pkgFragment = path.join(targetDir, `${ui}.pkg.json`);

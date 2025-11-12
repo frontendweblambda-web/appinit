@@ -1,8 +1,11 @@
-/**
- * @appinit/types
- * Global type definitions for scaffolding configuration.
- */
+import type { FrontendOptions } from "./frontend.types.js";
+import type { BackendOptions } from "./backend.types.js";
+import type { AuthOptions } from "./auth.types.js";
+import type { DeployOptions } from "./deploy.types.js";
 
+/**
+ * Global configuration schema for Appinit scaffolding.
+ */
 export type Answers = {
 	projectName: string;
 	description?: string;
@@ -11,42 +14,37 @@ export type Answers = {
 	packageScope?: string | null;
 
 	registry: "npm" | "pnpm" | "yarn" | "bun";
-	workspace: "single" | "turborepo";
+	workspace: "single" | "turborepo" | "nx" | "monorepo";
 
-	framework: "react" | "next" | "vue" | "svelte" | "framer" | "react-router";
-	ui: "tailwind" | "mui" | "shadcn" | "antd" | "none";
-	routing?: "app" | "pages" | "react-router" | "vue-router";
-	store?: "pinia" | "zustand" | "redux";
-
+	type: "frontend" | "backend" | "fullstack" | "library" | "cli";
 	language: "typescript" | "javascript";
-	structure: "flat" | "src-folder";
+	structure: "flat" | "src-folder" | "feature-based" | "domain-driven";
 
-	testing: "vitest" | "jest" | "none" | "playwright" | "cypress";
-	linting: "eslint" | "none";
-	formatting: "prettier" | "none";
+	formatting: "prettier" | "rome" | "none";
+	linting: "eslint" | "biome" | "none";
+	testing: "vitest" | "jest" | "playwright" | "cypress" | "storybook" | "none";
 	commitConventions: boolean;
 
-	editor: "vscode" | "sublime" | "atom" | "none";
-
-	auth: boolean;
-	authProvider?: "custom" | "nextauth" | "clerk" | "supabase" | "none";
-
-	database?: "none" | "postgresql" | "supabase" | "mongo" | "sqlite";
-	orm?: "prisma" | "typeorm" | "mongoose" | "none";
-
-	caching?: "none" | "api-cache" | "edge" | "redis";
-	analytics?: boolean;
-	monitoring?: boolean;
-
+	editor: "vscode" | "sublime" | "webstorm" | "cursor" | "none";
 	initGit: boolean;
 	createRemote: boolean;
 	repoVisibility?: "public" | "private";
 	remoteOrg?: string | null;
 
 	setupCI: boolean;
-	ciProvider?: "vercel" | "netlify" | "github-actions" | "none";
+	setupCD?: boolean;
 	autoInstall: boolean;
 	autoStart: boolean;
+	autoOpen?: boolean;
+
+	organization?: string;
+	projectVisibility?: "public" | "private" | "internal";
+	licenseType?: "MIT" | "ISC" | "Apache-2.0" | "Proprietary";
 
 	useAI?: boolean;
-};
+
+	// compose with specialized types
+} & FrontendOptions &
+	BackendOptions &
+	AuthOptions &
+	DeployOptions;
