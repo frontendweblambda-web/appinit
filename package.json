@@ -54,6 +54,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
+		"@changesets/cli": "2.29.7",
 		"@types/node": "^24.10.1",
 		"tsx": "^4.20.6",
 		"turbo": "2.6.1",
