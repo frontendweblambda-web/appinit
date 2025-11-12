@@ -1,4 +1,4 @@
-name: 🚀 Forge Publish
+name: 🚀 Appinit Publish
 on:
   release:
     types: [published]
@@ -33,7 +33,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build
-        run: pnpm exec turbo run build
+        run: pnpm turbo run build
 
       - name: 🚀 Publish
         env:
