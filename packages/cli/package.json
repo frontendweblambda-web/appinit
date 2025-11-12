@@ -1,0 +1,28 @@
+{
+  "name": "@appinit/cli",
+  "version": "1.0.0",
+  "description": "The command-line interface for Forge AI, driving scaffolding and management.",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "forge": "./bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [],
+  "author": "frontendweb-sg",
+  "license": "ISC",
+  "dependencies": {
+    "@appinit/engine": "workspace:*",
+    "@appinit/ui": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

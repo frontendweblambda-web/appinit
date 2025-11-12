@@ -1,1 +1,7 @@
-20.0.0
+# .nvmrc
+20.11.0 # Or whatever stable LTS version you choose
+
+echo "# Stop npm from being used as the installer.
+# The following was added to package.json
+# { \"engines\": { \"npm\": \"Use pnpm instead of npm.\" } }
+engine-strict=true" > .npmrc

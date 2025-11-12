@@ -1,7 +1,7 @@
 lockfileVersion: '9.0'
 
 settings:
-  autoInstallPeers: true
+  autoInstallPeers: false
   excludeLinksFromLockfile: false
 
 importers:
@@ -17,6 +17,19 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+
+  packages/cli:
+    dependencies:
+      '@appinit/engine':
+        specifier: workspace:*
+        version: link:../engine
+      '@appinit/ui':
+        specifier: workspace:*
+        version: link:../ui
+
+  packages/engine: {}
+
+  packages/ui: {}
 
 packages:
 
