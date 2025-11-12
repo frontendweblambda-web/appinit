@@ -1,0 +1,56 @@
+{
+  "name": "appinit",
+  "version": "1.0.0",
+  "description": "🚀 Codex CLI – The unified, framework-agnostic app generator for React, Next.js, Vue, Svelte, and Node.",
+  "main": "index.js",
+  "packageManager": "pnpm@9.10.0",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node dist/cli/index.js",
+    "dev": "tsx src/cli/index.ts",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@fwlambda:frontendweblambda-web/appinit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/frontendweblambda-web/appinit/issues"
+  },
+  "keywords": [
+    "codex",
+    "cli",
+    "scaffold",
+    "generator",
+    "vite",
+    "react",
+    "vue",
+    "nextjs",
+    "svelte",
+    "typescript",
+    "starter",
+    "boilerplate",
+    "fullstack"
+  ],
+  "author": {
+    "name": "frontendweb-sg",
+    "email": "frontendweb.ak@gmail.com",
+    "url": "https://github.com/frontendweblambda-web"
+  },
+  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
