@@ -1,8 +1,26 @@
+// tsconfig.json - root file
 {
 	"files": [],
 	"references": [
 		{ "path": "./tsconfig.base.json" },
+		{ "path": "./packages/agent-sdk" },
+		{ "path": "./packages/ai" },
+		{ "path": "./packages/cleanup" },
 		{ "path": "./packages/cli" },
-		{ "path": "./packages/engine" }
+		{ "path": "./packages/config" },
+		{ "path": "./packages/deploy" },
+		{ "path": "./packages/devops" },
+		{ "path": "./packages/types" },
+		{ "path": "./packages/utils" },
+		{ "path": "./packages/engine" },
+		{ "path": "./packages/git" },
+		{ "path": "./packages/git-tools" },
+		{ "path": "./packages/github" },
+		{ "path": "./packages/install" },
+		{ "path": "./packages/registry" },
+		{ "path": "./packages/marketplace" },
+		{ "path": "./packages/template-resolver" },
+		{ "path": "./packages/plugins" },
+		{ "path": "./packages/security" }
 	]
 }

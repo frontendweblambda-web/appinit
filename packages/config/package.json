@@ -24,7 +24,8 @@
 		"dist"
 	],
 	"dependencies": {
-		"@appinit/types": "workspace:*"
+		"@appinit/types": "workspace:*",
+		"@appinit/utils": "workspace:*"
 	},
 	"scripts": {
 		"clean": "npx rimraf dist",

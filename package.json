@@ -15,12 +15,11 @@
 		"release": "turbo run build && changeset publish",
 		"bootstrap": "tsx scripts/bootstrap.ts",
 		"prepare": "husky",
-		"clean:generated": "npx rimraf packages/**/src/**/*.js packages/**/src/**/*.d.ts apps/**/src/**/*.js apps/**/src/**/*.d.ts",
-		"clean:dist": "npx rimraf packages/**/dist apps/**/dist",
-		"clean:cache": "npx rimraf .turbo node_modules/.pnpm-store",
-		"clean:modules": "npx rimraf node_modules",
-		"clean": "pnpm clean:generated && pnpm clean:dist && pnpm clean:cache",
-		"clean:kill": "powershell -ExecutionPolicy Bypass -File scripts/kill-processes.ps1"
+		"clean:generated": "node scripts/clean-generated.mjs",
+		"clean:dist": "node scripts/clean-dist.mjs",
+		"clean:cache": "node scripts/clean-cache.mjs",
+		"clean:modules": "node scripts/clean-modules.mjs",
+		"clean": "pnpm clean:generated && pnpm clean:dist && pnpm clean:cache"
 	},
 	"repository": {
 		"type": "git",
@@ -68,6 +67,7 @@
 		"@types/fs-extra": "11.0.4",
 		"@types/node": "^24.10.1",
 		"@types/which": "3.0.4",
+		"fast-glob": "3.3.3",
 		"husky": "9.1.7",
 		"lint-staged": "16.2.6",
 		"prettier": "3.6.2",

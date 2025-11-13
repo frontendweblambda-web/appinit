@@ -1,46 +1,29 @@
-// packages/cli
-import { Command } from "commander";
+import { logger } from "@appinit/utils";
+import { runInit } from "./commands/init.js";
+import { runNew } from "./commands/new.js";
+import { runDoctor } from "./commands/doctor.js";
 
-import * as engine from "@appinit/engine";
-
-import { askQuestions } from "./questions/index.js";
-import { logger } from "./core/logger.js";
-import chalk from "chalk";
-
-const program = new Command();
+const args = process.argv.slice(2);
+const cmd = args[0];
 
 async function main() {
-	program
-		.description("🧱 Create a new full-stack project with Appinit")
-		.argument("[name]", "project name")
-		.option("--force", "overwrite existing directory")
-		.option("--no-install", "skip dependency installation")
-		.action(async (name, options) => {
-			try {
-				logger.info("🚀 Appinit - Create Project");
+	switch (cmd) {
+		case "init":
+			await runInit();
+			break;
 
-				// const userConfig = await loadUserConfig();
-				const answers = await askQuestions(name, options);
+		case "new":
+			await runNew();
+			break;
 
-				await engine.startEngine(answers);
+		case "doctor":
+			await runDoctor();
+			break;
 
-				logger.success(`✅ Project ${name} created successfully!`);
-			} catch (err) {
-				const message = err instanceof Error ? err.message : "";
-				logger.error(`❌ Failed to create project:"${message}`);
-				process.exit(1);
-			}
-		});
-
-	await program.parseAsync(process.argv);
+		default:
+			logger.error(`Unknown command: ${cmd}`);
+			logger.info(`Available commands: init, new, doctor`);
+	}
 }
 
-main().catch((err) => {
-	if (err?.name === "ExitPromptError") {
-		console.log(chalk.yellow("\n\n👋 Cancelled by user.\n"));
-		process.exit(0);
-	}
-
-	console.error(chalk.red("❌ Fatal error:"), err);
-	process.exit(1);
-});
+main();

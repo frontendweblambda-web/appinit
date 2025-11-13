@@ -1,7 +1,6 @@
 import path from "path";
-
-import { logger } from "../logger";
-import { exists } from "../exists";
+import { exists } from "../exists.js";
+import logger from "../logger/index.js";
 
 export async function loadConfig(
 	projectRoot: string,
