@@ -8,6 +8,7 @@ import { qualityPack } from "./packs/quality";
 import { infraPack } from "./packs/infra";
 import { automationPack } from "./packs/automation";
 import { logger } from "@appinit/utils";
+import { loadDynamicPromptPacks } from "./load-dynamic";
 
 const DEFAULT_PIPELINE: PromptPack[] = [
 	gitPack,
@@ -23,7 +24,9 @@ export async function runPromptEngine(
 	ctx: PromptContext,
 	packs?: PromptPack[],
 ): Promise<PromptResult> {
-	const pipeline = packs ?? DEFAULT_PIPELINE;
+	let pipeline: PromptPack[] = packs ?? DEFAULT_PIPELINE.slice();
+
+	const dynamic = await loadDynamicPromptPacks(ctx);
 	const final: PromptResult = {};
 
 	logger.step("Starting prompt engine...");

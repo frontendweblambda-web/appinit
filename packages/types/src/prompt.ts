@@ -1,15 +1,11 @@
 import type { Answers } from "./answers";
 
-// Flags parsed from CLI arguments (like commander or your own parser)
-export type Flags = Record<string, any>;
-
 // A single prompt pack (template or built-in)
 export interface PromptPack {
 	name: string;
-	handler: (
-		ctx: PromptContext,
-		accum: PromptResult,
-	) => Promise<Partial<Answers>>;
+	priority?: number; // lower => earlier; default 100
+	tags?: string[]; // optional tags used for filtering
+	handler: PromptPackHandler;
 }
 
 // Optional hooks for future AI auto-answer and UX improvements
@@ -35,7 +31,7 @@ export interface PromptContext {
 	templateMeta?: Record<string, any> | null;
 	defaultName?: string | null;
 	// ⭐ NEW: allow templates/plugins to inject their own prompt packs
-	templatePromptPacks?: PromptPack[];
+	templatePromptPacks?: (string | PromptPackDefinition)[];
 	// ⭐ NEW: allow template to skip default builtin packs
 	skipDefaultPacks?: boolean;
 	// ⭐ NEW: Fire hooks (AI/autofill/validation)
@@ -43,6 +39,16 @@ export interface PromptContext {
 	// ⭐ NEW: runtime environment (CLI, UI, API, Dashboard, CodeEditor)
 	runtime?: "cli" | "api" | "web" | "vscode";
 }
+// Flags parsed from CLI arguments (like commander or your own parser)
+export type Flags = Record<string, any>;
+export type PromptPackHandler = (
+	ctx: PromptContext,
+	accum: PromptResult,
+) => Promise<Partial<Answers>>;
 
 // What each pack returns (a slice of partial Answers)
 export type PromptResult = Partial<Answers>;
+export type PromptPackDefinition =
+	| { type: "module"; path: string } // path to js/ts module exporting { pack | default }
+	| { type: "json"; path: string } // path to JSON file with `prompts` array (simple)
+	| PromptPack;
