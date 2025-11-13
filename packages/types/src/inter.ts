@@ -1,4 +1,4 @@
-import type { Answers } from "./answers.js";
+import type { Answers } from "./answers";
 
 export const isFrontend = (a: Answers) =>
 	a.type === "frontend" || a.type === "fullstack";

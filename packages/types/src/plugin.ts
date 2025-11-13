@@ -2,7 +2,7 @@
 // Final unified plugin architecture for Appinit OS
 
 import type { Answers } from "./answers.js";
-import type { EngineContext } from "@appinit/types";
+import type { EngineContext } from "./engine/context.js";
 import type { ResolvedTemplate } from "./template.js";
 import { TemplateFile, TransformContext } from "./file.js";
 /* -----------------------------------------------------------

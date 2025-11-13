@@ -4,32 +4,32 @@
 	"description": "Shared utility helpers for Appinit OS.",
 	"private": false,
 	"type": "module",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"main": "./dist/cjs/index.cjs",
+	"module": "./dist/esm/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/esm/index.js",
+			"require": "./dist/cjs/index.cjs"
+		}
+	},
 	"files": [
 		"dist"
 	],
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		}
-	},
 	"scripts": {
-		"build": "tsc -p tsconfig.json",
-		"clean": "npx rimraf dist",
+		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"dev": "tsc -p tsconfig.json",
+		"build": "tsup",
+		"dev": "tsup --watch",
 		"test": "vitest"
 	},
 	"dependencies": {
-		"fs-extra": "^11.3.2"
+		"fs-extra": "latest"
 	},
 	"devDependencies": {
-		"typescript": "^5.9.3",
-		"@types/node": "^20.11.30",
-		"vitest": "^1.2.0",
-		"rimraf": "^6.1.0"
+		"tsup": "latest",
+		"typescript": "latest",
+		"vitest": "latest"
 	},
 	"engines": {
 		"node": ">=18"

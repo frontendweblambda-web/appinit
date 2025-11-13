@@ -6,15 +6,14 @@
 	"packageManager": "pnpm@10.21.0",
 	"private": true,
 	"scripts": {
-		"start": "node dist/cli/index.js",
 		"preinstall": "node -e \"if (!process.env.npm_config_user_agent?.includes('pnpm')) { console.error('\\n🚫 This project uses pnpm only.'); console.error('👉 Please use pnpm instead of npm or yarn.\\n'); process.exit(1); }\"",
+		"start": "node dist/cli/index.js",
 		"dev": "turbo run dev",
 		"build": "turbo run build",
 		"lint": "turbo run lint",
 		"test": "turbo run test",
-		"release": "turbo run build && changeset publish",
-		"bootstrap": "tsx scripts/bootstrap.ts",
 		"prepare": "husky",
+		"release": "turbo run build && changeset publish",
 		"clean:generated": "node scripts/clean-generated.mjs",
 		"clean:dist": "node scripts/clean-dist.mjs",
 		"clean:cache": "node scripts/clean-cache.mjs",
@@ -72,15 +71,16 @@
 		"lint-staged": "16.2.6",
 		"prettier": "3.6.2",
 		"rimraf": "^6.1.0",
-		"tsx": "^4.20.6",
-		"turbo": "2.6.1",
-		"typescript": "^5.9.3"
+		"@octokit/auth-oauth-device": "^8.0.3",
+		"@octokit/rest": "^22.0.1"
 	},
 	"workspaces": [
 		"packages/plugins"
 	],
 	"dependencies": {
-		"@octokit/auth-oauth-device": "^8.0.3",
-		"@octokit/rest": "^22.0.1"
+		"turbo": "latest",
+		"tsup": "latest",
+		"typescript": "latest",
+		"tsx": "latest"
 	}
 }
