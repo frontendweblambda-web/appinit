@@ -1,7 +1,7 @@
 {
 	"name": "@appinit/engine",
 	"version": "1.0.0",
-	"description": "Core scaffolding and configuration engine for AppInit ecosystem.",
+	"description": "Core scaffolding and configuration engine for the AppInit ecosystem.",
 	"private": false,
 	"type": "module",
 	"main": "dist/index.js",
@@ -9,30 +9,36 @@
 	"files": [
 		"dist"
 	],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
 	"scripts": {
-		"clean": "rimraf dist",
-		"build": "pnpm run clean && tsc -p tsconfig.json",
-		"prepare": "pnpm run build"
+		"clean": "npx rimraf dist",
+		"prebuild": "pnpm clean",
+		"build": "pnpm clean && tsc -p tsconfig.json",
+		"dev": "tsc -w -p tsconfig.json"
 	},
 	"dependencies": {
 		"@appinit/types": "workspace:*",
 		"chalk": "^5.6.2",
+		"deepmerge": "^4.3.1",
+		"execa": "^9.6.0",
 		"fs-extra": "^11.3.2",
 		"ora": "^9.0.0",
 		"path": "0.12.7",
-		"zod": "^4.1.12",
-		"execa": "^9.6.0",
 		"which": "^6.0.0",
-		"deepmerge": "^4.3.1"
+		"zod": "^4.1.12"
 	},
 	"devDependencies": {
-		"@types/node": "^24.10.1",
-		"rimraf": "^6.1.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"@types/node": "^20.11.30"
 	},
 	"keywords": [
 		"scaffold",
-		"cli-engine",
+		"engine",
 		"generator",
 		"appinit",
 		"typescript"

@@ -1,25 +1,42 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env", "package-lock.json"],
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", "build/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "test": {
-      "dependsOn": ["build"],
-      "outputs": []
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "release": {
-      "dependsOn": ["build"]
-    }
-  }
+	"$schema": "https://turbo.build/schema.json",
+	"globalDependencies": [".env", ".env.*", "pnpm-lock.yaml", "package.json"],
+	"tasks": {
+		"clean": {
+			"cache": false,
+			"outputs": []
+		},
+		"typecheck": {
+			"dependsOn": ["^typecheck"],
+			"inputs": ["src/**/*.ts", "src/**/*.tsx"],
+			"outputs": []
+		},
+		"lint": {
+			"dependsOn": ["^lint"],
+			"inputs": ["src/**/*", ".eslintrc.*", ".eslintignore"],
+			"outputs": []
+		},
+
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
+			"outputs": ["dist/**", "build/**", "lib/**"]
+		},
+
+		"test": {
+			"dependsOn": ["build"],
+			"inputs": ["src/**/*", "test/**/*", "vitest.config.*", "jest.config.*"],
+			"outputs": []
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true,
+			"dependsOn": ["^dev"]
+		},
+		"release": {
+			"dependsOn": ["build"],
+			"inputs": ["CHANGELOG.md", ".changeset/**"],
+			"outputs": []
+		}
+	}
 }

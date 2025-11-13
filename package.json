@@ -12,10 +12,15 @@
 		"build": "turbo run build",
 		"lint": "turbo run lint",
 		"test": "turbo run test",
-		"clean": "turbo run clean && rm -rf node_modules",
 		"release": "turbo run build && changeset publish",
 		"bootstrap": "tsx scripts/bootstrap.ts",
-		"prepare": "husky"
+		"prepare": "husky",
+		"clean:generated": "npx rimraf packages/**/src/**/*.js packages/**/src/**/*.d.ts apps/**/src/**/*.js apps/**/src/**/*.d.ts",
+		"clean:dist": "npx rimraf packages/**/dist apps/**/dist",
+		"clean:cache": "npx rimraf .turbo node_modules/.pnpm-store",
+		"clean:modules": "npx rimraf node_modules",
+		"clean": "pnpm clean:generated && pnpm clean:dist && pnpm clean:cache",
+		"clean:kill": "powershell -ExecutionPolicy Bypass -File scripts/kill-processes.ps1"
 	},
 	"repository": {
 		"type": "git",
@@ -66,6 +71,7 @@
 		"husky": "9.1.7",
 		"lint-staged": "16.2.6",
 		"prettier": "3.6.2",
+		"rimraf": "^6.1.0",
 		"tsx": "^4.20.6",
 		"turbo": "2.6.1",
 		"typescript": "^5.9.3"

@@ -1,0 +1,30 @@
+{
+	"name": "@appinit/template-resolver",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc --project tsconfig.json",
+		"dev": "tsc --watch",
+		"test": "vitest"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {
+		"tar": "^6.1.11"
+	},
+	"devDependencies": {
+		"typescript": "^5.0.0",
+		"vitest": "^1.0.0"
+	}
+}

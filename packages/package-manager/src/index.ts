@@ -1,22 +1,13 @@
 // packages/package-manager/src/index.ts
-// ESM-ready, turborepo-friendly package manager detection + execution layer
 
 import { exec as _exec } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import fs from "node:fs/promises";
 
+import type { PackageManager, PackageManagerAPI } from "@appinit/types";
+
 const exec = promisify(_exec);
-
-export type PackageManager = "npm" | "yarn" | "pnpm" | "bun";
-
-export interface PM {
-	name: PackageManager;
-	install(deps: string[]): Promise<void>;
-	installDev(deps: string[]): Promise<void>;
-	remove(deps: string[]): Promise<void>;
-	run(script: string): Promise<void>;
-}
 
 /** Detect package manager via lockfiles */
 export async function detectPM(cwd: string): Promise<PackageManager> {
@@ -34,50 +25,48 @@ export async function detectPM(cwd: string): Promise<PackageManager> {
 		} catch {}
 	}
 
-	// fallback: npm
-	return "npm";
+	return "npm"; // fallback
 }
 
 /** Create a unified PM interface */
-export async function getPM(cwd: string): Promise<PM> {
+export async function getPM(cwd: string): Promise<PackageManagerAPI> {
 	const pm = await detectPM(cwd);
 
-	function cmd(parts: string[]) {
-		return exec(parts.join(" "), { cwd });
-	}
+	const runCmd = (parts: string[]) =>
+		exec(parts.join(" "), { cwd, shell: true });
 
-	const api: PM = {
+	const api: PackageManagerAPI = {
 		name: pm,
 
 		async install(deps) {
 			if (!deps.length) return;
-			if (pm === "npm") return cmd(["npm", "install", ...deps]);
-			if (pm === "yarn") return cmd(["yarn", "add", ...deps]);
-			if (pm === "pnpm") return cmd(["pnpm", "add", ...deps]);
-			if (pm === "bun") return cmd(["bun", "add", ...deps]);
+			if (pm === "npm") return runCmd(["npm", "install", ...deps]);
+			if (pm === "yarn") return runCmd(["yarn", "add", ...deps]);
+			if (pm === "pnpm") return runCmd(["pnpm", "add", ...deps]);
+			if (pm === "bun") return runCmd(["bun", "add", ...deps]);
 		},
 
 		async installDev(deps) {
 			if (!deps.length) return;
-			if (pm === "npm") return cmd(["npm", "install", "-D", ...deps]);
-			if (pm === "yarn") return cmd(["yarn", "add", "-D", ...deps]);
-			if (pm === "pnpm") return cmd(["pnpm", "add", "-D", ...deps]);
-			if (pm === "bun") return cmd(["bun", "add", "-d", ...deps]);
+			if (pm === "npm") return runCmd(["npm", "install", "-D", ...deps]);
+			if (pm === "yarn") return runCmd(["yarn", "add", "-D", ...deps]);
+			if (pm === "pnpm") return runCmd(["pnpm", "add", "-D", ...deps]);
+			if (pm === "bun") return runCmd(["bun", "add", "-d", ...deps]);
 		},
 
 		async remove(deps) {
 			if (!deps.length) return;
-			if (pm === "npm") return cmd(["npm", "uninstall", ...deps]);
-			if (pm === "yarn") return cmd(["yarn", "remove", ...deps]);
-			if (pm === "pnpm") return cmd(["pnpm", "remove", ...deps]);
-			if (pm === "bun") return cmd(["bun", "remove", ...deps]);
+			if (pm === "npm") return runCmd(["npm", "uninstall", ...deps]);
+			if (pm === "yarn") return runCmd(["yarn", "remove", ...deps]);
+			if (pm === "pnpm") return runCmd(["pnpm", "remove", ...deps]);
+			if (pm === "bun") return runCmd(["bun", "remove", ...deps]);
 		},
 
 		async run(script) {
-			if (pm === "npm") return cmd(["npm", "run", script]);
-			if (pm === "yarn") return cmd(["yarn", script]);
-			if (pm === "pnpm") return cmd(["pnpm", "run", script]);
-			if (pm === "bun") return cmd(["bun", script]);
+			if (pm === "npm") return runCmd(["npm", "run", script]);
+			if (pm === "yarn") return runCmd(["yarn", script]);
+			if (pm === "pnpm") return runCmd(["pnpm", "run", script]);
+			if (pm === "bun") return runCmd(["bun", script]);
 		},
 	};
 

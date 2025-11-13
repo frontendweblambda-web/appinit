@@ -1,19 +1,22 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"baseUrl": ".",
-		"rootDir": "./src",
-		"outDir": "./dist",
-		"noEmit": false,
-		"target": "ES2022",
-		"module": "NodeNext",
-		"moduleResolution": "NodeNext",
+		"outDir": "dist",
+		"rootDir": "src",
+
 		"declaration": true,
-		"declarationMap": true,
+		"emitDeclarationOnly": true,
+		"declarationMap": false,
+
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"target": "ES2022",
+
+		"allowJs": false,
+		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
 		"strict": true
 	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "dist", "**/*.test.ts"]
+	"include": ["src"]
 }

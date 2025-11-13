@@ -1,20 +1,23 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"baseUrl": "./",
-		"rootDir": "./src",
-		"outDir": "./dist",
-		"noEmit": false,
+		"rootDir": "src",
+		"outDir": "dist",
+
+		"target": "ES2022",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
+
 		"declaration": true,
-		"declarationMap": true
+		"declarationMap": false,
+
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": true
 	},
+
 	"include": ["src"],
-	"exclude": ["node_modules", "dist"]
-	// 💡 IMPORTANT: If your CLI depends on the Engine or UI,
-	//    you must include project references here:
-	// "references": [
-	//   { "path": "../engine" }
-	// ]
+	"exclude": ["dist"]
 }

@@ -4,20 +4,21 @@
 	"description": "Shared TypeScript definitions for the Appinit ecosystem.",
 	"private": false,
 	"type": "module",
-	"main": "dist/index.js",
+	"main": "dist/index.d.ts",
 	"types": "dist/index.d.ts",
 	"files": [
 		"dist"
 	],
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
 		}
 	},
 	"scripts": {
+		"clean": "npx rimraf dist",
+		"prebuild": "pnpm clean",
 		"build": "tsc -p tsconfig.json",
-		"clean": "rimraf dist"
+		"dev": "tsc -w -p tsconfig.json"
 	},
 	"devDependencies": {
 		"typescript": "^5.4.0"

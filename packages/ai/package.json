@@ -1,14 +1,43 @@
 {
 	"name": "@appinit/ai",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
+	"description": "Appinit OS AI toolkit (LLM wrappers, agents, embeddings, prompts).",
 	"private": true,
-	"devDependencies": {},
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
 	},
-	"keywords": [],
+	"scripts": {
+		"clean": "npx rimraf dist",
+		"prebuild": "pnpm clean",
+		"build": "tsc -p tsconfig.json",
+		"dev": "tsc -w -p tsconfig.json",
+		"test": "echo \"No tests specified yet\""
+	},
+	"dependencies": {
+		"@appinit/types": "workspace:*",
+		"@appinit/utils": "workspace:*",
+		"@appinit/agent-sdk": "workspace:*",
+		"openai": "^4.54.0",
+		"ollama": "^0.4.1",
+		"node-fetch": "^3.3.2"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"@types/node": "^20.11.30",
+		"rimraf": "^6.1.0"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"author": "frontendweb-sg",
-	"license": "ISC"
+	"license": "MIT"
 }

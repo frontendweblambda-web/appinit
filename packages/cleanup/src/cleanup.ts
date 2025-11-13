@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import path from "node:path";
+
 import { logger } from "@appinit/utils";
 import { listTemp, clearTemp } from "./temp-registry";
 
