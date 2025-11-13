@@ -1,0 +1,27 @@
+{
+	"name": "@appinit/utils",
+	"version": "0.1.1",
+	"private": true,
+	"type": "module",
+	"main": "dist/index.js",
+	"module": "dist/index.esm.js",
+	"exports": {
+		"import": "./dist/index.js",
+		"types": "./dist/index.d.ts"
+	},
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc && rollup -c",
+		"test": "vitest"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"devDependencies": {
+		"typescript": "^5.0.0",
+		"rollup": "^3.0.0",
+		"@rollup/plugin-node-resolve": "^15.0.0",
+		"@rollup/plugin-commonjs": "^25.0.0",
+		"rollup-plugin-dts": "^5.0.0"
+	}
+}
