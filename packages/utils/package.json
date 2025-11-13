@@ -27,6 +27,7 @@
 		"fs-extra": "latest"
 	},
 	"devDependencies": {
+		"deepmerge": "latest",
 		"tsup": "latest",
 		"typescript": "latest",
 		"vitest": "latest"

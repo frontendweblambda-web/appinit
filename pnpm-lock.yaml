@@ -7,16 +7,28 @@ settings:
 importers:
   .:
     dependencies:
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      tsx:
+        specifier: latest
+        version: 4.20.6
+      turbo:
+        specifier: latest
+        version: 2.6.1
+      typescript:
+        specifier: latest
+        version: 5.9.3
+    devDependencies:
+      "@changesets/cli":
+        specifier: 2.29.7
+        version: 2.29.7(@types/node@24.10.1)
       "@octokit/auth-oauth-device":
         specifier: ^8.0.3
         version: 8.0.3
       "@octokit/rest":
         specifier: ^22.0.1
         version: 22.0.1
-    devDependencies:
-      "@changesets/cli":
-        specifier: 2.29.7
-        version: 2.29.7(@types/node@24.10.1)
       "@types/fs-extra":
         specifier: 11.0.4
         version: 11.0.4
@@ -26,6 +38,9 @@ importers:
       "@types/which":
         specifier: 3.0.4
         version: 3.0.4
+      deepmerge:
+        specifier: 4.3.1
+        version: 4.3.1
       fast-glob:
         specifier: 3.3.3
         version: 3.3.3
@@ -41,18 +56,6 @@ importers:
       rimraf:
         specifier: ^6.1.0
         version: 6.1.0
-      tsup:
-        specifier: 8.5.1
-        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
-      tsx:
-        specifier: ^4.20.6
-        version: 4.20.6
-      turbo:
-        specifier: 2.6.1
-        version: 2.6.1
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
   packages/agent-sdk:
     dependencies:
@@ -71,6 +74,9 @@ importers:
       fs-extra:
         specifier: ^11.3.2
         version: 11.3.2
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
     devDependencies:
       "@types/node":
         specifier: ^20.11.30
@@ -106,6 +112,9 @@ importers:
       rimraf:
         specifier: ^6.1.0
         version: 6.1.0
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -125,9 +134,9 @@ importers:
       "@types/node":
         specifier: ^20.11.30
         version: 20.19.25
-      rimraf:
-        specifier: ^6.1.0
-        version: 6.1.0
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -329,6 +338,9 @@ importers:
       "@types/node":
         specifier: ^20.11.30
         version: 20.19.25
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -640,30 +652,36 @@ importers:
 
   packages/types:
     devDependencies:
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       typescript:
-        specifier: ^5.4.0
+        specifier: latest
         version: 5.9.3
+      vitest:
+        specifier: latest
+        version: 4.0.8(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1)
 
   packages/ui: {}
 
   packages/utils:
     dependencies:
       fs-extra:
-        specifier: ^11.3.2
+        specifier: latest
         version: 11.3.2
     devDependencies:
-      "@types/node":
-        specifier: ^20.11.30
-        version: 20.19.25
-      rimraf:
-        specifier: ^6.1.0
-        version: 6.1.0
+      deepmerge:
+        specifier: latest
+        version: 4.3.1
+      tsup:
+        specifier: latest
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       typescript:
-        specifier: ^5.9.3
+        specifier: latest
         version: 5.9.3
       vitest:
-        specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)
+        specifier: latest
+        version: 4.0.8(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1)
 
 packages:
   "@babel/runtime@7.28.4":
@@ -2081,6 +2099,24 @@ packages:
       }
     engines: { node: ">=18" }
 
+  "@standard-schema/spec@1.0.0":
+    resolution:
+      {
+        integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==,
+      }
+
+  "@types/chai@5.2.3":
+    resolution:
+      {
+        integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==,
+      }
+
+  "@types/deep-eql@4.0.2":
+    resolution:
+      {
+        integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==,
+      }
+
   "@types/estree@1.0.8":
     resolution:
       {
@@ -2141,10 +2177,42 @@ packages:
         integrity: sha512-jXL+9+ZNIJKruofqXuuTClf44eSpcHlgj3CiuNihUF3Ioujtmc0zIa3UJOW5RjDK1YLBJZnWBlPuqhYycLioog==,
       }
 
+  "@vitest/expect@4.0.8":
+    resolution:
+      {
+        integrity: sha512-Rv0eabdP/xjAHQGr8cjBm+NnLHNoL268lMDK85w2aAGLFoVKLd8QGnVon5lLtkXQCoYaNL0wg04EGnyKkkKhPA==,
+      }
+
+  "@vitest/mocker@4.0.8":
+    resolution:
+      {
+        integrity: sha512-9FRM3MZCedXH3+pIh+ME5Up2NBBHDq0wqwhOKkN4VnvCiKbVxddqH9mSGPZeawjd12pCOGnl+lo/ZGHt0/dQSg==,
+      }
+    peerDependencies:
+      msw: ^2.4.9
+      vite: ^6.0.0 || ^7.0.0-0
+    peerDependenciesMeta:
+      msw:
+        optional: true
+      vite:
+        optional: true
+
+  "@vitest/pretty-format@4.0.8":
+    resolution:
+      {
+        integrity: sha512-qRrjdRkINi9DaZHAimV+8ia9Gq6LeGz2CgIEmMLz3sBDYV53EsnLZbJMR1q84z1HZCMsf7s0orDgZn7ScXsZKg==,
+      }
+
   "@vitest/runner@1.6.1":
     resolution:
       {
         integrity: sha512-3nSnYXkVkf3mXFfE7vVyPmi3Sazhb/2cfZGGs0JRzFsPFvAMBEcrweV1V1GsrstdXeKCTXlJbvnQwGWgEIHmOA==,
+      }
+
+  "@vitest/runner@4.0.8":
+    resolution:
+      {
+        integrity: sha512-mdY8Sf1gsM8hKJUQfiPT3pn1n8RF4QBcJYFslgWh41JTfrK1cbqY8whpGCFzBl45LN028g0njLCYm0d7XxSaQQ==,
       }
 
   "@vitest/snapshot@1.6.1":
@@ -2153,16 +2221,34 @@ packages:
         integrity: sha512-WvidQuWAzU2p95u8GAKlRMqMyN1yOJkGHnx3M1PL9Raf7AQ1kwLKg04ADlCa3+OXUZE7BceOhVZiuWAbzCKcUQ==,
       }
 
+  "@vitest/snapshot@4.0.8":
+    resolution:
+      {
+        integrity: sha512-Nar9OTU03KGiubrIOFhcfHg8FYaRaNT+bh5VUlNz8stFhCZPNrJvmZkhsr1jtaYvuefYFwK2Hwrq026u4uPWCw==,
+      }
+
   "@vitest/spy@1.6.1":
     resolution:
       {
         integrity: sha512-MGcMmpGkZebsMZhbQKkAf9CX5zGvjkBTqf8Zx3ApYWXr3wG+QvEu2eXWfnIIWYSJExIp4V9FCKDEeygzkYrXMw==,
       }
 
+  "@vitest/spy@4.0.8":
+    resolution:
+      {
+        integrity: sha512-nvGVqUunyCgZH7kmo+Ord4WgZ7lN0sOULYXUOYuHr55dvg9YvMz3izfB189Pgp28w0vWFbEEfNc/c3VTrqrXeA==,
+      }
+
   "@vitest/utils@1.6.1":
     resolution:
       {
         integrity: sha512-jOrrUvXM4Av9ZWiG1EajNto0u96kWAhJ1LmPmJhXXQx/32MecEKd10pOLYgS2BQx1TgkGhloPU1ArDW2vvaY6g==,
+      }
+
+  "@vitest/utils@4.0.8":
+    resolution:
+      {
+        integrity: sha512-pdk2phO5NDvEFfUTxcTP8RFYjVj/kfLSPIN5ebP2Mu9kcIMeAQTbknqcFEyBcC4z2pJlJI9aS5UQjcYfhmKAow==,
       }
 
   abort-controller@3.0.0:
@@ -2295,6 +2381,13 @@ packages:
         integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==,
       }
 
+  assertion-error@2.0.1:
+    resolution:
+      {
+        integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==,
+      }
+    engines: { node: ">=12" }
+
   async@3.2.6:
     resolution:
       {
@@ -2382,6 +2475,13 @@ packages:
         integrity: sha512-RITGBfijLkBddZvnn8jdqoTypxvqbOLYQkGGxXzeFjVHvudaPw0HNFD9x928/eUwYWd2dPCugVqspGALTZZQKw==,
       }
     engines: { node: ">=4" }
+
+  chai@6.2.1:
+    resolution:
+      {
+        integrity: sha512-p4Z49OGG5W/WBCPSS/dH3jQ73kD6tiMmUM+bckNK6Jr5JHMG3k9bg/BvKR8lKmtVBKmOiuVaV2ws8s9oSbwysg==,
+      }
+    engines: { node: ">=18" }
 
   chalk-table@1.0.2:
     resolution:
@@ -2697,6 +2797,12 @@ packages:
       }
     engines: { node: ">= 0.4" }
 
+  es-module-lexer@1.7.0:
+    resolution:
+      {
+        integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==,
+      }
+
   es-object-atoms@1.1.1:
     resolution:
       {
@@ -2782,6 +2888,13 @@ packages:
         integrity: sha512-jpWzZ1ZhwUmeWRhS7Qv3mhpOhLfwI+uAX4e5fOcXqwMR7EcJ0pj2kV1CVzHVMX/LphnKWD3LObjZCoJ71lKpHw==,
       }
     engines: { node: ^18.19.0 || >=20.5.0 }
+
+  expect-type@1.2.2:
+    resolution:
+      {
+        integrity: sha512-JhFGDVJ7tmDJItKhYgJCGLOWjuK9vPxiXoUFLwLDc99NlmklilbiQJwoctZtt13+xMw91MCk/REan6MWHqDjyA==,
+      }
+    engines: { node: ">=12.0.0" }
 
   extendable-error@0.1.7:
     resolution:
@@ -4273,6 +4386,13 @@ packages:
       }
     engines: { node: ">=14.0.0" }
 
+  tinyrainbow@3.0.3:
+    resolution:
+      {
+        integrity: sha512-PSkbLUoxOFRzJYjjxHJt9xro7D+iilgMX/C9lawzVuYiIdcihh9DXmVibBe8lmcFrRi/VzlPjBxbN7rH24q8/Q==,
+      }
+    engines: { node: ">=14.0.0" }
+
   tinyspy@2.2.1:
     resolution:
       {
@@ -4531,6 +4651,49 @@ packages:
       terser:
         optional: true
 
+  vite@7.2.2:
+    resolution:
+      {
+        integrity: sha512-BxAKBWmIbrDgrokdGZH1IgkIk/5mMHDreLDmCJ0qpyJaAteP8NvMhkwr/ZCQNqNH97bw/dANTE9PDzqwJghfMQ==,
+      }
+    engines: { node: ^20.19.0 || >=22.12.0 }
+    hasBin: true
+    peerDependencies:
+      "@types/node": ^20.19.0 || >=22.12.0
+      jiti: ">=1.21.0"
+      less: ^4.0.0
+      lightningcss: ^1.21.0
+      sass: ^1.70.0
+      sass-embedded: ^1.70.0
+      stylus: ">=0.54.8"
+      sugarss: ^5.0.0
+      terser: ^5.16.0
+      tsx: ^4.8.1
+      yaml: ^2.4.2
+    peerDependenciesMeta:
+      "@types/node":
+        optional: true
+      jiti:
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+      tsx:
+        optional: true
+      yaml:
+        optional: true
+
   vitest@1.6.1:
     resolution:
       {
@@ -4551,6 +4714,43 @@ packages:
       "@types/node":
         optional: true
       "@vitest/browser":
+        optional: true
+      "@vitest/ui":
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
+  vitest@4.0.8:
+    resolution:
+      {
+        integrity: sha512-urzu3NCEV0Qa0Y2PwvBtRgmNtxhj5t5ULw7cuKhIHh3OrkKTLlut0lnBOv9qe5OvbkMH2g38G7KPDCTpIytBVg==,
+      }
+    engines: { node: ^20.0.0 || ^22.0.0 || >=24.0.0 }
+    hasBin: true
+    peerDependencies:
+      "@edge-runtime/vm": "*"
+      "@types/debug": ^4.1.12
+      "@types/node": ^20.0.0 || ^22.0.0 || >=24.0.0
+      "@vitest/browser-playwright": 4.0.8
+      "@vitest/browser-preview": 4.0.8
+      "@vitest/browser-webdriverio": 4.0.8
+      "@vitest/ui": 4.0.8
+      happy-dom: "*"
+      jsdom: "*"
+    peerDependenciesMeta:
+      "@edge-runtime/vm":
+        optional: true
+      "@types/debug":
+        optional: true
+      "@types/node":
+        optional: true
+      "@vitest/browser-playwright":
+        optional: true
+      "@vitest/browser-preview":
+        optional: true
+      "@vitest/browser-webdriverio":
         optional: true
       "@vitest/ui":
         optional: true
@@ -5447,6 +5647,15 @@ snapshots:
 
   "@sindresorhus/merge-streams@4.0.0": {}
 
+  "@standard-schema/spec@1.0.0": {}
+
+  "@types/chai@5.2.3":
+    dependencies:
+      "@types/deep-eql": 4.0.2
+      assertion-error: 2.0.1
+
+  "@types/deep-eql@4.0.2": {}
+
   "@types/estree@1.0.8": {}
 
   "@types/fs-extra@11.0.4":
@@ -5485,11 +5694,37 @@ snapshots:
       "@vitest/utils": 1.6.1
       chai: 4.5.0
 
+  "@vitest/expect@4.0.8":
+    dependencies:
+      "@standard-schema/spec": 1.0.0
+      "@types/chai": 5.2.3
+      "@vitest/spy": 4.0.8
+      "@vitest/utils": 4.0.8
+      chai: 6.2.1
+      tinyrainbow: 3.0.3
+
+  "@vitest/mocker@4.0.8(vite@7.2.2(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1))":
+    dependencies:
+      "@vitest/spy": 4.0.8
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.2.2(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1)
+
+  "@vitest/pretty-format@4.0.8":
+    dependencies:
+      tinyrainbow: 3.0.3
+
   "@vitest/runner@1.6.1":
     dependencies:
       "@vitest/utils": 1.6.1
       p-limit: 5.0.0
       pathe: 1.1.2
+
+  "@vitest/runner@4.0.8":
+    dependencies:
+      "@vitest/utils": 4.0.8
+      pathe: 2.0.3
 
   "@vitest/snapshot@1.6.1":
     dependencies:
@@ -5497,9 +5732,17 @@ snapshots:
       pathe: 1.1.2
       pretty-format: 29.7.0
 
+  "@vitest/snapshot@4.0.8":
+    dependencies:
+      "@vitest/pretty-format": 4.0.8
+      magic-string: 0.30.21
+      pathe: 2.0.3
+
   "@vitest/spy@1.6.1":
     dependencies:
       tinyspy: 2.2.1
+
+  "@vitest/spy@4.0.8": {}
 
   "@vitest/utils@1.6.1":
     dependencies:
@@ -5507,6 +5750,11 @@ snapshots:
       estree-walker: 3.0.3
       loupe: 2.3.7
       pretty-format: 29.7.0
+
+  "@vitest/utils@4.0.8":
+    dependencies:
+      "@vitest/pretty-format": 4.0.8
+      tinyrainbow: 3.0.3
 
   abort-controller@3.0.0:
     dependencies:
@@ -5562,6 +5810,8 @@ snapshots:
 
   assertion-error@1.1.0: {}
 
+  assertion-error@2.0.1: {}
+
   async@3.2.6: {}
 
   asynckit@0.4.0: {}
@@ -5616,6 +5866,8 @@ snapshots:
       loupe: 2.3.7
       pathval: 1.1.1
       type-detect: 4.1.0
+
+  chai@6.2.1: {}
 
   chalk-table@1.0.2:
     dependencies:
@@ -5752,6 +6004,8 @@ snapshots:
 
   es-errors@1.3.0: {}
 
+  es-module-lexer@1.7.0: {}
+
   es-object-atoms@1.1.1:
     dependencies:
       es-errors: 1.3.0
@@ -5885,6 +6139,8 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 4.0.0
       yoctocolors: 2.1.2
+
+  expect-type@1.2.2: {}
 
   extendable-error@0.1.7: {}
 
@@ -6697,6 +6953,8 @@ snapshots:
 
   tinypool@0.8.4: {}
 
+  tinyrainbow@3.0.3: {}
+
   tinyspy@2.2.1: {}
 
   to-regex-range@5.0.1:
@@ -6830,6 +7088,20 @@ snapshots:
       "@types/node": 20.19.25
       fsevents: 2.3.3
 
+  vite@7.2.2(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1):
+    dependencies:
+      esbuild: 0.25.12
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+      postcss: 8.5.6
+      rollup: 4.53.2
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      "@types/node": 24.10.1
+      fsevents: 2.3.3
+      tsx: 4.20.6
+      yaml: 2.8.1
+
   vitest@1.6.1(@types/node@20.19.25):
     dependencies:
       "@vitest/expect": 1.6.1
@@ -6863,6 +7135,44 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+
+  vitest@4.0.8(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1):
+    dependencies:
+      "@vitest/expect": 4.0.8
+      "@vitest/mocker": 4.0.8(vite@7.2.2(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1))
+      "@vitest/pretty-format": 4.0.8
+      "@vitest/runner": 4.0.8
+      "@vitest/snapshot": 4.0.8
+      "@vitest/spy": 4.0.8
+      "@vitest/utils": 4.0.8
+      debug: 4.4.3
+      es-module-lexer: 1.7.0
+      expect-type: 1.2.2
+      magic-string: 0.30.21
+      pathe: 2.0.3
+      picomatch: 4.0.3
+      std-env: 3.10.0
+      tinybench: 2.9.0
+      tinyexec: 0.3.2
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.0.3
+      vite: 7.2.2(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      "@types/node": 24.10.1
+    transitivePeerDependencies:
+      - jiti
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
 
   web-streams-polyfill@3.3.3: {}
 

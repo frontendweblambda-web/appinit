@@ -14,3 +14,4 @@ export * from "./pkg";
 export * from "./semver";
 export * from "./exec";
 export * from "./file";
+export * from "./json";
