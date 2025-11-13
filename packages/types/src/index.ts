@@ -39,3 +39,4 @@ export * from "./agent";
 export * from "./provider";
 export * from "./json";
 export * from "./prompt";
+export * from "./command";
