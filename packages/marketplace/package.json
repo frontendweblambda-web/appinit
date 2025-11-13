@@ -1,14 +1,42 @@
 {
 	"name": "@appinit/marketplace",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
+	"description": "Marketplace registry, template catalog, and plugin discovery system for Appinit OS.",
 	"private": true,
-	"devDependencies": {},
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist",
+		"catalog"
+	],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
 	},
-	"keywords": [],
+	"scripts": {
+		"clean": "npx rimraf dist",
+		"prebuild": "pnpm clean",
+		"build": "tsc -p tsconfig.json",
+		"dev": "tsc -w -p tsconfig.json",
+		"test": "echo \"No tests yet\""
+	},
+	"dependencies": {
+		"@appinit/types": "workspace:*",
+		"@appinit/utils": "workspace:*",
+		"yaml": "^2.8.0",
+		"fs-extra": "^11.3.2"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"@types/node": "^20.11.30",
+		"rimraf": "^6.1.0"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"author": "frontendweb-sg",
-	"license": "ISC"
+	"license": "MIT"
 }
