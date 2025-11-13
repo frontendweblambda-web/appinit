@@ -1,63 +1,26 @@
 import path from "node:path";
-import { makeTempDir, readJson } from "../utils";
-import { ResolvedTemplate } from "@appinit/types";
-import { exec as _exec } from "node:child_process";
-import { promisify } from "node:util";
-import fs from "node:fs/promises";
-
-const exec = promisify(_exec);
+import tmp from "tmp";
+import fs from "fs-extra";
+import { execa } from "execa";
+import { resolveLocalTemplate } from "./local.js";
 
 /**
- * locator examples:
- * npm:@appinit/template-next
- * @appinit/template-next
+ * Downloads an npm package to a temp dir using `npm pack` then extracts.
+ * This keeps resolution offline-friendly and cacheable.
  */
-export async function resolveNpm(locator: string): Promise<ResolvedTemplate> {
-	const packageName = locator.replace(/^npm:/, "");
-
-	const temp = await makeTempDir();
-
-	// use npm pack to download the tarball into temp
-	// npm pack <pkg> --pack-destination <dir> is supported in npm@8+ but to be safe use npm pack and mv
-	const cwd = temp;
-	const { stdout } = await exec(`npm pack ${packageName}`, { cwd });
-	// npm pack writes the tarball filename to stdout
-	const tarball = stdout.trim().split("\n").pop();
-	if (!tarball) throw new Error("npm pack failed to produce tarball");
-
-	// extract tarball
-	const tarballPath = path.join(cwd, tarball);
-	// use tar (dependency) to extract
-	const tar = await import("tar");
-	await tar.x({ file: tarballPath, cwd });
-
-	// npm pack creates package/ inside cwd
-	const extractedDir = path.join(cwd, "package");
-
-	const meta = await readJson(path.join(extractedDir, "template.json"));
-
-	// move extractedDir contents into a clean tempDir2
-	const finalTemp = await makeTempDir();
-	await copyRecursive(extractedDir, finalTemp);
-
-	// cleanup tarball and package dir
-	await fs.rm(tarballPath, { force: true });
-	await fs.rm(extractedDir, { recursive: true, force: true });
-
-	return { source: "npm", sourceLocator: locator, tempDir: finalTemp, meta };
-}
-
-async function copyRecursive(src: string, dest: string) {
-	await fs.mkdir(dest, { recursive: true });
-	const entries = await fs.readdir(src, { withFileTypes: true });
-
-	for (const entry of entries) {
-		const srcPath = path.join(src, entry.name);
-		const destPath = path.join(dest, entry.name);
-		if (entry.isDirectory()) {
-			await copyRecursive(srcPath, destPath);
-		} else if (entry.isFile()) {
-			await fs.copyFile(srcPath, destPath);
-		}
+export async function resolveNpmPackage(pkgName: string) {
+	const tmpDir = tmp.dirSync({ unsafeCleanup: true });
+	try {
+		const cwd = tmpDir.name;
+		// run `npm pack <pkg>` and get tarball
+		const { stdout } = await execa("npm", ["pack", pkgName], { cwd });
+		const tarball = stdout.trim().split(/\r?\n/).pop();
+		if (!tarball) throw new Error("npm pack failed");
+		await execa("tar", ["-xzf", tarball], { cwd });
+		// npm pack extracts to package/ by default
+		const pkgRoot = path.join(cwd, "package");
+		return await resolveLocalTemplate(pkgRoot);
+	} finally {
+		// keep temp dir for debugging; caller may remove
 	}
 }

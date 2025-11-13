@@ -1,34 +1,27 @@
-import { makeTempDir, readJson } from "../utils";
-import { ResolvedTemplate } from "@appinit/types";
-import { exec as _exec } from "node:child_process";
-import { promisify } from "node:util";
+import fs from "fs-extra";
 import path from "node:path";
+import { execa } from "execa";
+import tmp from "tmp";
+import { resolveLocalTemplate } from "./local.js";
 
-const exec = promisify(_exec);
-
-/** locator examples:
- * github:org/repo
- * github:org/repo#branch
- * git+https://github.com/org/repo.git
- */
-export async function resolveGitHub(
-	locator: string,
-): Promise<ResolvedTemplate> {
-	// parse locator
-	const withoutPrefix = locator.replace(/^github:/, "");
-	const [repoPart, ref] = withoutPrefix.split("#");
-	const repoUrl = `https://github.com/${repoPart}.git`;
-
-	const temp = await makeTempDir();
-
-	// clone shallow
-	const refArg = ref ? `--branch ${ref}` : "--depth 1";
-	// if ref provided use --branch (this shallow clones the branch)
-	await exec(
-		`git clone ${repoUrl} ${temp} ${ref ? `--branch ${ref}` : "--depth 1"}`,
-	);
-
-	const meta = await readJson(path.join(temp, "template.json"));
-
-	return { source: "github", sourceLocator: locator, tempDir: temp, meta };
+export async function resolveGitTemplate(
+	url: string,
+	ref?: string,
+	subpath?: string,
+) {
+	const tmpDir = tmp.dirSync({ unsafeCleanup: true });
+	try {
+		const cloneArgs = ["clone", "--depth", "1", url, tmpDir.name];
+		if (ref) {
+			cloneArgs.splice(2, 0, "--branch", ref);
+		}
+		await execa("git", cloneArgs, { stdio: "ignore" });
+		const root = subpath ? path.join(tmpDir.name, subpath) : tmpDir.name;
+		return await resolveLocalTemplate(root);
+	} catch (err) {
+		throw new Error(`Failed to fetch git template: ${String(err)}`);
+	} finally {
+		// NOTE: let caller decide when to cleanup if they want caching
+		// tmpDir.removeCallback();
+	}
 }

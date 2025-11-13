@@ -1,38 +1,20 @@
 import path from "node:path";
-import fs from "node:fs/promises";
-import { makeTempDir, readJson } from "../utils";
-import { ResolvedTemplate } from "@appinit/types";
-import { copyDir } from "fs-extra";
+import fs from "fs-extra";
+import glob from "glob";
+import { VFS } from "../vfs.js";
 
-// Note: we use fs-extra copyDir for simplicity — but not adding dependency here; implement simple recursive copy if needed
+export async function resolveLocalTemplate(folder: string): Promise<VFS> {
+	const vfs = new VFS();
+	const root = path.resolve(folder);
+	if (!(await fs.pathExists(root)))
+		throw new Error(`Local template not found: ${root}`);
 
-export async function resolveLocal(locator: string): Promise<ResolvedTemplate> {
-	const full = path.resolve(locator);
-	const stat = await fs.stat(full);
-	if (!stat.isDirectory())
-		throw new Error("Local template must be a directory");
-
-	const temp = await makeTempDir();
-
-	// simple recursive copy
-	await copyRecursive(full, temp);
-
-	const meta = await readJson(path.join(temp, "template.json"));
-
-	return { source: "local", sourceLocator: full, tempDir: temp, meta };
-}
-
-async function copyRecursive(src: string, dest: string) {
-	await fs.mkdir(dest, { recursive: true });
-	const entries = await fs.readdir(src, { withFileTypes: true });
-
-	for (const entry of entries) {
-		const srcPath = path.join(src, entry.name);
-		const destPath = path.join(dest, entry.name);
-		if (entry.isDirectory()) {
-			await copyRecursive(srcPath, destPath);
-		} else if (entry.isFile()) {
-			await fs.copyFile(srcPath, destPath);
-		}
+	const files = glob.sync("**/*", { cwd: root, dot: true, nodir: true });
+	for (const f of files) {
+		const full = path.join(root, f);
+		const content = await fs.readFile(full, "utf8");
+		vfs.write(f, content);
 	}
+
+	return vfs;
 }

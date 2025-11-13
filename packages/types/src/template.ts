@@ -21,7 +21,25 @@ export interface TemplateMeta {
 
 export interface ResolvedTemplate {
 	source: TemplateSource;
-	sourceLocator: string;
-	tempDir: string;
+	sourceLocator: string; // git URL, folder, npm pkg, marketplace ID, etc.
+	tempDir: string; // extracted template root
 	meta: TemplateMeta | null;
+
+	/** Virtual file system returned by resolver */
+	files: Map<string, string>;
+
+	/** Optional loaded package.json from template root */
+	packageJson?: Record<string, any>;
+
+	/** Optional template hooks */
+	hooks?: {
+		before?: string;
+		after?: string;
+	};
+}
+
+export interface ResolveOptions {
+	cwd?: string;
+	cacheDir?: string;
+	inlineVariables?: Record<string, any>;
 }
