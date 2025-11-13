@@ -4,6 +4,15 @@
 	"private": false,
 	"type": "module",
 	"description": "Official template & configuration collection for Appinit CLI.",
+	"main": "./dist/cjs/index.cjs",
+	"module": "./dist/esm/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/esm/index.js",
+			"require": "./dist/cjs/index.cjs"
+		}
+	},
 	"keywords": [
 		"appinit",
 		"template",
@@ -12,8 +21,6 @@
 	],
 	"author": "frontendweb-sg",
 	"license": "MIT",
-	"main": "index.js",
-	"types": "dist/index.d.ts",
 	"files": [
 		"react",
 		"next",

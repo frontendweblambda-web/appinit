@@ -4,23 +4,25 @@
 	"description": "Appinit OS AI toolkit (LLM wrappers, agents, embeddings, prompts).",
 	"private": true,
 	"type": "module",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"main": "./dist/cjs/index.cjs",
+	"module": "./dist/esm/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/esm/index.js",
+			"require": "./dist/cjs/index.cjs"
+		}
+	},
 	"files": [
 		"dist"
 	],
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		}
-	},
 	"scripts": {
-		"clean": "npx rimraf dist",
+		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"build": "tsc -p tsconfig.json",
-		"dev": "tsc -w -p tsconfig.json",
-		"test": "echo \"No tests specified yet\""
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest"
 	},
 	"dependencies": {
 		"@appinit/types": "workspace:*",
@@ -33,7 +35,8 @@
 	"devDependencies": {
 		"typescript": "^5.9.3",
 		"@types/node": "^20.11.30",
-		"rimraf": "^6.1.0"
+		"rimraf": "^6.1.0",
+		"tsup": "latest"
 	},
 	"engines": {
 		"node": ">=18"
