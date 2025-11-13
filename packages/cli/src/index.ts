@@ -1,7 +1,7 @@
 import { logger } from "@appinit/utils";
-import { runInit } from "./commands/init.js";
-import { runNew } from "./commands/new.js";
-import { runDoctor } from "./commands/doctor.js";
+import { runInit } from "./commands/init";
+import { runNew } from "./commands/new";
+import { runDoctor } from "./commands/doctor";
 
 const args = process.argv.slice(2);
 const cmd = args[0];

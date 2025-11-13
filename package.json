@@ -67,6 +67,7 @@
 		"@octokit/rest": "^22.0.1",
 		"@types/fs-extra": "11.0.4",
 		"@types/node": "^24.10.1",
+		"@types/prompts": "2.4.9",
 		"@types/which": "3.0.4",
 		"deepmerge": "4.3.1",
 		"fast-glob": "3.3.3",
@@ -79,6 +80,7 @@
 		"packages/plugins"
 	],
 	"dependencies": {
+		"prompts": "2.4.2",
 		"tsup": "latest",
 		"tsx": "latest",
 		"turbo": "latest",

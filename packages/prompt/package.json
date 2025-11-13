@@ -1,0 +1,37 @@
+{
+	"name": "@appinit/prompt",
+	"version": "1.0.0",
+	"description": "Prompt rendering and prompt utilities for Appinit OS.",
+	"private": false,
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"clean": "node ../../scripts/clean-dist.mjs dist",
+		"prebuild": "pnpm clean",
+		"build": "tsup src/index.ts --format=esm --dts --clean",
+		"dev": "tsup src/index.ts --format=esm --dts --watch",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@appinit/types": "workspace:*",
+		"@appinit/engine": "workspace:*",
+		"@appinit/utils": "workspace:*"
+	},
+	"devDependencies": {
+		"tsup": "latest",
+		"typescript": "latest",
+		"vitest": "latest"
+	}
+}

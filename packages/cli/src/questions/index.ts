@@ -1,4 +1,5 @@
 import { Answers } from "@appinit/types";
+import { validateScaffoldName } from "@appinit/utils";
 import inquirer from "inquirer";
 
 export function isFlat(structure: string) {
@@ -7,14 +8,8 @@ export function isFlat(structure: string) {
 
 export async function askQuestions(
 	defaultName?: string,
-	flags: any = {},
+	flags: Record<string, any> = {},
 ): Promise<Answers> {
-	const validateName = (v: string) => {
-		if (!v || !v.trim()) return "Project name cannot be empty";
-		if (!/^[a-z0-9\-_]+$/i.test(v)) return "Use only letters, numbers, - or _";
-		return true;
-	};
-
 	if (defaultName && !flags.projectName) flags.projectName = defaultName;
 	const answers: Partial<Answers> = {};
 
@@ -80,7 +75,7 @@ export async function askQuestions(
 			name: "projectName",
 			message: "🧱 Project name:",
 			default: defaultName || flags.projectName || "my-codex-app",
-			validate: validateName,
+			validate: validateScaffoldName,
 			when: !(defaultName || flags.projectName),
 		},
 		{
