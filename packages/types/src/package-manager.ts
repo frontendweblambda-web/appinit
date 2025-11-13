@@ -25,4 +25,7 @@ export interface PackageManagerAPI {
 
 	/** Run a script (e.g. build / dev / lint / start) */
 	run(script: string): Promise<void>;
+
+	/** Run raw flags/commands (e.g. npm audit fix --force) */
+	runRaw(args: string[]): Promise<void>;
 }

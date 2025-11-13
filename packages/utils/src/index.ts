@@ -15,3 +15,5 @@ export * from "./semver";
 export * from "./exec";
 export * from "./file";
 export * from "./json";
+export * from "./shell";
+export * from "./package-manager";

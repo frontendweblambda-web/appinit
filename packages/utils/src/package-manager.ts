@@ -1,16 +1,16 @@
-// packages/package-manager/src/index.ts
-
 import { exec as _exec } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import fs from "node:fs/promises";
-
+import { DEFAULT_SHELL } from "./shell";
 import type { PackageManager, PackageManagerAPI } from "@appinit/types";
 
 const exec = promisify(_exec);
 
-/** Detect package manager via lockfiles */
-export async function detectPM(cwd: string): Promise<PackageManager> {
+/** Detect package manager by lockfile */
+export async function detectPackageManager(
+	cwd: string,
+): Promise<PackageManager> {
 	const checks: Array<[PackageManager, string]> = [
 		["pnpm", "pnpm-lock.yaml"],
 		["yarn", "yarn.lock"],
@@ -25,17 +25,19 @@ export async function detectPM(cwd: string): Promise<PackageManager> {
 		} catch {}
 	}
 
-	return "npm"; // fallback
+	return "npm";
 }
 
 /** Create a unified PM interface */
-export async function getPM(cwd: string): Promise<PackageManagerAPI> {
-	const pm = await detectPM(cwd);
+export async function getPackageManager(
+	cwd: string = process.cwd(),
+): Promise<PackageManagerAPI> {
+	const pm = await detectPackageManager(cwd);
 
-	const runCmd = (parts: string[]) =>
-		exec(parts.join(" "), { cwd, shell: true });
-
-	const api: PackageManagerAPI = {
+	const runCmd = async (parts: string[]) => {
+		await exec(parts.join(" "), { cwd, shell: DEFAULT_SHELL });
+	};
+	return {
 		name: pm,
 
 		async install(deps) {
@@ -68,9 +70,9 @@ export async function getPM(cwd: string): Promise<PackageManagerAPI> {
 			if (pm === "pnpm") return runCmd(["pnpm", "run", script]);
 			if (pm === "bun") return runCmd(["bun", script]);
 		},
+		/** NEW: run arbitrary PM commands */
+		async runRaw(args) {
+			return runCmd([pm, ...args]);
+		},
 	};
-
-	return api;
 }
-
-export default getPM;

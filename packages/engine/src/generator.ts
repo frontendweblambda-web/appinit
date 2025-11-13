@@ -2,11 +2,13 @@ import fs from "fs-extra";
 import path from "path";
 import chalk from "chalk";
 import { execa } from "execa";
-
-import { copyTemplate } from "./common/copy.js";
-import { detectPackageManager } from "./common/package-manager.js";
-import { mergePackageJson } from "./common/merge-package-json.js";
-import { resolveTemplate } from "./common/template-resolver.js";
+import {
+	mergeJson,
+	getPackageManager,
+	pathExists,
+	readJson,
+} from "@appinit/utils";
+import { copyTemplate } from "./common/copy";
 
 /**
  * Generates a fully configured React template.
@@ -21,13 +23,11 @@ export const generateReactTemplate = async (targetDir: string, ui: string) => {
 	// === Step 1: Apply UI template if selected ===
 	if (ui && ui !== "none") {
 		console.log(chalk.cyan(`🎨 Applying ${ui} UI configuration...`));
-		const templatePath = await resolveTemplate(answers.framework + "/base");
-		await copyTemplate(templatePath, targetDir);
 		await copyTemplate(`react/ui/${ui}`, targetDir);
 
 		const pkgFragment = path.join(targetDir, `${ui}.pkg.json`);
-		if (await fs.pathExists(pkgFragment)) {
-			await mergePackageJson(targetDir, pkgFragment);
+		if (await pathExists(pkgFragment)) {
+			mergeJson(targetDir, pkgFragment);
 			await fs.remove(pkgFragment);
 			// console.log(chalk.green(`✅ Merged ${ui}.pkg.json into package.json`));
 		}
@@ -35,28 +35,21 @@ export const generateReactTemplate = async (targetDir: string, ui: string) => {
 
 	// === Step 2: Ensure "type": "module" in package.json ===
 	const pkgPath = path.join(targetDir, "package.json");
-	if (await fs.pathExists(pkgPath)) {
-		const pkg = await fs.readJson(pkgPath);
+	if (await pathExists(pkgPath)) {
+		const pkg = await readJson(pkgPath);
 		pkg.type = pkg.type || "module"; // ensure ESM mode
 		await fs.writeJson(pkgPath, pkg, { spaces: 2 });
 		// console.log(chalk.gray(`🧩 Ensured "type": "module" in package.json`));
 	}
 
 	// === Step 3: Ensure required type dependencies ===
-	const pm = detectPackageManager();
+	const pm = await getPackageManager(targetDir);
 	const deps = ["@types/react", "@types/react-dom", "typescript"];
 
 	// console.log(chalk.cyan(`📦 Ensuring required dev dependencies...`));
 	try {
-		await execa(pm, ["install", "-D", ...deps], {
-			cwd: targetDir,
-			stdio: "inherit",
-		});
-		// Step 2 — run audit fix safely (optional)
-		await execa(pm, ["audit", "fix", "--force"], {
-			cwd: targetDir,
-			stdio: "inherit",
-		});
+		await pm.install(deps);
+		if (pm.name === "npm") await pm.runRaw(["audit", "fix", "--force"]);
 		console.log(chalk.green(`✅ Installed React type packages successfully`));
 	} catch (err: any) {
 		console.log(chalk.red(`⚠️ Failed to auto-install types:`), err.message);

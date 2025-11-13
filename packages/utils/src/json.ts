@@ -4,6 +4,7 @@ import { pathExists, readJson as readJsonRaw, writeFileUtf8 } from "./file";
 import fs from "fs-extra";
 import { isArray } from "./helpers";
 import { JsonArray, JsonObject, JsonValue } from "@appinit/types";
+import { isObject } from "./deep-merge";
 
 /**
  * Safely read JSON, returning fallback if missing or invalid.
@@ -31,13 +32,6 @@ export async function writeJsonSafe(filePath: string, data: any, spaces = 2) {
 
 	// Move atomically
 	await fs.move(tmpPath, filePath, { overwrite: true });
-}
-
-/**
- * Helper: check for plain object.
- */
-export function isObject(v: unknown): v is Record<string, any> {
-	return v !== null && typeof v === "object" && !Array.isArray(v);
 }
 
 /**
