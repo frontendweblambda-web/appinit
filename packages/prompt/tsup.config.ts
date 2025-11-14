@@ -9,4 +9,12 @@ export default defineConfig({
 	target: "es2022",
 	splitting: false,
 	outDir: "dist",
+	external: [
+		"fs-extra",
+		"path",
+		"fs",
+		"@appinit/utils",
+		"@appinit/types",
+		"@appinit/engine",
+	],
 });

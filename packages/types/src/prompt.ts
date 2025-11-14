@@ -52,3 +52,39 @@ export type PromptPackDefinition =
 	| { type: "module"; path: string } // path to js/ts module exporting { pack | default }
 	| { type: "json"; path: string } // path to JSON file with `prompts` array (simple)
 	| PromptPack;
+
+export type PromptBase = {
+	name: string;
+	message: string;
+	when?: (accum: Record<string, any>) => boolean | Promise<boolean>;
+	validate?: (value: any) => true | string | Promise<true | string>;
+	format?: (value: any) => any;
+	initial?: any;
+
+	// ⭐ NEW universal fields (safe for all prompts)
+	choices?: { title?: string; label?: string; value: any }[];
+	options?: { title?: string; label?: string; value: any }[];
+};
+
+export type PromptText = PromptBase & {
+	type: "text";
+};
+
+export type PromptSelect = PromptBase & {
+	type: "select";
+};
+
+export type PromptConfirm = PromptBase & {
+	type: "confirm" | "toggle";
+};
+
+export type PromptMulti = PromptBase & {
+	type: "multiselect";
+};
+
+export type PromptQuestion =
+	| PromptText
+	| PromptSelect
+	| PromptConfirm
+	| PromptMulti
+	| (Record<string, any> & { type: string }); // fallback for plugin/template custom fields

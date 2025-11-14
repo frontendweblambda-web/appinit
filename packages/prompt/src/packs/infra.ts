@@ -2,12 +2,9 @@ import { askAnswers } from "../prompt";
 import type { PromptPack, PromptContext } from "@appinit/types";
 
 export const infraPack: PromptPack = {
-	name: "infrastructure",
+	name: "infra",
 
 	handler: async (ctx: PromptContext, accum) => {
-		// ---------------------------------------------------
-		// 1. Non-interactive mode
-		// ---------------------------------------------------
 		if (ctx.flags["non-interactive"]) {
 			return {
 				auth: ctx.flags.auth ?? false,
@@ -20,114 +17,114 @@ export const infraPack: PromptPack = {
 			};
 		}
 
-		// index helpers
-		const dbOrder = [
-			"none",
-			"postgresql",
-			"supabase",
-			"mongo",
-			"sqlite",
-		] as const;
-		const cacheOrder = ["none", "api-cache", "edge", "redis"] as const;
-
-		const dbIdx =
-			dbOrder.indexOf(ctx.flags.database) >= 0
-				? dbOrder.indexOf(ctx.flags.database)
-				: 0;
-
-		const cacheIdx =
-			cacheOrder.indexOf(ctx.flags.caching) >= 0
-				? cacheOrder.indexOf(ctx.flags.caching)
-				: 0;
-
-		// ---------------------------------------------------
-		// 2. Interactive mode
-		// ---------------------------------------------------
-		const res = await askAnswers(
+		const base = await askAnswers(
 			[
 				{
-					type: "toggle",
+					type: "confirm",
 					name: "auth",
 					message: "🔐 Add authentication?",
 					initial: ctx.flags.auth ?? false,
-					active: "yes",
-					inactive: "no",
 				},
-				{
-					type: (prev) => (prev.auth ? "select" : null),
-					name: "authProvider",
-					message: "🔑 Auth Provider:",
-					choices: [
-						{ title: "custom", value: "custom" },
-						{ title: "nextauth", value: "nextauth" },
-						{ title: "clerk", value: "clerk" },
-						{ title: "supabase", value: "supabase" },
-						{ title: "none", value: "none" },
-					],
-					initial: 1, // nextauth default
-				},
-
 				{
 					type: "select",
 					name: "database",
 					message: "🗄 Database:",
-					choices: dbOrder.map((v) => ({ title: v, value: v })),
-					initial: dbIdx,
-				},
-
-				{
-					type: (prev) => (prev.database !== "none" ? "select" : null),
-					name: "orm",
-					message: "🧭 ORM:",
-					choices: (prev) => {
-						if (prev.database === "mongo") {
-							return [
-								{ title: "mongoose", value: "mongoose" },
-								{ title: "typeorm", value: "typeorm" },
-								{ title: "none", value: "none" },
-							];
-						}
-						if (prev.database !== "none") {
-							return [
-								{ title: "prisma", value: "prisma" },
-								{ title: "typeorm", value: "typeorm" },
-								{ title: "none", value: "none" },
-							];
-						}
-						return [{ title: "none", value: "none" }];
-					},
-					initial: 0,
-				},
-
-				{
-					type: "select",
-					name: "caching",
-					message: "⚡ Caching strategy:",
-					choices: cacheOrder.map((v) => ({ title: v, value: v })),
-					initial: cacheIdx,
-				},
-
-				{
-					type: "toggle",
-					name: "analytics",
-					message: "📈 Add analytics?",
-					initial: ctx.flags.analytics ?? false,
-					active: "yes",
-					inactive: "no",
-				},
-
-				{
-					type: "toggle",
-					name: "monitoring",
-					message: "🛠 Add monitoring?",
-					initial: ctx.flags.monitoring ?? false,
-					active: "yes",
-					inactive: "no",
+					choices: [
+						{ label: "none", value: "none" },
+						{ label: "postgresql", value: "postgresql" },
+						{ label: "supabase", value: "supabase" },
+						{ label: "mongo", value: "mongo" },
+						{ label: "sqlite", value: "sqlite" },
+					],
+					initial: ctx.flags.database ?? "none",
 				},
 			],
 			accum,
 		);
 
-		return res;
+		// Dynamic: auth provider
+		let authProviderResult = {};
+		if (base.auth) {
+			authProviderResult = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "authProvider",
+						message: "🔑 Auth Provider:",
+						choices: [
+							{ label: "custom", value: "custom" },
+							{ label: "nextauth", value: "nextauth" },
+							{ label: "clerk", value: "clerk" },
+							{ label: "supabase", value: "supabase" },
+							{ label: "none", value: "none" },
+						],
+						initial: ctx.flags.authProvider ?? "nextauth",
+					},
+				],
+				{ ...accum, ...base },
+			);
+		}
+
+		// Dynamic: ORM
+		let ormChoices;
+		switch (base.database) {
+			case "mongo":
+				ormChoices = [
+					{ label: "mongoose", value: "mongoose" },
+					{ label: "typeorm", value: "typeorm" },
+					{ label: "none", value: "none" },
+				];
+				break;
+
+			case "none":
+				ormChoices = [{ label: "none", value: "none" }];
+				break;
+
+			default:
+				ormChoices = [
+					{ label: "prisma", value: "prisma" },
+					{ label: "typeorm", value: "typeorm" },
+					{ label: "none", value: "none" },
+				];
+		}
+
+		const ormResult = await askAnswers(
+			[
+				{
+					type: "select",
+					name: "orm",
+					message: "🧭 ORM:",
+					choices: ormChoices,
+					initial: ctx.flags.orm ?? "none",
+				},
+				{
+					type: "select",
+					name: "caching",
+					message: "⚡ Caching strategy:",
+					choices: [
+						{ label: "none", value: "none" },
+						{ label: "api-cache", value: "api-cache" },
+						{ label: "edge", value: "edge" },
+						{ label: "redis", value: "redis" },
+					],
+					initial: ctx.flags.caching ?? "none",
+				},
+				{
+					type: "confirm",
+					name: "analytics",
+					message: "📈 Add analytics?",
+					initial: ctx.flags.analytics ?? false,
+				},
+				{
+					type: "confirm",
+					name: "monitoring",
+					message: "🛠 Add monitoring?",
+					initial: ctx.flags.monitoring ?? false,
+				},
+			],
+			{ ...accum, ...base, ...authProviderResult },
+		);
+
+		return { ...base, ...authProviderResult, ...ormResult };
 	},
 };

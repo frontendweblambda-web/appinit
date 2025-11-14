@@ -7,9 +7,14 @@ import type {
 	PromptPack,
 	PromptPackDefinition,
 	PromptResult,
+	PromptQuestion,
 } from "@appinit/types";
+
 import { askAnswers } from "./prompt.js";
 
+/* -------------------------------------------------------------
+ * Default filenames to scan in template directories
+ * ------------------------------------------------------------- */
 const DEFAULT_MODULE_FILENAMES = [
 	"prompt.js",
 	"prompt.ts",
@@ -17,17 +22,20 @@ const DEFAULT_MODULE_FILENAMES = [
 	"prompt.mjs",
 	"prompt.mts",
 ];
+
 const DEFAULT_JSON_FILENAME = "appinit.template.json";
 
-/**
- * Load dynamic packs declared in ctx.templateMeta or ctx.templatePromptPacks
- */
+/* -------------------------------------------------------------
+ * MAIN LOADER
+ * ------------------------------------------------------------- */
 export async function loadDynamicPromptPacks(
 	ctx: PromptContext,
 ): Promise<PromptPack[]> {
 	const packs: PromptPack[] = [];
 
-	// 1) If templatePromptPacks is explicitly provided (already resolved by template-resolver)
+	/* -----------------------------
+	 * 1. templatePromptPacks (explicit)
+	 * ----------------------------- */
 	if (Array.isArray(ctx.templatePromptPacks)) {
 		for (const def of ctx.templatePromptPacks) {
 			try {
@@ -42,16 +50,21 @@ export async function loadDynamicPromptPacks(
 		}
 	}
 
-	// 2) If templateMeta has file references (common when resolver points to template root)
+	/* -----------------------------
+	 * 2. Scan template root
+	 * ----------------------------- */
 	const templateRoot = ctx.templateMeta?.__rootPath as string | undefined;
+
 	if (templateRoot) {
-		// 2.a) look for appinit.template.json
+		// 2.a JSON spec: appinit.template.json
 		const jsonPath = path.join(templateRoot, DEFAULT_JSON_FILENAME);
+
 		if (await fs.pathExists(jsonPath)) {
 			try {
 				const json = await fs.readJSON(jsonPath);
-				// If it contains a `prompts` array (simple), wrap into pack
-				if (Array.isArray(json.prompts) && json.prompts.length) {
+
+				/* simple JSON-based prompts */
+				if (Array.isArray(json.prompts) && json.prompts.length > 0) {
 					packs.push(
 						jsonPromptsToPack(
 							json.prompts,
@@ -60,50 +73,53 @@ export async function loadDynamicPromptPacks(
 					);
 				}
 
-				// Optionally template may declare script packs list
+				/* promptPack modules */
 				if (Array.isArray(json.promptPacks)) {
 					for (const rel of json.promptPacks) {
-						const p = path.join(templateRoot, rel);
+						const abs = path.join(templateRoot, rel);
+
 						try {
-							const pack = await loadPackFromPath(p, ctx);
+							const pack = await loadPackFromPath(abs, ctx);
 							if (pack) packs.push(pack);
 						} catch (err) {
 							logger.error(
-								`Failed to load prompt pack ${p}:`,
+								`Failed to load prompt pack ${abs}:`,
 								(err as Error).message,
 							);
 						}
 					}
 				}
 			} catch (err) {
-				logger.error(
-					"Failed to parse template JSON prompts:",
-					(err as Error).message,
-				);
+				logger.error(`Failed to parse template JSON:`, (err as Error).message);
 			}
 		}
 
-		// 2.b) auto-scan default filenames like prompt.js / prompt.ts
+		// 2.b auto-discover prompt.js/prompt.ts/etc
 		for (const fname of DEFAULT_MODULE_FILENAMES) {
-			const p = path.join(templateRoot, fname);
-			if (await fs.pathExists(p)) {
+			const abs = path.join(templateRoot, fname);
+			if (await fs.pathExists(abs)) {
 				try {
-					const pack = await loadPackFromPath(p, ctx);
+					const pack = await loadPackFromPath(abs, ctx);
 					if (pack) packs.push(pack);
 				} catch (err) {
-					logger.error(`Failed to load ${p}:`, (err as Error).message);
+					logger.error(`Failed to load ${abs}:`, (err as Error).message);
 				}
 			}
 		}
 	}
 
-	// dedupe by name (later packs can override earlier by name)
+	/* -----------------------------
+	 * Dedupe & sort
+	 * ----------------------------- */
 	const deduped = dedupeAndSortPacks(packs);
 	logger.info(`Loaded ${deduped.length} dynamic prompt pack(s).`);
+
 	return deduped;
 }
 
-/** Load a module (js/ts) that exports either `pack` or default or `prompts` */
+/* -------------------------------------------------------------
+ * Load a JS/TS module that exports a prompt pack
+ * ------------------------------------------------------------- */
 async function loadPackFromPath(
 	filePath: string,
 	ctx: PromptContext,
@@ -111,20 +127,21 @@ async function loadPackFromPath(
 	const abs = path.isAbsolute(filePath)
 		? filePath
 		: path.resolve(process.cwd(), filePath);
+
 	if (!(await fs.pathExists(abs))) return null;
 
-	// dynamic import — wrap in try/catch
 	try {
 		const mod = await import(abs);
-		// First: module exports `pack` or `default` object with handler
+
 		const maybePack = mod.pack ?? mod.default ?? mod;
-		// If module exported array `prompts`, wrap it
+
+		/* case 1: module exports prompts[] directly */
 		if (Array.isArray(maybePack?.prompts) || Array.isArray(mod.prompts)) {
-			const promptsArray = maybePack.prompts ?? mod.prompts;
-			return jsonPromptsToPack(promptsArray, path.basename(abs));
+			const prompts = maybePack.prompts ?? mod.prompts;
+			return jsonPromptsToPack(prompts, path.basename(abs));
 		}
 
-		// If module is a function (old pack), wrap as handler
+		/* case 2: module exports a function (legacy pack) */
 		if (typeof maybePack === "function") {
 			return {
 				name: path.basename(abs),
@@ -132,14 +149,15 @@ async function loadPackFromPath(
 			};
 		}
 
-		// If module exported a prompt pack-like object, validate
+		/* case 3: module exports a correct PromptPack */
 		if (
 			maybePack &&
 			typeof maybePack === "object" &&
 			typeof maybePack.handler === "function"
 		) {
-			// ensure name
-			if (!maybePack.name) maybePack.name = path.basename(abs);
+			if (!maybePack.name) {
+				maybePack.name = path.basename(abs);
+			}
 			return maybePack as PromptPack;
 		}
 
@@ -151,64 +169,97 @@ async function loadPackFromPath(
 	}
 }
 
-/** Convert a plain prompts array (prompts library format) into a PromptPack */
+/* -------------------------------------------------------------
+ * Convert JSON prompts (user template) → PromptPack
+ * ------------------------------------------------------------- */
 function jsonPromptsToPack(
 	promptsArray: any[],
 	name = "json-prompts",
 ): PromptPack {
+	const normalized = promptsArray.map(normalizeJsonPrompt);
+
 	return {
 		name,
 		priority: 100,
 		handler: async (_ctx, accum: PromptResult) => {
-			// use askAnswers to return Partial<Answers>
-			const res = await askAnswers(promptsArray, accum as any);
-			return res;
+			return askAnswers(normalized as PromptQuestion[], accum);
 		},
 	};
 }
 
-/** Deduplicate packs by name and sort by priority */
+/* -------------------------------------------------------------
+ * Normalize JSON prompt structure for Clack
+ * ------------------------------------------------------------- */
+function normalizeJsonPrompt(q: any): PromptQuestion {
+	const out: any = { ...q };
+
+	// title → label
+	if (q.title && !q.label) out.label = q.title;
+
+	// Clack uses initialValue instead of initial
+	if (q.initial !== undefined && !q.initialValue) {
+		out.initialValue = q.initial;
+	}
+
+	// Inquirer choices[] → Clack options[]
+	if (Array.isArray(q.choices) && !q.options) {
+		out.options = q.choices.map((c: any) => ({
+			label: c.label ?? c.title ?? c.value,
+			value: c.value,
+		}));
+	}
+
+	// delete unsupported fields
+	delete out.title;
+	delete out.choices;
+
+	return out as PromptQuestion;
+}
+
+/* -------------------------------------------------------------
+ * Dedupe prompt packs by name (later overrides earlier)
+ * ------------------------------------------------------------- */
 function dedupeAndSortPacks(packs: PromptPack[]): PromptPack[] {
 	const map = new Map<string, PromptPack>();
+
 	for (const p of packs) {
 		if (!p?.name) continue;
-		// if existing, prefer higher priority (lower number wins)
 		const existing = map.get(p.name);
+
 		if (!existing) {
 			map.set(p.name, p);
 			continue;
 		}
-		const exPriority = existing.priority ?? 100;
-		const pPriority = p.priority ?? 100;
-		// choose the one with lower priority number (earlier)
-		if (pPriority <= exPriority) map.set(p.name, p);
+
+		const prioNew = p.priority ?? 100;
+		const prioOld = existing.priority ?? 100;
+
+		if (prioNew <= prioOld) map.set(p.name, p);
 	}
 
-	// sort by priority asc
 	return Array.from(map.values()).sort(
 		(a, b) => (a.priority ?? 100) - (b.priority ?? 100),
 	);
 }
 
+/* -------------------------------------------------------------
+ * Parse PromptPackDefinition from templatePromptPacks[]
+ * ------------------------------------------------------------- */
 async function loadPackDefinition(
 	def: PromptPackDefinition,
 	ctx: PromptContext,
 ): Promise<PromptPack | null> {
-	// 1) Already a full PromptPack
+	// 1. Direct object
 	if ((def as any).handler && (def as any).name) {
 		return def as PromptPack;
 	}
 
-	// 2) A module reference { type: "module", path }
+	// 2. Module reference
 	if ("type" in def && def.type === "module") {
-		const pack = await loadPackFromPath(def.path, ctx);
-		if (!pack) {
-			logger.error(`Failed to load module prompt pack at: ${def.path}`);
-		}
-		return pack;
+		return await loadPackFromPath(def.path, ctx);
 	}
 
-	// 3) A JSON reference { type: "json", path }
+	// 3. JSON reference
 	if ("type" in def && def.type === "json") {
 		const abs = path.isAbsolute(def.path)
 			? def.path
@@ -220,6 +271,7 @@ async function loadPackDefinition(
 		}
 
 		const json = await fs.readJSON(abs);
+
 		if (!Array.isArray(json.prompts)) {
 			logger.error(`Invalid JSON pack at ${abs}: missing prompts[]`);
 			return null;

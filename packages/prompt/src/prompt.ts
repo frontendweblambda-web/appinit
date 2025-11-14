@@ -1,104 +1,78 @@
-import { logger } from "@appinit/utils";
-import type { Answers } from "@appinit/types";
-import prompts, { PromptObject } from "prompts";
+import { askText, askSelect, askConfirm, askMulti } from "./helpers";
 
-// Global defaults
-const defaultPromptOptions = {
-	onCancel: () => {
-		logger.error("Prompt cancelled by user.");
-		throw new Error("Prompt cancelled");
-	},
-};
-
-// --------------------------------------------------------
-// ask(): base wrapper
-// --------------------------------------------------------
-export async function ask<T extends Record<string, any> = Record<string, any>>(
-	questions: PromptObject | PromptObject[],
-	opts: Record<string, any> = {},
-): Promise<T> {
-	try {
-		const response = await prompts(questions as any, {
-			...defaultPromptOptions,
-			...opts,
-		});
-
-		return response as T;
-	} catch (err) {
-		if ((err as Error).message === "Prompt cancelled") {
-			throw err;
-		}
-		logger.error("Prompt error:", (err as Error).message);
-		throw err;
-	}
-}
-
-// --------------------------------------------------------
-// askAnswers(): ALWAYS returns Partial<Answers>
-// --------------------------------------------------------
+import type { PromptQuestion, PromptResult } from "@appinit/types";
+/**
+ * Runs an array of question objects and returns a Partial<Answers>.
+ * Compatible with:
+ *   - Built-in packs (metaPack, gitPack, etc.)
+ *   - Template JSON-based packs (dynamic-loader)
+ *   - Plugin-provided packs
+ *   - Validation, formatting, conditional prompts
+ */
 export async function askAnswers(
-	questions: PromptObject | PromptObject[],
-	initial: Partial<Answers> = {},
-): Promise<Partial<Answers>> {
-	const result = await ask<Record<string, any>>(questions);
+	questions: PromptQuestion[],
+	initial: PromptResult = {},
+): Promise<PromptResult> {
+	const result: PromptResult = { ...initial };
 
-	// Safe merging (TS guaranteed Partial<Answers>)
-	return {
-		...initial,
-		...(result as Partial<Answers>),
-	};
-}
+	for (const q of questions) {
+		const {
+			type,
+			name,
+			message,
+			initial: initialValue,
+			validate,
+			format,
+			when,
+			choices,
+			options,
+		} = q;
 
-// --------------------------------------------------------
-// Typed helper questions
-// --------------------------------------------------------
-export async function askText<K extends keyof Answers>(
-	key: K,
-	message: string,
-	initial?: Answers[K],
-): Promise<Pick<Answers, K>> {
-	const r = await ask<{ value: Answers[K] }>({
-		type: "text",
-		name: "value",
-		message,
-		initial: initial as any,
-	});
+		// Handle conditional execution
+		if (typeof when === "function") {
+			const shouldRun = await when(result);
+			if (!shouldRun) continue;
+		}
 
-	// TS-safe: forces field to match Answers[K]
-	return { [key]: r.value } as Pick<Answers, K>;
-}
+		let value: any;
 
-export async function askToggle<K extends keyof Answers>(
-	key: K,
-	message: string,
-	initial?: boolean,
-): Promise<Pick<Answers, K>> {
-	const r = await ask<{ value: boolean }>({
-		type: "toggle",
-		name: "value",
-		message,
-		active: "yes",
-		inactive: "no",
-		initial,
-	});
+		switch (type) {
+			case "text": {
+				value = await askText(message, initialValue);
 
-	// Cast is safe because you control Answers[K] types
-	return { [key]: r.value as Answers[K] } as Pick<Answers, K>;
-}
+				if (typeof validate === "function") {
+					const v = await validate(value);
+					if (v !== true) {
+						// TODO: re-ask or warning
+					}
+				}
 
-export async function askSelect<K extends keyof Answers, T extends Answers[K]>(
-	key: K,
-	message: string,
-	choices: { title: string; value: T }[],
-	initialIndex = 0,
-): Promise<Pick<Answers, K>> {
-	const r = await ask<{ value: T }>({
-		type: "select",
-		name: "value",
-		message,
-		choices,
-		initial: initialIndex,
-	});
+				if (typeof format === "function") {
+					value = format(value);
+				}
+				break;
+			}
 
-	return { [key]: r.value } as unknown as Pick<Answers, K>;
+			case "select":
+				value = await askSelect(message, choices ?? options ?? []);
+				break;
+
+			case "confirm":
+			case "toggle":
+				value = await askConfirm(message, initialValue ?? true);
+				break;
+
+			case "multiselect":
+				value = await askMulti(message, choices ?? options ?? []);
+				break;
+
+			default:
+				throw new Error(`Unsupported prompt type "${type}"`);
+		}
+
+		// FIX: Safe dynamic assignment
+		(result as Record<string, any>)[name] = value;
+	}
+
+	return result;
 }

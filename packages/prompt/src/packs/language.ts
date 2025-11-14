@@ -3,10 +3,8 @@ import type { PromptContext, PromptPack } from "@appinit/types";
 
 export const languagePack: PromptPack = {
 	name: "language",
+
 	handler: async (ctx: PromptContext, accum) => {
-		// -------------------------
-		// 1. Non-interactive mode
-		// -------------------------
 		if (ctx.flags["non-interactive"]) {
 			return {
 				language: ctx.flags.language ?? "typescript",
@@ -14,10 +12,6 @@ export const languagePack: PromptPack = {
 			};
 		}
 
-		// -------------------------
-		// 2. Interactive prompt
-		// Note: "initial" must be an index, NOT a string.
-		// -------------------------
 		const res = await askAnswers(
 			[
 				{
@@ -25,20 +19,20 @@ export const languagePack: PromptPack = {
 					name: "language",
 					message: "💬 Language preference:",
 					choices: [
-						{ title: "TypeScript", value: "typescript" },
-						{ title: "JavaScript", value: "javascript" },
+						{ label: "TypeScript", value: "typescript" },
+						{ label: "JavaScript", value: "javascript" },
 					],
-					initial: ctx.flags.language === "javascript" ? 1 : 0,
+					initial: ctx.flags.language ?? accum.language ?? "typescript",
 				},
 				{
 					type: "select",
 					name: "structure",
 					message: "📁 Project structure:",
 					choices: [
-						{ title: "Flat (no src/ folder)", value: "flat" },
-						{ title: "With src/ folder", value: "src-folder" },
+						{ label: "Flat (no src folder)", value: "flat" },
+						{ label: "With src/ folder", value: "src-folder" },
 					],
-					initial: ctx.flags.structure === "flat" ? 0 : 1,
+					initial: ctx.flags.structure ?? accum.structure ?? "src-folder",
 				},
 			],
 			accum,

@@ -5,9 +5,6 @@ export const frameworkPack: PromptPack = {
 	name: "framework",
 
 	handler: async (ctx: PromptContext, accum) => {
-		// ---------------------------------------------------
-		// 1. Non-interactive mode
-		// ---------------------------------------------------
 		if (ctx.flags["non-interactive"]) {
 			return {
 				framework: ctx.flags.framework ?? "react",
@@ -17,97 +14,85 @@ export const frameworkPack: PromptPack = {
 			};
 		}
 
-		// ---------------------------------------------------
-		// 2. Interactive mode
-		// Correct `initial` indexes
-		// ---------------------------------------------------
+		const frameworkInitial = ctx.flags.framework ?? accum.framework ?? "react";
+		const uiInitial = ctx.flags.ui ?? accum.ui ?? "tailwind";
 
-		const frameworkOrder = [
-			"react",
-			"next",
-			"vue",
-			"svelte",
-			"framer",
-			"react-router",
-		] as const;
-
-		const uiOrder = ["tailwind", "mui", "shadcn", "antd", "none"] as const;
-
-		const res = await askAnswers(
+		// 1️⃣ Ask framework + UI first
+		const base = await askAnswers(
 			[
 				{
 					type: "select",
 					name: "framework",
 					message: "⚙️ Choose framework:",
 					choices: [
-						{ title: "React (Vite)", value: "react" },
-						{ title: "Next.js (App Router)", value: "next" },
-						{ title: "Vue (Vite)", value: "vue" },
-						{ title: "Svelte", value: "svelte" },
-						{ title: "Framer", value: "framer" },
-						{ title: "React Router (SPA)", value: "react-router" },
+						{ label: "React (Vite)", value: "react" },
+						{ label: "Next.js (App Router)", value: "next" },
+						{ label: "Vue (Vite)", value: "vue" },
+						{ label: "Svelte", value: "svelte" },
+						{ label: "Framer", value: "framer" },
+						{ label: "React Router (SPA)", value: "react-router" },
 					],
-					initial:
-						frameworkOrder.indexOf(ctx.flags.framework) >= 0
-							? frameworkOrder.indexOf(ctx.flags.framework)
-							: 0,
+					initial: frameworkInitial,
 				},
-
 				{
 					type: "select",
 					name: "ui",
 					message: "🎨 UI library:",
-					choices: uiOrder.map((v) => ({ title: v, value: v })),
-					initial:
-						uiOrder.indexOf(ctx.flags.ui) >= 0
-							? uiOrder.indexOf(ctx.flags.ui)
-							: 0,
-				},
-
-				{
-					type: "select",
-					name: "routing",
-					message: "🗺 Routing:",
-					choices: (prev) => {
-						switch (prev.framework) {
-							case "next":
-								return [
-									{ title: "App Router (recommended)", value: "app" },
-									{ title: "Pages Router", value: "pages" },
-								];
-
-							case "vue":
-								return [{ title: "Vue Router", value: "vue-router" }];
-
-							default:
-								return [{ title: "React Router", value: "react-router" }];
-						}
-					},
-				},
-
-				{
-					type: "select",
-					name: "store",
-					message: "🧠 State management:",
 					choices: [
-						{ title: "zustand", value: "zustand" },
-						{ title: "redux", value: "redux" },
-						{ title: "pinia", value: "pinia" },
-						{ title: "none", value: "none" },
+						{ label: "tailwind", value: "tailwind" },
+						{ label: "mui", value: "mui" },
+						{ label: "shadcn", value: "shadcn" },
+						{ label: "antd", value: "antd" },
+						{ label: "none", value: "none" },
 					],
-					initial:
-						ctx.flags.store === "redux"
-							? 1
-							: ctx.flags.store === "pinia"
-								? 2
-								: ctx.flags.store === "none"
-									? 3
-									: 0,
+					initial: uiInitial,
 				},
 			],
 			accum,
 		);
 
-		return res;
+		let routingChoices;
+
+		switch (base.framework) {
+			case "next":
+				routingChoices = [
+					{ label: "App Router", value: "app" },
+					{ label: "Pages Router", value: "pages" },
+				];
+				break;
+			case "vue":
+				routingChoices = [{ label: "Vue Router", value: "vue-router" }];
+				break;
+			default:
+				routingChoices = [{ label: "React Router", value: "react-router" }];
+		}
+
+		const rest = await askAnswers(
+			[
+				{
+					type: "select",
+					name: "routing",
+					message: "🗺 Routing:",
+					choices: routingChoices,
+					initial:
+						ctx.flags.routing ?? accum.routing ?? routingChoices[0].value,
+				},
+				{
+					type: "select",
+					name: "store",
+					message: "🧠 State management:",
+					choices: [
+						{ label: "zustand", value: "zustand" },
+						{ label: "redux", value: "redux" },
+						{ label: "pinia", value: "pinia" },
+						{ label: "none", value: "none" },
+					],
+					initial: ctx.flags.store ?? accum.store ?? "zustand",
+				},
+			],
+			{ ...accum, ...base },
+		);
+
+		return { ...base, ...rest };
 	},
 };

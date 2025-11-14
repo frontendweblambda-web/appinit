@@ -7,6 +7,9 @@ settings:
 importers:
   .:
     dependencies:
+      "@clack/prompts":
+        specifier: 0.11.0
+        version: 0.11.0
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -158,6 +161,9 @@ importers:
       "@appinit/engine":
         specifier: workspace:*
         version: link:../engine
+      "@appinit/prompt":
+        specifier: workspace:*
+        version: link:../prompt
       "@appinit/template-resolver":
         specifier: "*"
         version: link:../template-resolver
@@ -570,6 +576,16 @@ importers:
         version: 5.9.3
 
   packages/prompt:
+    dependencies:
+      "@appinit/engine":
+        specifier: workspace:*
+        version: link:../engine
+      "@appinit/types":
+        specifier: workspace:*
+        version: link:../types
+      "@appinit/utils":
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       tsup:
         specifier: latest
@@ -822,6 +838,18 @@ packages:
     resolution:
       {
         integrity: sha512-CdTLvIOPiCNuH71pyDu3rA+Q0n65cmAbXnwWH84rKGiFumFzkmHNT8KHTMEchcxN+Kl8I54xGUhJ7l3E7X396Q==,
+      }
+
+  "@clack/core@0.5.0":
+    resolution:
+      {
+        integrity: sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow==,
+      }
+
+  "@clack/prompts@0.11.0":
+    resolution:
+      {
+        integrity: sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw==,
       }
 
   "@esbuild/aix-ppc64@0.21.5":
@@ -5093,6 +5121,17 @@ snapshots:
       fs-extra: 7.0.1
       human-id: 4.1.2
       prettier: 2.8.8
+
+  "@clack/core@0.5.0":
+    dependencies:
+      picocolors: 1.1.1
+      sisteransi: 1.0.5
+
+  "@clack/prompts@0.11.0":
+    dependencies:
+      "@clack/core": 0.5.0
+      picocolors: 1.1.1
+      sisteransi: 1.0.5
 
   "@esbuild/aix-ppc64@0.21.5":
     optional: true
