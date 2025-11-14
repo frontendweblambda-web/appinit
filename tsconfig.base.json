@@ -19,6 +19,9 @@
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 
+		"noEmit": true,
+		"declaration": false,
+		"emitDeclarationOnly": false,
 		// Monorepo path aliasing
 		"baseUrl": ".",
 		"paths": {

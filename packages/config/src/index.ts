@@ -1,4 +1,3 @@
-export * from "./define-config.js";
 export * from "./load-config.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
