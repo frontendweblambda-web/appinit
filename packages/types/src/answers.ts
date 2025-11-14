@@ -8,6 +8,7 @@ import type { FrontendOptions } from "./frontend.js";
 import type { BackendOptions } from "./backend.js";
 import type { AuthOptions } from "./auth.js";
 import type { DeployOptions } from "./deploy.js";
+import { DeployContext } from "./provider.js";
 
 // -------------------------------------
 // Workspace toolchains
@@ -118,6 +119,7 @@ export interface BaseAnswers {
 	licenseType?: "MIT" | "ISC" | "Apache-2.0" | "Proprietary";
 
 	useAI?: boolean;
+	deploy?: DeployOptions;
 }
 
 // ─────────────────────────────────────────────

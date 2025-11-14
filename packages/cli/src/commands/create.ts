@@ -1,25 +1,37 @@
 import { buildContext } from "../core/context.js";
 import { runPromptEngine } from "@appinit/prompt";
 import { scaffoldProject } from "../core/scaffold.js";
-import { saveUserConfig } from "../core/config-store.js";
-import { Flags } from "@appinit/types";
+import { saveUserConfig } from "../core/config-store";
 
-export async function createProject(cmd: {
-	name: string;
-	args: string[];
-	flags: Flags;
-}) {
+import { CLICommand } from "../core/flags";
+import { startEngine } from "@appinit/engine";
+import { Answers } from "@appinit/types";
+import { applyTemplate } from "@appinit/template-resolver";
+import path from "path";
+import { ensureDir } from "@appinit/utils";
+
+export async function createProject(cmd: CLICommand) {
 	console.clear();
 	console.log("\n🚀 Appinit — Create a project\n");
 
 	const ctx = await buildContext(cmd);
 
 	// run prompt engine (your existing @appinit/prompt)
-	const answers = await runPromptEngine(ctx as any);
+	const { answers, template } = await runPromptEngine(ctx);
 	ctx.answers = answers;
+	ctx.template = template;
 
-	// scaffold minimal project
-	await scaffoldProject(ctx, answers);
+	// 1. Write template files
+	const projectName = answers.projectName;
+	const targetDir = path.resolve(ctx.cwd, projectName!);
+	ctx.targetDir = targetDir;
+	await ensureDir(targetDir);
+	await applyTemplate(template, targetDir, {
+		...ctx,
+		answers: answers as Answers,
+	});
+
+	await startEngine(ctx.targetDir!, answers as Answers);
 
 	// save last answers
 	await saveUserConfig(answers);

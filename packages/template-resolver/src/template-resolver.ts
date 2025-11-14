@@ -9,6 +9,7 @@ import {
 	downloadNpmTemplate,
 	downloadUrlTemplate,
 	resolveLocalTemplate,
+	mergeJson,
 } from "@appinit/utils";
 
 import { readDirRecursive } from "./utils/read-dir-recursive";
@@ -21,12 +22,11 @@ import type {
 	TemplateContext,
 } from "@appinit/types";
 
-import { mergeJson } from "@appinit/utils";
 import { loadJsonIfExists } from "./utils/load-json-if-exists";
 import { loadTemplateModule } from "./utils/load-template-module";
 import { normalizePath } from "./utils/normalize-path";
 
-export async function resolveTemplate(
+export async function templateResolver(
 	source: string,
 	options: ResolveOptions,
 ): Promise<ResolvedTemplate> {
@@ -110,7 +110,7 @@ export async function resolveTemplate(
 	// PREPARE LANGUAGE MODE
 	// ----------------------------------------------
 	const language =
-		options.language === "JavaScript" ? "JavaScript" : "TypeScript";
+		options.language === "javascript" ? "javascript" : "typescript";
 
 	// ----------------------------------------------
 	// COMPOSE RESOLVED TEMPLATE

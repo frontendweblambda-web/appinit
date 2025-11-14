@@ -1,2 +1,3 @@
 export * from "./vfs";
-export * from "./resolver";
+export * from "./template-resolver";
+export * from "./apply-template";

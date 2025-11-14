@@ -1,6 +1,6 @@
-import type { Answers } from "../answers.js";
+import type { Answers } from "../answers";
 
-export interface EngineContext extends Answers {
+export type EngineContext = Answers & {
 	cwd: string;
 	targetDir: string;
 	templateDir: string;
@@ -9,4 +9,4 @@ export interface EngineContext extends Answers {
 	// computed metadata
 	packageManager: "npm" | "pnpm" | "yarn" | "bun";
 	nodeVersion?: string;
-}
+};

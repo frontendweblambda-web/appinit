@@ -27,7 +27,8 @@
 	"dependencies": {
 		"@appinit/types": "workspace:*",
 		"@appinit/engine": "workspace:*",
-		"@appinit/utils": "workspace:*"
+		"@appinit/utils": "workspace:*",
+		"@appinit/template-resolver": "workspace:*"
 	},
 	"devDependencies": {
 		"tsup": "latest",

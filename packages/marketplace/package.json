@@ -19,7 +19,7 @@
 	"scripts": {
 		"clean": "npx rimraf dist",
 		"prebuild": "pnpm clean",
-		"build": "tsc -p tsconfig.json",
+		"build": "tsup src/index.ts --format=esm --dts --clean",
 		"dev": "tsc -w -p tsconfig.json",
 		"test": "echo \"No tests yet\""
 	},

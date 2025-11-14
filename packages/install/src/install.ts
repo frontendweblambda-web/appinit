@@ -1,8 +1,7 @@
-import { getPM } from "@appinit/package-manager";
 import { InstallOptions, InstallResult } from "@appinit/types";
 
 import { rollbackOnFailure } from "./rollback";
-import { logger, retry } from "@appinit/utils";
+import { getPackageManager, logger, retry } from "@appinit/utils";
 export async function installDependencies(
 	opts: InstallOptions,
 ): Promise<InstallResult> {
@@ -11,7 +10,7 @@ export async function installDependencies(
 	const devDeps = opts.devDeps ?? [];
 	const retryCount = typeof opts.retry === "number" ? opts.retry : 3;
 
-	const pm = await getPM(cwd);
+	const pm = await getPackageManager(cwd);
 
 	try {
 		if (deps.length) {

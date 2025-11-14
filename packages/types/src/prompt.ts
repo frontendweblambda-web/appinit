@@ -5,6 +5,7 @@
 ────────────────────────────────────────────────── */
 
 import type { Answers } from "./answers";
+import { ResolvedTemplate } from "./template";
 
 // -------------------------------------------------
 // FLAGS (parsed CLI arguments)
@@ -14,7 +15,7 @@ export type Flags = Record<string, any>;
 // -------------------------------------------------
 // Prompt Result (partial Answers per pack)
 // -------------------------------------------------
-export type PromptResult = Partial<Answers>;
+export type PromptResult = Partial<Answers> & Record<string, any>;
 
 // -------------------------------------------------
 // Prompt Pack Handler Signature
@@ -155,6 +156,7 @@ export interface PromptContext {
 
 	// Accumulated answers (set by prompt orchestrator)
 	answers?: PromptResult;
+	template?: ResolvedTemplate;
 }
 
 export type ChoiceOption = {

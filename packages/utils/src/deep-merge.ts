@@ -1,6 +1,4 @@
-export function isObject(v: unknown): v is Record<string, any> {
-	return v !== null && typeof v === "object" && !Array.isArray(v);
-}
+import { isObject } from "./helpers";
 
 export function deepMerge<T extends object, U extends object>(
 	target: T,

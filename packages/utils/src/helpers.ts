@@ -18,3 +18,5 @@ export const isStaticFrontend = (a: Answers) =>
 	isFrontend(a) && a.deploymentStrategy === "static";
 export const isServerlessBackend = (a: Answers) =>
 	isBackend(a) && a.backendDeployTarget === "lambda";
+export const isFullstack = (a: Answers) => a.type === "fullstack";
+export const isLibrary = (a: Answers) => a.type === "library";

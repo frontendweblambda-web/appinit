@@ -1,9 +1,10 @@
+import { Flags } from "@appinit/types";
 import mri from "mri";
 
 export type CLICommand = {
 	name: string;
 	args: string[];
-	flags: Record<string, any>;
+	flags: Flags;
 };
 
 export function parseFlags(argv: string[]): CLICommand {

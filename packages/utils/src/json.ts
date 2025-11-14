@@ -2,9 +2,8 @@
 
 import { pathExists, readJson as readJsonRaw, writeFileUtf8 } from "./file";
 import fs from "fs-extra";
-import { isArray } from "./helpers";
+import { isArray, isObject } from "./helpers";
 import { JsonArray, JsonObject, JsonValue } from "@appinit/types";
-import { isObject } from "./deep-merge";
 
 /**
  * Safely read JSON, returning fallback if missing or invalid.

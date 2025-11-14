@@ -4,7 +4,7 @@
    With Hooks, Template Logic Modules, Variables, FS
 ────────────────────────────────────────────────── */
 
-import type { Answers } from "./answers";
+import type { Answers, Language } from "./answers";
 
 // ================================================
 // Template Origin
@@ -31,7 +31,7 @@ export interface TemplateMeta {
 	frameworks?: string[];
 
 	/** Supported languages: TS/JS */
-	languages?: ("TypeScript" | "JavaScript")[];
+	languages?: ("typeScript" | "javaScript")[];
 
 	/** Template-defined custom prompts (simple mode) */
 	prompts?: Array<{
@@ -115,7 +115,7 @@ export interface ResolvedTemplate {
 	hooks?: TemplateHooks;
 
 	/** Computed language value (TS/JS) */
-	language: "TypeScript" | "JavaScript";
+	language: Language;
 
 	/** Merged computed variables (meta + logic + CLI) */
 	variables?: Record<string, any>;
@@ -141,7 +141,7 @@ export interface ResolveOptions {
 	framework: string;
 
 	/** Language mode */
-	language: "TypeScript" | "JavaScript";
+	language: Language;
 
 	/** Answers from prompt packs */
 	answers?: Answers;
@@ -167,7 +167,7 @@ export interface TemplateContext {
 	projectName: string;
 
 	/** Selected language */
-	language: "TypeScript" | "JavaScript";
+	language: Language;
 
 	/** Answers from the prompt engine (fully typed) */
 	answers: Answers;

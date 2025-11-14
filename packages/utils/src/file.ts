@@ -109,3 +109,10 @@ export async function isFile(pathStr: string) {
 		return false;
 	}
 }
+
+export async function writeJson(
+	CONFIG_FILE: string,
+	data: Record<string, any>,
+) {
+	return fs.writeJSON(CONFIG_FILE, { lastCreate: data }, { spaces: 2 });
+}
