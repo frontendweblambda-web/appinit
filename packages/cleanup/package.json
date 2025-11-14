@@ -19,7 +19,7 @@
 	"scripts": {
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"build": "tsup",
+		"build": "tsup src/index.ts --format=esm --dts --clean",
 		"dev": "tsup --watch",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest"

@@ -1,0 +1,11 @@
+{
+  "name": "react/typescript",
+  "title": "React + JavaScript",
+  "description": "React + Vite + JavaScript base template for AppInit OS.",
+  "version": "1.0.0",
+  "framework": "react",
+  "language": "js",
+  "builder": "vite",
+  "features": ["react", "javascript", "vite"],
+  "tags": ["frontend", "react"]
+}

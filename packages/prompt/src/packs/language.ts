@@ -1,10 +1,14 @@
 import { askAnswers } from "../prompt";
-import type { PromptContext, PromptPack } from "@appinit/types";
+import type { PromptContext, PromptPack, ChoiceOption } from "@appinit/types";
 
 export const languagePack: PromptPack = {
 	name: "language",
+	priority: 15,
 
 	handler: async (ctx: PromptContext, accum) => {
+		// ----------------------------------------------------
+		// NON-INTERACTIVE MODE
+		// ----------------------------------------------------
 		if (ctx.flags["non-interactive"]) {
 			return {
 				language: ctx.flags.language ?? "typescript",
@@ -12,6 +16,9 @@ export const languagePack: PromptPack = {
 			};
 		}
 
+		// ----------------------------------------------------
+		// INTERACTIVE MODE
+		// ----------------------------------------------------
 		const res = await askAnswers(
 			[
 				{
@@ -21,7 +28,7 @@ export const languagePack: PromptPack = {
 					choices: [
 						{ label: "TypeScript", value: "typescript" },
 						{ label: "JavaScript", value: "javascript" },
-					],
+					] as ChoiceOption[],
 					initial: ctx.flags.language ?? accum.language ?? "typescript",
 				},
 				{
@@ -31,11 +38,12 @@ export const languagePack: PromptPack = {
 					choices: [
 						{ label: "Flat (no src folder)", value: "flat" },
 						{ label: "With src/ folder", value: "src-folder" },
-					],
+					] as ChoiceOption[],
 					initial: ctx.flags.structure ?? accum.structure ?? "src-folder",
 				},
 			],
 			accum,
+			ctx,
 		);
 
 		return res;

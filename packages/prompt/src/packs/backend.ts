@@ -1,27 +1,39 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type {
+	PromptPack,
+	PromptContext,
+	PromptQuestion,
+	ChoiceOption,
+	PromptResult,
+} from "@appinit/types";
 
 export const backendPack: PromptPack = {
 	name: "backend",
-	priority: 45, // runs after language & environment
+	priority: 45, // Runs after language/environment
 
 	async handler(ctx: PromptContext, accum) {
+		const flags = ctx.flags ?? {};
+
+		const type = accum.type ?? ctx.flags.type;
+		if (type !== "backend" && type !== "fullstack") {
+			return {};
+		}
 		// ----------------------------------------------------
-		// 1. Non-interactive mode
+		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
-		if (ctx.flags["non-interactive"]) {
+		if (flags["non-interactive"]) {
 			return {
-				backendFramework: ctx.flags.backendFramework ?? "express",
-				apiStyle: ctx.flags.apiStyle ?? "rest",
-				database: ctx.flags.database ?? "none",
-				orm: ctx.flags.orm ?? "none",
-				authStrategy: ctx.flags.authStrategy ?? "none",
-				deployTarget: ctx.flags.deployTarget ?? "node",
+				backendFramework: flags.backendFramework ?? "express",
+				apiStyle: flags.apiStyle ?? "rest",
+				database: flags.database ?? "none",
+				orm: flags.orm ?? "none",
+				authStrategy: flags.authStrategy ?? "none",
+				deployTarget: flags.deployTarget ?? "node",
 			};
 		}
 
 		// ----------------------------------------------------
-		// 2. Interactive mode
+		// BASE BACKEND QUESTIONS
 		// ----------------------------------------------------
 		const base = await askAnswers(
 			[
@@ -35,9 +47,9 @@ export const backendPack: PromptPack = {
 						{ label: "NestJS", value: "nest" },
 						{ label: "Hono", value: "hono" },
 						{ label: "Elysia (Bun)", value: "elysia" },
-					],
+					] as ChoiceOption[],
 					initial:
-						ctx.flags.backendFramework ?? accum.backendFramework ?? "express",
+						flags.backendFramework ?? accum.backendFramework ?? "express",
 				},
 				{
 					type: "select",
@@ -47,16 +59,17 @@ export const backendPack: PromptPack = {
 						{ label: "REST", value: "rest" },
 						{ label: "tRPC", value: "trpc" },
 						{ label: "GraphQL", value: "graphql" },
-					],
-					initial: ctx.flags.apiStyle ?? accum.apiStyle ?? "rest",
+					] as ChoiceOption[],
+					initial: flags.apiStyle ?? accum.apiStyle ?? "rest",
 				},
 			],
 			accum,
+			ctx,
 		);
 
-		// ------------------------------
-		// Database + ORM
-		// ------------------------------
+		// ----------------------------------------------------
+		// DATABASE QUESTIONS
+		// ----------------------------------------------------
 		const dbPart = await askAnswers(
 			[
 				{
@@ -70,15 +83,18 @@ export const backendPack: PromptPack = {
 						{ label: "MongoDB", value: "mongo" },
 						{ label: "SQLite", value: "sqlite" },
 						{ label: "Supabase", value: "supabase" },
-					],
-					initial: ctx.flags.database ?? accum.database ?? "none",
+					] as ChoiceOption[],
+					initial: flags.database ?? accum.database ?? "none",
 				},
 			],
 			{ ...accum, ...base },
+			ctx,
 		);
 
-		// ORM depends on database
-		let ormChoices;
+		// ----------------------------------------------------
+		// ORM CHOICES DEPEND ON DATABASE
+		// ----------------------------------------------------
+		let ormChoices: ChoiceOption[];
 
 		switch (dbPart.database) {
 			case "mongo":
@@ -109,15 +125,16 @@ export const backendPack: PromptPack = {
 					name: "orm",
 					message: "🧭 ORM:",
 					choices: ormChoices,
-					initial: ctx.flags.orm ?? accum.orm ?? "none",
+					initial: flags.orm ?? accum.orm ?? "none",
 				},
 			],
 			{ ...accum, ...base, ...dbPart },
+			ctx,
 		);
 
-		// ------------------------------
-		// Auth Strategy
-		// ------------------------------
+		// ----------------------------------------------------
+		// AUTH STRATEGY
+		// ----------------------------------------------------
 		const authPart = await askAnswers(
 			[
 				{
@@ -130,16 +147,17 @@ export const backendPack: PromptPack = {
 						{ label: "OAuth2", value: "oauth2" },
 						{ label: "Clerk", value: "clerk" },
 						{ label: "Supabase Auth", value: "supabase" },
-					],
-					initial: ctx.flags.authStrategy ?? "none",
+					] as ChoiceOption[],
+					initial: flags.authStrategy ?? "none",
 				},
 			],
 			{ ...accum, ...base, ...dbPart, ...ormPart },
+			ctx,
 		);
 
-		// ------------------------------
-		// Deployment target
-		// ------------------------------
+		// ----------------------------------------------------
+		// DEPLOYMENT TARGET
+		// ----------------------------------------------------
 		const deployPart = await askAnswers(
 			[
 				{
@@ -151,11 +169,12 @@ export const backendPack: PromptPack = {
 						{ label: "Vercel", value: "vercel" },
 						{ label: "Cloudflare Workers", value: "cloudflare" },
 						{ label: "Docker", value: "docker" },
-					],
-					initial: ctx.flags.deployTarget ?? "node",
+					] as ChoiceOption[],
+					initial: flags.deployTarget ?? "node",
 				},
 			],
 			{ ...accum, ...base, ...dbPart, ...ormPart, ...authPart },
+			ctx,
 		);
 
 		return {

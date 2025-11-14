@@ -1,41 +1,49 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
 
 export const automationPack: PromptPack = {
 	name: "automation",
+	priority: 90, // runs towards the end
 
 	handler: async (ctx: PromptContext, accum) => {
-		if (ctx.flags["non-interactive"]) {
+		const flags = ctx.flags ?? {};
+
+		// ----------------------------------------------------
+		// NON-INTERACTIVE MODE
+		// ----------------------------------------------------
+		if (flags["non-interactive"]) {
 			return {
-				autoInstall: ctx.flags.autoInstall ?? true,
-				autoStart: ctx.flags.autoStart ?? false,
-				useAI: ctx.flags.useAI ?? false,
+				autoInstall: flags.autoInstall ?? true,
+				autoStart: flags.autoStart ?? false,
+				useAI: flags.useAI ?? false,
 			};
 		}
 
-		const res = await askAnswers(
-			[
-				{
-					type: "confirm",
-					name: "autoInstall",
-					message: "⚙️ Install dependencies after generation?",
-					initial: ctx.flags.autoInstall ?? true,
-				},
-				{
-					type: "confirm",
-					name: "autoStart",
-					message: "▶️ Start dev server after install?",
-					initial: ctx.flags.autoStart ?? false,
-				},
-				{
-					type: "confirm",
-					name: "useAI",
-					message: "🤖 Let AI optimize setup?",
-					initial: ctx.flags.useAI ?? false,
-				},
-			],
-			accum,
-		);
+		// ----------------------------------------------------
+		// INTERACTIVE MODE
+		// ----------------------------------------------------
+		const questions: PromptQuestion[] = [
+			{
+				type: "confirm",
+				name: "autoInstall",
+				message: "⚙️ Install dependencies after generation?",
+				initial: flags.autoInstall ?? true,
+			},
+			{
+				type: "confirm",
+				name: "autoStart",
+				message: "▶️ Start dev server after install?",
+				initial: flags.autoStart ?? false,
+			},
+			{
+				type: "confirm",
+				name: "useAI",
+				message: "🤖 Let AI optimize setup?",
+				initial: flags.useAI ?? false,
+			},
+		];
+
+		const res = await askAnswers(questions, accum, ctx);
 
 		return res;
 	},

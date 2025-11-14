@@ -11,19 +11,24 @@ import { automationPack } from "./packs/automation";
 
 import { loadDynamicPromptPacks } from "./load-dynamic";
 import { logger } from "@appinit/utils";
+import { uiPack } from "./packs";
 
 // --------------------------------------------------------
 // DEFAULT PIPELINE (used only when skipDefaultPacks is false)
 // --------------------------------------------------------
 const DEFAULT_PIPELINE: PromptPack[] = [
-	gitPack,
+	projectTypePack,
 	metaPack,
-	languagePack,
 	environmentPack,
+	languagePack,
 	frameworkPack,
-	qualityPack,
+	uiPack,
+	backendPack,
 	infraPack,
+	qualityPack,
+	gitPack,
 	automationPack,
+	deployPack,
 ];
 
 // --------------------------------------------------------
@@ -44,10 +49,10 @@ export async function runPromptEngine(
 	}
 
 	// 2️⃣ Load dynamic packs (plugin/template/JSON-based)
-	const dynamicPacks = await loadDynamicPromptPacks(ctx);
-	if (dynamicPacks.length) {
-		pipeline = [...pipeline, ...dynamicPacks];
-	}
+	// const dynamicPacks = await loadDynamicPromptPacks(ctx);
+	// if (dynamicPacks.length) {
+	// 	pipeline = [...pipeline, ...dynamicPacks];
+	// }
 
 	// 3️⃣ User-supplied packs (API/CLI override) take highest priority
 	if (Array.isArray(packs)) {

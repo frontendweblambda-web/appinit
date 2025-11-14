@@ -1,19 +1,25 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type {
+	PromptPack,
+	PromptContext,
+	PromptQuestion,
+	ChoiceOption,
+	PromptResult,
+} from "@appinit/types";
 
 export const gitPack: PromptPack = {
 	name: "git",
 	priority: 10,
 
 	async handler(ctx: PromptContext, accum) {
-		const flags = ctx.flags || {};
-		const prev = ctx.config || {};
+		const flags = ctx.flags ?? {};
+		const prev = ctx.config ?? {};
 		const ai = ctx.hooks;
 
 		const nonInteractive = flags["non-interactive"] || ctx.runtime === "api";
 
 		// ----------------------------------------------------
-		// BEFORE HOOK: AI or plugin can prefill
+		// BEFORE HOOK
 		// ----------------------------------------------------
 		if (ai?.beforePrompt) {
 			await ai.beforePrompt(ctx, accum);
@@ -25,29 +31,23 @@ export const gitPack: PromptPack = {
 		if (nonInteractive) {
 			return {
 				initGit: flags.initGit ?? prev.initGit ?? accum.initGit ?? true,
-
 				createRemote:
 					flags.createRemote ??
 					prev.createRemote ??
 					accum.createRemote ??
 					false,
-
 				remoteOrg: flags.remoteOrg ?? prev.remoteOrg ?? accum.remoteOrg ?? null,
-
 				repoVisibility:
 					flags.repoVisibility ??
 					prev.repoVisibility ??
 					accum.repoVisibility ??
 					"public",
-
 				setupCI: flags.setupCI ?? prev.setupCI ?? accum.setupCI ?? false,
-
 				ciProvider:
 					flags.ciProvider ??
 					prev.ciProvider ??
 					accum.ciProvider ??
 					"github-actions",
-
 				setupCD: flags.setupCD ?? prev.setupCD ?? accum.setupCD ?? false,
 			};
 		}
@@ -55,7 +55,7 @@ export const gitPack: PromptPack = {
 		// ----------------------------------------------------
 		// INTERACTIVE MODE
 		// ----------------------------------------------------
-		const questions = [];
+		const questions: PromptQuestion[] = [];
 
 		// → initGit
 		if (flags.initGit === undefined) {
@@ -69,35 +69,37 @@ export const gitPack: PromptPack = {
 			accum.initGit = flags.initGit;
 		}
 
-		// → if Git enabled
+		// → createRemote
 		questions.push({
 			type: "confirm",
 			name: "createRemote",
-			message: "📦 Create a remote GitHub/GitLab/Bitbucket repository?",
-			when: (a: any) => a.initGit,
+			message: "📦 Create a remote GitHub/GitLab/Bitbucket repo?",
+			when: (a: PromptResult) => a.initGit === true,
 			initial:
 				flags.createRemote ?? prev.createRemote ?? accum.createRemote ?? false,
 		});
 
+		// → remoteOrg
 		questions.push({
 			type: "text",
 			name: "remoteOrg",
 			message: "🏢 Organization (optional):",
-			when: (a: any) => a.initGit && a.createRemote,
+			when: (a: PromptResult) => a.initGit && a.createRemote,
 			initial: flags.remoteOrg ?? prev.remoteOrg ?? accum.remoteOrg ?? "",
-			format: (v: any) => v || null,
+			format: (v: string) => (v ? v : null),
 		});
 
+		// → repoVisibility
 		questions.push({
 			type: "select",
 			name: "repoVisibility",
 			message: "🔒 Repository visibility:",
-			when: (a: any) => a.initGit && a.createRemote,
+			when: (a: PromptResult) => a.initGit && a.createRemote,
 			choices: [
 				{ label: "Public", value: "public" },
 				{ label: "Private", value: "private" },
 				{ label: "Internal (GitLab)", value: "internal" },
-			],
+			] as ChoiceOption[],
 			initial:
 				flags.repoVisibility ??
 				prev.repoVisibility ??
@@ -105,20 +107,21 @@ export const gitPack: PromptPack = {
 				"public",
 		});
 
-		// CI / CD
+		// → setup CI?
 		questions.push({
 			type: "confirm",
 			name: "setupCI",
 			message: "⚙️ Setup CI/CD?",
-			when: (a: any) => a.initGit && a.createRemote,
+			when: (a: PromptResult) => a.initGit && a.createRemote,
 			initial: flags.setupCI ?? prev.setupCI ?? accum.setupCI ?? false,
 		});
 
+		// → CI Provider
 		questions.push({
 			type: "select",
 			name: "ciProvider",
 			message: "🚀 Choose CI provider:",
-			when: (a: any) => a.setupCI,
+			when: (a: PromptResult) => a.setupCI === true,
 			choices: [
 				{ label: "GitHub Actions", value: "github-actions" },
 				{ label: "GitLab CI", value: "gitlab-ci" },
@@ -126,7 +129,7 @@ export const gitPack: PromptPack = {
 				{ label: "Netlify", value: "netlify" },
 				{ label: "AWS Pipeline", value: "aws-pipeline" },
 				{ label: "None", value: "none" },
-			],
+			] as ChoiceOption[],
 			initial:
 				flags.ciProvider ??
 				prev.ciProvider ??
@@ -134,17 +137,18 @@ export const gitPack: PromptPack = {
 				"github-actions",
 		});
 
+		// → setupCD
 		questions.push({
 			type: "confirm",
 			name: "setupCD",
 			message: "🚚 Enable CD (continuous deployment)?",
-			when: (a: any) =>
-				a.setupCI && ["vercel", "netlify"].includes(a.ciProvider),
+			when: (a: PromptResult) =>
+				a.setupCI === true && ["vercel", "netlify"].includes(a.ciProvider),
 			initial: flags.setupCD ?? prev.setupCD ?? accum.setupCD ?? false,
 		});
 
 		// ASK
-		const result = await askAnswers(questions, accum);
+		const result = await askAnswers(questions, accum, ctx);
 
 		// ----------------------------------------------------
 		// AFTER HOOK

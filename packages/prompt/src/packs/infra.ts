@@ -1,29 +1,38 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type { PromptPack, PromptContext, ChoiceOption } from "@appinit/types";
 
 export const infraPack: PromptPack = {
 	name: "infra",
+	priority: 60,
 
 	handler: async (ctx: PromptContext, accum) => {
-		if (ctx.flags["non-interactive"]) {
+		const flags = ctx.flags ?? {};
+
+		// ----------------------------------------------------
+		// NON-INTERACTIVE MODE
+		// ----------------------------------------------------
+		if (flags["non-interactive"]) {
 			return {
-				auth: ctx.flags.auth ?? false,
-				authProvider: ctx.flags.authProvider ?? "nextauth",
-				database: ctx.flags.database ?? "none",
-				orm: ctx.flags.orm ?? "none",
-				caching: ctx.flags.caching ?? "none",
-				analytics: ctx.flags.analytics ?? false,
-				monitoring: ctx.flags.monitoring ?? false,
+				auth: flags.auth ?? false,
+				authProvider: flags.authProvider ?? "nextauth",
+				database: flags.database ?? "none",
+				orm: flags.orm ?? "none",
+				caching: flags.caching ?? "none",
+				analytics: flags.analytics ?? false,
+				monitoring: flags.monitoring ?? false,
 			};
 		}
 
+		// ----------------------------------------------------
+		// BASE QUESTIONS
+		// ----------------------------------------------------
 		const base = await askAnswers(
 			[
 				{
 					type: "confirm",
 					name: "auth",
 					message: "🔐 Add authentication?",
-					initial: ctx.flags.auth ?? false,
+					initial: flags.auth ?? false,
 				},
 				{
 					type: "select",
@@ -35,16 +44,20 @@ export const infraPack: PromptPack = {
 						{ label: "supabase", value: "supabase" },
 						{ label: "mongo", value: "mongo" },
 						{ label: "sqlite", value: "sqlite" },
-					],
-					initial: ctx.flags.database ?? "none",
+					] as ChoiceOption[],
+					initial: flags.database ?? "none",
 				},
 			],
 			accum,
+			ctx,
 		);
 
-		// Dynamic: auth provider
+		// ----------------------------------------------------
+		// AUTH PROVIDER (Conditional)
+		// ----------------------------------------------------
 		let authProviderResult = {};
-		if (base.auth) {
+
+		if (base.auth === true) {
 			authProviderResult = await askAnswers(
 				[
 					{
@@ -57,16 +70,20 @@ export const infraPack: PromptPack = {
 							{ label: "clerk", value: "clerk" },
 							{ label: "supabase", value: "supabase" },
 							{ label: "none", value: "none" },
-						],
-						initial: ctx.flags.authProvider ?? "nextauth",
+						] as ChoiceOption[],
+						initial: flags.authProvider ?? "nextauth",
 					},
 				],
 				{ ...accum, ...base },
+				ctx,
 			);
 		}
 
-		// Dynamic: ORM
-		let ormChoices;
+		// ----------------------------------------------------
+		// ORM CHOICES BASED ON DATABASE
+		// ----------------------------------------------------
+		let ormChoices: ChoiceOption[];
+
 		switch (base.database) {
 			case "mongo":
 				ormChoices = [
@@ -88,6 +105,9 @@ export const infraPack: PromptPack = {
 				];
 		}
 
+		// ----------------------------------------------------
+		// ORM, Caching, Analytics, Monitoring
+		// ----------------------------------------------------
 		const ormResult = await askAnswers(
 			[
 				{
@@ -95,7 +115,7 @@ export const infraPack: PromptPack = {
 					name: "orm",
 					message: "🧭 ORM:",
 					choices: ormChoices,
-					initial: ctx.flags.orm ?? "none",
+					initial: flags.orm ?? "none",
 				},
 				{
 					type: "select",
@@ -106,25 +126,33 @@ export const infraPack: PromptPack = {
 						{ label: "api-cache", value: "api-cache" },
 						{ label: "edge", value: "edge" },
 						{ label: "redis", value: "redis" },
-					],
-					initial: ctx.flags.caching ?? "none",
+					] as ChoiceOption[],
+					initial: flags.caching ?? "none",
 				},
 				{
 					type: "confirm",
 					name: "analytics",
 					message: "📈 Add analytics?",
-					initial: ctx.flags.analytics ?? false,
+					initial: flags.analytics ?? false,
 				},
 				{
 					type: "confirm",
 					name: "monitoring",
 					message: "🛠 Add monitoring?",
-					initial: ctx.flags.monitoring ?? false,
+					initial: flags.monitoring ?? false,
 				},
 			],
 			{ ...accum, ...base, ...authProviderResult },
+			ctx,
 		);
 
-		return { ...base, ...authProviderResult, ...ormResult };
+		// ----------------------------------------------------
+		// RESULT
+		// ----------------------------------------------------
+		return {
+			...base,
+			...authProviderResult,
+			...ormResult,
+		};
 	},
 };

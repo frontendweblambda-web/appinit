@@ -1,17 +1,26 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type { PromptPack, PromptContext, ChoiceOption } from "@appinit/types";
 
 export const environmentPack: PromptPack = {
 	name: "environment",
+	priority: 30,
 
 	handler: async (ctx: PromptContext, accum) => {
-		if (ctx.flags["non-interactive"]) {
+		const flags = ctx.flags ?? {};
+
+		// ------------------------------------------------------
+		// NON-INTERACTIVE MODE (CI / API / scripted)
+		// ------------------------------------------------------
+		if (flags["non-interactive"]) {
 			return {
-				registry: ctx.flags.registry ?? "pnpm",
-				workspace: ctx.flags.workspace ?? "single",
+				registry: flags.registry ?? accum.registry ?? "pnpm",
+				workspace: flags.workspace ?? accum.workspace ?? "single",
 			};
 		}
 
+		// ------------------------------------------------------
+		// INTERACTIVE PROMPTS
+		// ------------------------------------------------------
 		const res = await askAnswers(
 			[
 				{
@@ -23,8 +32,8 @@ export const environmentPack: PromptPack = {
 						{ label: "pnpm", value: "pnpm" },
 						{ label: "yarn", value: "yarn" },
 						{ label: "bun", value: "bun" },
-					],
-					initial: ctx.flags.registry ?? accum.registry ?? "pnpm",
+					] as ChoiceOption[],
+					initial: flags.registry ?? accum.registry ?? "pnpm",
 				},
 				{
 					type: "select",
@@ -33,11 +42,13 @@ export const environmentPack: PromptPack = {
 					choices: [
 						{ label: "Single project", value: "single" },
 						{ label: "Turborepo (monorepo)", value: "turborepo" },
-					],
-					initial: ctx.flags.workspace ?? accum.workspace ?? "single",
+						// If you add more: nx, lerna, moon, etc.
+					] as ChoiceOption[],
+					initial: flags.workspace ?? accum.workspace ?? "single",
 				},
 			],
 			accum,
+			ctx,
 		);
 
 		return res;

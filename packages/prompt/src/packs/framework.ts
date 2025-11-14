@@ -1,98 +1,174 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
 
 export const frameworkPack: PromptPack = {
 	name: "framework",
+	priority: 20,
 
 	handler: async (ctx: PromptContext, accum) => {
-		if (ctx.flags["non-interactive"]) {
+		const flags = ctx.flags ?? {};
+		const projectType = accum.type ?? flags.type;
+
+		// -----------------------------------------
+		// NON-INTERACTIVE MODE
+		// -----------------------------------------
+		if (flags["non-interactive"]) {
 			return {
-				framework: ctx.flags.framework ?? "react",
-				ui: ctx.flags.ui ?? "tailwind",
-				routing: ctx.flags.routing ?? "react-router",
-				store: ctx.flags.store ?? "zustand",
+				framework: flags.framework,
+				routing: flags.routing,
+				store: flags.store,
 			};
 		}
 
-		const frameworkInitial = ctx.flags.framework ?? accum.framework ?? "react";
-		const uiInitial = ctx.flags.ui ?? accum.ui ?? "tailwind";
+		// =================================================================
+		// 1️⃣ FRONTEND PROJECTS
+		// =================================================================
+		if (projectType === "frontend") {
+			const base = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "framework",
+						message: "⚙️ Frontend Framework:",
+						choices: [
+							{ label: "React (Vite)", value: "react" },
+							{ label: "Next.js (App Router)", value: "next" },
+							{ label: "Vue (Vite)", value: "vue" },
+							{ label: "Svelte", value: "svelte" },
+							{ label: "SolidJS", value: "solid" },
+							{ label: "Qwik", value: "qwik" },
+							{ label: "Astro", value: "astro" },
+						],
+						initial: accum.framework ?? "react",
+					},
+				],
+				accum,
+				ctx,
+			);
 
-		// 1️⃣ Ask framework + UI first
-		const base = await askAnswers(
-			[
-				{
-					type: "select",
-					name: "framework",
-					message: "⚙️ Choose framework:",
-					choices: [
-						{ label: "React (Vite)", value: "react" },
-						{ label: "Next.js (App Router)", value: "next" },
-						{ label: "Vue (Vite)", value: "vue" },
-						{ label: "Svelte", value: "svelte" },
-						{ label: "Framer", value: "framer" },
-						{ label: "React Router (SPA)", value: "react-router" },
-					],
-					initial: frameworkInitial,
-				},
-				{
-					type: "select",
-					name: "ui",
-					message: "🎨 UI library:",
-					choices: [
-						{ label: "tailwind", value: "tailwind" },
-						{ label: "mui", value: "mui" },
-						{ label: "shadcn", value: "shadcn" },
-						{ label: "antd", value: "antd" },
-						{ label: "none", value: "none" },
-					],
-					initial: uiInitial,
-				},
-			],
-			accum,
-		);
+			const routingChoices = getRoutingChoices(base.framework);
+			const storeChoices = getStoreChoices(base.framework);
 
-		let routingChoices;
+			const rest = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "routing",
+						message: "🗺 Routing:",
+						choices: routingChoices,
+						initial: routingChoices[0].value,
+					},
+					{
+						type: "select",
+						name: "store",
+						message: "🧠 State management:",
+						choices: storeChoices,
+						initial: storeChoices[0].value,
+					},
+				],
+				{ ...accum, ...base },
+				ctx,
+			);
 
-		switch (base.framework) {
-			case "next":
-				routingChoices = [
-					{ label: "App Router", value: "app" },
-					{ label: "Pages Router", value: "pages" },
-				];
-				break;
-			case "vue":
-				routingChoices = [{ label: "Vue Router", value: "vue-router" }];
-				break;
-			default:
-				routingChoices = [{ label: "React Router", value: "react-router" }];
+			return { ...base, ...rest };
 		}
 
-		const rest = await askAnswers(
-			[
-				{
-					type: "select",
-					name: "routing",
-					message: "🗺 Routing:",
-					choices: routingChoices,
-					initial:
-						ctx.flags.routing ?? accum.routing ?? routingChoices[0].value,
-				},
-				{
-					type: "select",
-					name: "store",
-					message: "🧠 State management:",
-					choices: [
-						{ label: "zustand", value: "zustand" },
-						{ label: "redux", value: "redux" },
-						{ label: "pinia", value: "pinia" },
-						{ label: "none", value: "none" },
-					],
-					initial: ctx.flags.store ?? accum.store ?? "zustand",
-				},
-			],
-			{ ...accum, ...base },
-		);
+		// =================================================================
+		// 2️⃣ BACKEND PROJECTS — no frontend framework
+		// =================================================================
+		if (projectType === "backend") {
+			return {};
+		}
 
-		return { ...base, ...rest };
+		// =================================================================
+		// 3️⃣ FULLSTACK PROJECTS
+		// =================================================================
+		if (projectType === "fullstack") {
+			const base = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "framework",
+						message: "⚙️ Fullstack Framework:",
+						choices: [
+							{ label: "Next.js", value: "next" },
+							{ label: "Remix", value: "react-router" },
+							{ label: "SvelteKit", value: "svelte" },
+							{ label: "Nuxt (Vue)", value: "vue" },
+						],
+						initial: accum.framework ?? "next",
+					},
+				],
+				accum,
+				ctx,
+			);
+
+			const routingChoices = getRoutingChoices(base.framework);
+			const storeChoices = getStoreChoices(base.framework);
+
+			const rest = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "routing",
+						message: "🗺 Routing:",
+						choices: routingChoices,
+						initial: routingChoices[0].value,
+					},
+					{
+						type: "select",
+						name: "store",
+						message: "🧠 State management:",
+						choices: storeChoices,
+						initial: storeChoices[0].value,
+					},
+				],
+				{ ...accum, ...base },
+				ctx,
+			);
+
+			return { ...base, ...rest };
+		}
+
+		return {};
 	},
 };
+
+// ===============================================
+// Helpers
+// ===============================================
+function getRoutingChoices(framework: string) {
+	switch (framework) {
+		case "next":
+			return [
+				{ label: "App Router", value: "app" },
+				{ label: "Pages Router", value: "pages" },
+			];
+		case "vue":
+			return [{ label: "Vue Router", value: "vue-router" }];
+		case "react-router":
+			return [{ label: "React Router", value: "react-router" }];
+		default:
+			return [{ label: "File-System Router", value: "file-system" }];
+	}
+}
+
+function getStoreChoices(framework: string) {
+	switch (framework) {
+		case "vue":
+			return [
+				{ label: "Pinia", value: "pinia" },
+				{ label: "None", value: "none" },
+			];
+		case "react":
+		case "next":
+			return [
+				{ label: "Zustand", value: "zustand" },
+				{ label: "Redux", value: "redux" },
+				{ label: "Jotai", value: "jotai" },
+				{ label: "None", value: "none" },
+			];
+		default:
+			return [{ label: "None", value: "none" }];
+	}
+}

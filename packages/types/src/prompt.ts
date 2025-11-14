@@ -1,94 +1,84 @@
+/* ────────────────────────────────────────────────
+   AppInit Prompt Types
+   Prompt Packs • Prompt Context • Prompt Handler
+   Supports: CLI, API, Web, VSCode, Marketplace Plugins
+────────────────────────────────────────────────── */
+
 import type { Answers } from "./answers";
 
-// A single prompt pack (template or built-in)
-export interface PromptPack {
-	name: string;
-	priority?: number; // lower => earlier; default 100
-	tags?: string[]; // optional tags used for filtering
-	handler: PromptPackHandler;
-}
+// -------------------------------------------------
+// FLAGS (parsed CLI arguments)
+// -------------------------------------------------
+export type Flags = Record<string, any>;
 
-// Optional hooks for future AI auto-answer and UX improvements
+// -------------------------------------------------
+// Prompt Result (partial Answers per pack)
+// -------------------------------------------------
+export type PromptResult = Partial<Answers>;
+
+// -------------------------------------------------
+// Prompt Pack Handler Signature
+// -------------------------------------------------
+export type PromptPackHandler = (
+	ctx: PromptContext,
+	accum: PromptResult,
+) => Promise<Partial<Answers>>;
+
+// -------------------------------------------------
+// Prompt Hooks (AI and validation hooks)
+// -------------------------------------------------
 export interface PromptHooks {
-	// called before prompts, can modify flags or context
+	// Before prompts: can mutate flags or defaults
 	beforePrompt?: (
 		ctx: PromptContext,
 		accum: PromptResult,
 	) => void | Promise<void>;
 
-	// called after prompts, can validate, inject defaults, etc.
+	// After prompts: validate or inject computed values
 	afterPrompt?: (
 		ctx: PromptContext,
 		result: PromptResult,
 	) => void | Promise<void>;
 }
 
-// Central context provided to every prompt pack
-export interface PromptContext {
-	// ↓ Provided by CLI (create/add/etc)
-	command: string; // "create", "add", "deploy"
-	cliName?: string | null; // project name argument
-	flags: Flags; // CLI flags
-	cwd: string; // current working directory
-	targetDir?: string | null; // project output directory
-	packageManager?: string | null; // npm | pnpm | yarn | bun | auto
-
-	// ↓ Template information
-	templateId?: string | null; // passed via flags or pack
-	templateName?: string | null; // canonical name
-	templateMeta?: Record<string, any> | null;
-	templateDir?: string | null; // resolved filesystem dir
-	templateResolved?: boolean; // set by template resolver
-	templatePromptPacks?: (string | PromptPackDefinition)[];
-
-	// ↓ Plugin system (marketplace)
-	pluginPromptPacks?: PromptPackDefinition[];
-
-	// ↓ Dynamic defaults
-	config?: Record<string, any> | null; // previous config
-	previousConfigLoaded?: boolean; // flag for packs
-
-	// ↓ Prompt control
-	skipDefaultPacks?: boolean;
-	runtime?: "cli" | "api" | "web" | "vscode";
-	outputMode?: "text" | "rich" | "minimal" | "json";
-
-	// ↓ AI hooks / validation / defaults
-	hooks?: PromptHooks;
-
-	// ↓ Shared workspace for packs
-	extra?: Record<string, any>;
-
-	// ↓ Shared accumulated answers (optional)
-	answers?: PromptResult;
-}
-// Flags parsed from CLI arguments (like commander or your own parser)
-export type Flags = Record<string, any>;
-export type PromptPackHandler = (
-	ctx: PromptContext,
-	accum: PromptResult,
-) => Promise<Partial<Answers>>;
-
-// What each pack returns (a slice of partial Answers)
-export type PromptResult = Partial<Answers>;
-export type PromptPackDefinition =
-	| { type: "module"; path: string } // path to js/ts module exporting { pack | default }
-	| { type: "json"; path: string } // path to JSON file with `prompts` array (simple)
-	| PromptPack;
-
-export type PromptBase = {
+// -------------------------------------------------
+// Prompt Pack Definition
+// -------------------------------------------------
+export interface PromptPack {
 	name: string;
-	message: string;
+	priority?: number; // lower = earlier (default: 100)
+	tags?: string[]; // filter packs by tags (auth/frontend/backend/etc.)
+	handler: PromptPackHandler;
+}
+
+// -------------------------------------------------
+// External (dynamic) prompt pack definitions
+// -------------------------------------------------
+export type PromptPackDefinition =
+	| { type: "module"; path: string } // JS/TS module exporting a PromptPack
+	| { type: "json"; path: string } // JSON prompts for simple packs
+	| PromptPack; // Direct inline pack
+
+// -------------------------------------------------
+// Universal Prompt Base
+// -------------------------------------------------
+export type PromptBase = {
+	name: string; // key in Answers
+	message: string; // display label
+
 	when?: (accum: Record<string, any>) => boolean | Promise<boolean>;
 	validate?: (value: any) => true | string | Promise<true | string>;
 	format?: (value: any) => any;
 	initial?: any;
 
-	// ⭐ NEW universal fields (safe for all prompts)
+	// Universal choice support
 	choices?: { title?: string; label?: string; value: any }[];
 	options?: { title?: string; label?: string; value: any }[];
 };
 
+// -------------------------------------------------
+// Prompt Types (text, select, confirm, multiselect, etc.)
+// -------------------------------------------------
 export type PromptText = PromptBase & {
 	type: "text";
 };
@@ -105,9 +95,70 @@ export type PromptMulti = PromptBase & {
 	type: "multiselect";
 };
 
+// Generic fallback — allows plugin templates to define custom prompt types
 export type PromptQuestion =
 	| PromptText
 	| PromptSelect
 	| PromptConfirm
 	| PromptMulti
-	| (Record<string, any> & { type: string }); // fallback for plugin/template custom fields
+	| (Record<string, any> & { type: string });
+
+// -------------------------------------------------
+// Prompt Context (central state passed to all packs)
+// -------------------------------------------------
+export interface PromptContext {
+	// CLI command: create, add, deploy
+	command: string;
+
+	// Project name argument
+	cliName?: string | null;
+
+	// Parsed flags
+	flags: Flags;
+
+	// Directories
+	cwd: string;
+	targetDir?: string | null;
+
+	// Package manager (npm | pnpm | yarn | bun | auto)
+	packageManager?: string | null;
+
+	// Template metadata (resolved by template resolver)
+	templateId?: string | null;
+	templateName?: string | null;
+	templateMeta?: Record<string, any> | null;
+	templateDir?: string | null;
+	templateResolved?: boolean;
+
+	// Template packs included in template
+	templatePromptPacks?: (string | PromptPackDefinition)[];
+
+	// Marketplace plugin prompt packs
+	pluginPromptPacks?: PromptPackDefinition[];
+
+	// Dynamic config (loaded from previous run)
+	config?: Record<string, any> | null;
+	previousConfigLoaded?: boolean;
+
+	// Control default packs
+	skipDefaultPacks?: boolean;
+
+	// Execution environment
+	runtime?: "cli" | "api" | "web" | "vscode";
+	outputMode?: "text" | "rich" | "minimal" | "json";
+
+	// Optional Hooks (AI, validators, etc.)
+	hooks?: PromptHooks;
+
+	// Shared workspace (for packs to pass data)
+	extra?: Record<string, any>;
+
+	// Accumulated answers (set by prompt orchestrator)
+	answers?: PromptResult;
+}
+
+export type ChoiceOption = {
+	title?: string;
+	label?: string;
+	value: any;
+};

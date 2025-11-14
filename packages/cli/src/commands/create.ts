@@ -2,11 +2,12 @@ import { buildContext } from "../core/context.js";
 import { runPromptEngine } from "@appinit/prompt";
 import { scaffoldProject } from "../core/scaffold.js";
 import { saveUserConfig } from "../core/config-store.js";
+import { Flags } from "@appinit/types";
 
 export async function createProject(cmd: {
 	name: string;
 	args: string[];
-	flags: Record<string, any>;
+	flags: Flags;
 }) {
 	console.clear();
 	console.log("\n🚀 Appinit — Create a project\n");

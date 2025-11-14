@@ -1,0 +1,30 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Outer Glow Ring -->
+  <circle cx="60" cy="60" r="45" stroke="url(#g1)" stroke-width="6"></circle>
+
+  <!-- AppInit “A” Core -->
+  <path d="M60 28 L82 80 H72 L67 67 H53 L48 80 H38 L60 28 Z" fill="url(#g2)"></path>
+
+  <!-- Dot (Init Point) -->
+  <circle cx="60" cy="92" r="5" fill="url(#g3)"></circle>
+
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="g1" x1="20" y1="20" x2="100" y2="100">
+      <stop offset="0%" stop-color="#8B5CF6"></stop>
+      <stop offset="100%" stop-color="#6D28D9"></stop>
+    </linearGradient>
+
+    <linearGradient id="g2" x1="60" y1="28" x2="60" y2="80">
+      <stop offset="0%" stop-color="#A78BFA"></stop>
+      <stop offset="100%" stop-color="#7C3AED"></stop>
+    </linearGradient>
+
+    <linearGradient id="g3" x1="60" y1="87" x2="60" y2="97">
+      <stop offset="0%" stop-color="#C084FC"></stop>
+      <stop offset="100%" stop-color="#9333EA"></stop>
+    </linearGradient>
+  </defs>
+
+</svg>

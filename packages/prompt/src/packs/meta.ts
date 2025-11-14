@@ -1,25 +1,30 @@
-import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
+import type {
+	PromptPack,
+	PromptContext,
+	PromptQuestion,
+	ChoiceOption,
+} from "@appinit/types";
 import { validateName } from "@appinit/utils";
+import { askAnswers } from "../prompt";
 
 export const metaPack: PromptPack = {
 	name: "meta",
 	priority: 20,
 
 	async handler(ctx: PromptContext, accum) {
-		const flags = ctx.flags || {};
-		const prev = ctx.config || {};
+		const flags = ctx.flags ?? {};
+		const prev = ctx.config ?? {};
 		const ai = ctx.hooks;
 
 		// ----------------------------------------------------
-		// 0. BEFORE HOOK (AI can prefill)
+		// 0. BEFORE HOOK
 		// ----------------------------------------------------
 		if (ai?.beforePrompt) {
 			await ai.beforePrompt(ctx, accum);
 		}
 
 		// ----------------------------------------------------
-		// 1. Non-interactive mode (CI / API / script)
+		// 1. NON-INTERACTIVE MODE
 		// ----------------------------------------------------
 		if (flags["non-interactive"] || ctx.runtime === "api") {
 			return {
@@ -38,15 +43,15 @@ export const metaPack: PromptPack = {
 				license: flags.license ?? prev.license ?? accum.license ?? "MIT",
 
 				packageScope: flags.packageScope
-					? `@${flags.packageScope}`
+					? `@${flags.packageScope.replace(/^@/, "")}`
 					: (prev.packageScope ?? accum.packageScope ?? null),
 			};
 		}
 
 		// ----------------------------------------------------
-		// 2. Interactive mode
+		// 2. INTERACTIVE MODE
 		// ----------------------------------------------------
-		const questions = [];
+		const questions: PromptQuestion[] = [];
 
 		// --------------------------
 		// Project Name
@@ -57,11 +62,7 @@ export const metaPack: PromptPack = {
 				name: "projectName",
 				message: "🧱 Project name:",
 				initial:
-					accum.projectName ??
-					ctx.cliName ??
-					prev.projectName ??
-					ctx.cliName ??
-					"my-app",
+					accum.projectName ?? prev.projectName ?? ctx.cliName ?? "my-app",
 				validate: validateName,
 			});
 		} else {
@@ -105,7 +106,7 @@ export const metaPack: PromptPack = {
 				{ label: "GPL-3.0", value: "GPL-3.0" },
 				{ label: "Unlicense", value: "Unlicense" },
 				{ label: "Other", value: "Other" },
-			],
+			] as ChoiceOption[],
 			initial: flags.license ?? accum.license ?? prev.license ?? "MIT",
 		});
 
@@ -116,20 +117,17 @@ export const metaPack: PromptPack = {
 			type: "text",
 			name: "packageScope",
 			message: "📦 Package scope (optional, without @):",
-			initial:
-				flags.packageScope ??
-				(prev.packageScope ? prev.packageScope.replace("@", "") : "") ??
-				"",
-			format: (v: string) => (v ? `@${v}` : null),
+			initial: flags.packageScope ?? prev.packageScope?.replace(/^@/, "") ?? "",
+			format: (v: string) => (v ? `@${v.replace(/^@/, "")}` : null),
 		});
 
 		// --------------------------
 		// Ask questions
 		// --------------------------
-		const res = await askAnswers(questions, accum);
+		const res = await askAnswers(questions, accum, ctx);
 
 		// ----------------------------------------------------
-		// 3. AFTER HOOK (AI can validate or adjust)
+		// 3. AFTER HOOK
 		// ----------------------------------------------------
 		if (ai?.afterPrompt) {
 			await ai.afterPrompt(ctx, res);

@@ -1,7 +1,0 @@
-{
-  "merge": {
-    "packageJsonStrategy": "deep",
-    "tsconfigStrategy": "deep"
-  },
-  "variables": ["enableLoginUi"]
-}
