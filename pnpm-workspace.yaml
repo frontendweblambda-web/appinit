@@ -6,3 +6,6 @@ packages:
 
 ignoredBuiltDependencies:
   - esbuild
+
+overrides:
+  "@appinit/cli": link:packages/cli

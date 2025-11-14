@@ -1,8 +1,10 @@
 import * as fs from "node:fs";
-import { parseFlags } from "../flags";
+import { parseFlags } from "../core/flags";
 import path from "node:path";
 
-export async function runInit(argv: string[]) {
+export async function runAdd(argv: string[]) {
+	console.clear();
+	console.log("\n🚀 Appinit — adding\n");
 	const { args, flags } = parseFlags(argv);
 	const cwd = process.cwd();
 
@@ -17,19 +19,4 @@ export async function runInit(argv: string[]) {
 		"appinit.json",
 	];
 	const existing = candidates.find((f) => fs.existsSync(path.join(cwd, f)));
-
-	if (existing && !skipPrompts) {
-		const resp: any = await ask([
-			{
-				type: "confirm",
-				name: "useExisting",
-				message: `Found ${existing}. Overwrite?`,
-				initial: false,
-			},
-		]);
-		if (!resp.useExisting) {
-			logger.info("Init cancelled by user.");
-			return;
-		}
-	}
 }

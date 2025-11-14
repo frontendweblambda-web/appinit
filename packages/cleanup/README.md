@@ -32,3 +32,9 @@ Rollback file system state after a failed scaffold.
 - Dependency-free except @appinit/utils
 - Safe for Turborepo caching & pipelines
 ```
+
+**Link global**
+pnpm link --global
+
+**Start**
+appinit create my-app

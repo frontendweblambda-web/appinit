@@ -1,3 +1,4 @@
+// @appinit/prompt/engine.ts
 import type { PromptContext, PromptResult, PromptPack } from "@appinit/types";
 import { gitPack } from "./packs/git";
 import { metaPack } from "./packs/meta";

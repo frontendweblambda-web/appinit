@@ -1,28 +1,12 @@
-import { logger } from "@appinit/utils";
-import { runInit } from "./commands/init";
-import { runNew } from "./commands/new";
-import { runDoctor } from "./commands/doctor";
-
-const args = process.argv.slice(2);
-const cmd = args[0];
+#!/usr/bin/env node
+import { router } from "./router.js";
 
 async function main() {
-	switch (cmd) {
-		case "init":
-			await runInit();
-			break;
-
-		case "new":
-			await runNew();
-			break;
-
-		case "doctor":
-			await runDoctor();
-			break;
-
-		default:
-			logger.error(`Unknown command: ${cmd}`);
-			logger.info(`Available commands: init, new, doctor`);
+	try {
+		await router(process.argv);
+	} catch (err) {
+		console.error("Fatal CLI error:", err);
+		process.exit(1);
 	}
 }
 

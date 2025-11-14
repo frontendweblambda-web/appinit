@@ -25,19 +25,42 @@ export interface PromptHooks {
 
 // Central context provided to every prompt pack
 export interface PromptContext {
-	flags: Flags;
-	config?: Record<string, any> | null;
-	templateName?: string | null;
+	// ↓ Provided by CLI (create/add/etc)
+	command: string; // "create", "add", "deploy"
+	cliName?: string | null; // project name argument
+	flags: Flags; // CLI flags
+	cwd: string; // current working directory
+	targetDir?: string | null; // project output directory
+	packageManager?: string | null; // npm | pnpm | yarn | bun | auto
+
+	// ↓ Template information
+	templateId?: string | null; // passed via flags or pack
+	templateName?: string | null; // canonical name
 	templateMeta?: Record<string, any> | null;
-	defaultName?: string | null;
-	// ⭐ NEW: allow templates/plugins to inject their own prompt packs
+	templateDir?: string | null; // resolved filesystem dir
+	templateResolved?: boolean; // set by template resolver
 	templatePromptPacks?: (string | PromptPackDefinition)[];
-	// ⭐ NEW: allow template to skip default builtin packs
+
+	// ↓ Plugin system (marketplace)
+	pluginPromptPacks?: PromptPackDefinition[];
+
+	// ↓ Dynamic defaults
+	config?: Record<string, any> | null; // previous config
+	previousConfigLoaded?: boolean; // flag for packs
+
+	// ↓ Prompt control
 	skipDefaultPacks?: boolean;
-	// ⭐ NEW: Fire hooks (AI/autofill/validation)
-	hooks?: PromptHooks;
-	// ⭐ NEW: runtime environment (CLI, UI, API, Dashboard, CodeEditor)
 	runtime?: "cli" | "api" | "web" | "vscode";
+	outputMode?: "text" | "rich" | "minimal" | "json";
+
+	// ↓ AI hooks / validation / defaults
+	hooks?: PromptHooks;
+
+	// ↓ Shared workspace for packs
+	extra?: Record<string, any>;
+
+	// ↓ Shared accumulated answers (optional)
+	answers?: PromptResult;
 }
 // Flags parsed from CLI arguments (like commander or your own parser)
 export type Flags = Record<string, any>;

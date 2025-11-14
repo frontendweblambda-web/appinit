@@ -1,38 +1,14 @@
-export async function route(argv: string[]) {
-	const [maybeCmd, ...rest] = argv;
+import { parseFlags } from "./core/flags.js";
+import { createProject } from "./commands/create.js";
 
-	// support: `appinit new` and plain `appinit` -> help
-	const cmd = maybeCmd ?? "help";
+export async function router(argv: string[]) {
+	const cmd = parseFlags(argv);
 
-	switch (cmd) {
-		case "new":
-			return cmdNew(rest);
-
-		case "init":
-			return cmdInit(rest);
-
-		case "doctor":
-			return cmdDoctor(rest);
-
-		case "help":
+	switch (cmd.name) {
+		case "create":
+			await createProject(cmd);
+			break;
 		default:
-			return showHelp();
+			console.log(`Appinit CLI\n\nUsage:\n  appinit create <project-name>\n`);
 	}
-}
-
-function showHelp() {
-	console.log(
-		[
-			"AppInit CLI",
-			"",
-			"Usage:",
-			"  appinit <command> [options]",
-			"",
-			"Commands:",
-			"  new       Scaffold a new project",
-			"  init      Convert existing project",
-			"  doctor    Check environment",
-			"  help      Show usage",
-		].join("\n"),
-	);
 }
