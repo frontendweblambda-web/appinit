@@ -24,3 +24,4 @@ export * from "./market";
 export * from "./local";
 export * from "./npm";
 export * from "./url";
+export * from "./github";

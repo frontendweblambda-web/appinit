@@ -5,17 +5,13 @@ import fs from "fs-extra";
 
 import {
 	downloadGithubTemplate,
+	downloadMarketTemplate,
 	downloadNpmTemplate,
 	downloadUrlTemplate,
 	resolveLocalTemplate,
-	downloadMarketTemplate,
-} from "@types/utils";
+} from "@appinit/utils";
 
-import { readDirRecursive } from "./utils/readDirRecursive";
-import { normalizePath } from "./utils/normalizePath";
-import { loadJsonIfExists } from "./utils/loadJsonIfExists";
-import { mergeVfsMaps } from "./utils/mergeVfsMaps";
-import { loadTemplateModule } from "./utils/loadTemplateModule";
+import { readDirRecursive } from "./utils/read-dir-recursive";
 
 import type {
 	TemplateSource,
@@ -25,7 +21,10 @@ import type {
 	TemplateContext,
 } from "@appinit/types";
 
-import { mergeJson } from "@appinit/utils/json";
+import { mergeJson } from "@appinit/utils";
+import { loadJsonIfExists } from "./utils/load-json-if-exists";
+import { loadTemplateModule } from "./utils/load-template-module";
+import { normalizePath } from "./utils/normalize-path";
 
 export async function resolveTemplate(
 	source: string,
