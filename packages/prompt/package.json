@@ -20,7 +20,7 @@
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
 		"build": "tsup src/index.ts --format=esm --dts --clean",
-		"dev": "tsup dev.ts --format=esm --dts --watch",
+		"dev": "npx tsc src/engine.ts ",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest"
 	},

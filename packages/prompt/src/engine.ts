@@ -31,19 +31,19 @@ import path from "path";
 // DEFAULT PIPELINE (used only when skipDefaultPacks is false)
 // --------------------------------------------------------
 const DEFAULT_PIPELINE: PromptPack[] = [
-	// previousConfigPack, // MUST RUN FIRST
-	// projectTypePack,
-	// metaPack,
-	// environmentPack,
-	// languagePack,
-	// frameworkPack,
-	// uiPack,
-	// backendPack,
-	// infraPack,
-	// qualityPack,
-	// gitPack,
-	// automationPack,
-	// deployPack,
+	previousConfigPack, // MUST RUN FIRST
+	projectTypePack,
+	metaPack,
+	environmentPack,
+	languagePack,
+	frameworkPack,
+	uiPack,
+	backendPack,
+	infraPack,
+	qualityPack,
+	gitPack,
+	automationPack,
+	deployPack,
 ];
 
 // --------------------------------------------------------
@@ -80,53 +80,51 @@ export async function runPromptEngine(
 	// --------------------------------------------------------
 	// Execute each pack
 	// --------------------------------------------------------
-	// for (const pack of pipeline) {
-	// 	try {
-	// 		logger.info(`➡️  Running pack: ${pack.name}`);
+	for (const pack of pipeline) {
+		try {
+			logger.info(`➡️  Running pack: ${pack.name}`);
 
-	// 		// Optional: beforePrompt hook
-	// 		if (ctx.hooks?.beforePrompt) {
-	// 			await ctx.hooks.beforePrompt(ctx, final);
-	// 		}
+			// Optional: beforePrompt hook
+			if (ctx.hooks?.beforePrompt) {
+				await ctx.hooks.beforePrompt(ctx, final);
+			}
 
-	// 		const res = await pack.handler(ctx, final);
+			const res = await pack.handler(ctx, final);
 
-	// 		// Merge pack output safely
-	// 		if (res && typeof res === "object") {
-	// 			Object.assign(final, res);
-	// 		}
+			// Merge pack output safely
+			if (res && typeof res === "object") {
+				Object.assign(final, res);
+			}
 
-	// 		// Optional: afterPrompt hook
-	// 		if (ctx.hooks?.afterPrompt) {
-	// 			await ctx.hooks.afterPrompt(ctx, final);
-	// 		}
-	// 	} catch (err) {
-	// 		logger.error(
-	// 			`❌ Prompt pack "${pack.name}" failed:`,
-	// 			(err as Error).message,
-	// 		);
-	// 		throw err;
-	// 	}
-	// }
+			// Optional: afterPrompt hook
+			if (ctx.hooks?.afterPrompt) {
+				await ctx.hooks.afterPrompt(ctx, final);
+			}
+		} catch (err) {
+			logger.error(
+				`❌ Prompt pack "${pack.name}" failed:`,
+				(err as Error).message,
+			);
+			throw err;
+		}
+	}
 
 	logger.info("Prompt engine complete.");
 
 	// --------------------------------------------------------
 	// 🔥 Resolve Template (this is the missing final step!)
 	// --------------------------------------------------------
-	// const template = await templateResolver(
-	// 	final.templateSource ?? `${final.framework}-${final.ui}`, // or explicit template name
-	// 	{
-	// 		cwd: process.cwd(),
-	// 		projectName: final.projectName!,
-	// 		framework: final.framework,
-	// 		ui: final.ui,
-	// 		language: final.language as Language,
-	// 		answers: final as Answers,
-	// 		cacheDir: path.join(os.homedir(), ".appinit/cache"),
-	// 	},
-	// );
-
-	console.log("TEMPLATE", final);
-	return { answers: final, template: {} as any };
+	const template = await templateResolver(
+		final.templateSource ?? `${final.framework}-${final.ui}`, // or explicit template name
+		{
+			cwd: process.cwd(),
+			projectName: final.projectName!,
+			framework: final.framework,
+			ui: final.ui,
+			language: final.language as Language,
+			answers: final as Answers,
+			cacheDir: path.join(os.homedir(), ".appinit/cache"),
+		},
+	);
+	return { answers: final, template };
 }

@@ -11,12 +11,12 @@ export function isArray(v: unknown): v is JsonArray {
 }
 
 export const isFrontend = (a: Answers) =>
-	a.type === "frontend" || a.type === "fullstack";
+	a.projectType === "frontend" || a.projectType === "fullstack";
 export const isBackend = (a: Answers) =>
-	a.type === "backend" || a.type === "fullstack";
+	a.projectType === "backend" || a.projectType === "fullstack";
 export const isStaticFrontend = (a: Answers) =>
 	isFrontend(a) && a.deploymentStrategy === "static";
 export const isServerlessBackend = (a: Answers) =>
 	isBackend(a) && a.backendDeployTarget === "lambda";
-export const isFullstack = (a: Answers) => a.type === "fullstack";
-export const isLibrary = (a: Answers) => a.type === "library";
+export const isFullstack = (a: Answers) => a.projectType === "fullstack";
+export const isLibrary = (a: Answers) => a.projectType === "library";

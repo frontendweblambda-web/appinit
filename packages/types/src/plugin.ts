@@ -10,7 +10,7 @@ import { TemplateFile, TransformContext } from "./file.js";
  * -------------------------------------------------------- */
 
 /** Context passed to plugin.apply() and lifecycle hooks */
-export interface PluginContext {
+export interface PluginContext extends EngineContext {
 	cwd: string;
 	answers: Answers;
 	engine: EngineContext;

@@ -44,7 +44,7 @@ export async function askAnswers(
 				break;
 
 			default:
-				throw new Error(`Unsupported prompt type "${q.type}"`);
+				throw new Error(`Unsupported prompt type "${q ? q.type : ""}"`);
 		}
 
 		// Validation
@@ -61,7 +61,7 @@ export async function askAnswers(
 		}
 
 		// SAFE ASSIGNMENT
-		(result as Record<string, any>)[q.name] = value;
+		result[q.name] = value;
 	}
 
 	return result;

@@ -7,7 +7,6 @@ import {
 	isBackend,
 	ensureDir,
 	isFullstack,
-	exists,
 	pathExists,
 	isLibrary,
 } from "@appinit/utils";
@@ -45,7 +44,10 @@ import { generateFrontend } from "./frontend-generate.js";
 	// ==============================
 	// 🔷 Only frontend or fullstack needs React template
 	// ==============================
-	if (answers.type === "frontend" || answers.type === "fullstack") {
+	if (
+		answers.projectType === "frontend" ||
+		answers.projectType === "fullstack"
+	) {
 		await runStep("Generate UI Template", async () => {
 			await generateReactTemplate(projectDir, answers.framework);
 		});

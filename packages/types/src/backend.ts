@@ -44,7 +44,7 @@ export interface BackendFeatureFlags {
 	rateLimit?: boolean;
 	cors?: boolean;
 }
-interface CommonBackendOptions {
+export interface CommonBackendOptions {
 	api?: ApiStyle;
 	database?: Database;
 	cache?: Cache;

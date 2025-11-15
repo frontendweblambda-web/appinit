@@ -1,13 +1,12 @@
+import { UI_BY_FRAMEWORK } from "@appinit/utils";
 import { askAnswers } from "../prompt";
 import type {
 	PromptPack,
 	PromptContext,
 	PromptQuestion,
 	ChoiceOption,
-	PromptResult,
+	Framework,
 } from "@appinit/types";
-
-import { UI_BY_FRAMEWORK } from "@appinit/types"; // your generated static map
 
 export const uiPack: PromptPack = {
 	name: "ui",
@@ -39,7 +38,7 @@ export const uiPack: PromptPack = {
 					flags.ui ??
 					prev.ui ??
 					accum.ui ??
-					UI_BY_FRAMEWORK[framework]?.[0] ??
+					UI_BY_FRAMEWORK[framework as Framework]?.[0] ??
 					"none",
 			};
 		}
@@ -47,7 +46,7 @@ export const uiPack: PromptPack = {
 		// ---------------------------------------------------------
 		// UI options based on framework
 		// ---------------------------------------------------------
-		const allowedUI = UI_BY_FRAMEWORK[framework] ?? ["none"];
+		const allowedUI = UI_BY_FRAMEWORK[framework as Framework] ?? ["none"];
 
 		const uiChoices: ChoiceOption[] = allowedUI.map((uiName) => ({
 			label: uiName,
