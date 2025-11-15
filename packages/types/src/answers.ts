@@ -4,106 +4,52 @@
    Fully typed & framework-specific
 ────────────────────────────────────────────────── */
 
-import type { FrontendOptions } from "./frontend.js";
-import type { BackendOptions } from "./backend.js";
+import type { FrontendOptions } from "./frontend";
+import type { BackendOptions } from "./backend";
 import type { AuthOptions } from "./auth.js";
-import type { DeployOptions } from "./deploy.js";
-import { DeployContext } from "./provider.js";
-
-// -------------------------------------
-// Workspace toolchains
-// -------------------------------------
-export type WorkspaceTool = "single" | "turborepo" | "nx" | "monorepo";
-
-// -------------------------------------
-// Language
-// -------------------------------------
-export type Language = "typescript" | "javascript";
-
-// -------------------------------------
-// Project Types
-// -------------------------------------
-export type ProjectType =
-	| "frontend"
-	| "backend"
-	| "fullstack"
-	| "library"
-	| "cli";
-
-// -------------------------------------
-// Project structure strategy
-// -------------------------------------
-export type ProjectStructure =
-	| "flat"
-	| "src-folder"
-	| "feature-based"
-	| "domain-driven";
-
-// -------------------------------------
-// Formatting / Linting / Testing
-// -------------------------------------
-export type Formatter = "prettier" | "rome" | "none";
-export type Linter = "eslint" | "biome" | "none";
-
-export type TestRunner =
-	| "vitest"
-	| "jest"
-	| "playwright"
-	| "cypress"
-	| "storybook"
-	| "none";
-
-// -------------------------------------
-// Git editor preference
-// -------------------------------------
-export type Editor = "vscode" | "sublime" | "webstorm" | "cursor" | "none";
-
-// -------------------------------------
-// License types
-// -------------------------------------
-export type LicenseType = "MIT" | "ISC" | "Apache-2.0" | "Proprietary";
-
-// -------------------------------------
-// Repository visibility
-// -------------------------------------
-export type RepoVisibility = "public" | "private" | "internal";
-export type CIProvider =
-	| "github-actions"
-	| "gitlab-ci"
-	| "vercel"
-	| "netlify"
-	| "aws-pipeline"
-	| "none";
-
-// -------------------------------------
-// Final Answers Type
-// Merged union of all AppInit categories
-// -------------------------------------
+import type { DeployOptions } from "./deploy";
+import {
+	CIProvider,
+	Editor,
+	Formatter,
+	Language,
+	LicenseType,
+	Linter,
+	PackageManager,
+	ProjectStructure,
+	ProjectType,
+	RepoVisibility,
+	TestRunner,
+	WorkspaceTool,
+} from "./common";
 
 export interface BaseAnswers {
+	currentDir?: string;
+	targetDir?: string;
 	projectName: string;
 	description?: string;
 	author?: string;
 	license?: string;
 	packageScope?: string | null;
 
-	registry: "npm" | "pnpm" | "yarn" | "bun";
-	workspace: "single" | "turborepo" | "nx" | "monorepo";
+	packageManager: PackageManager;
+	workspaceTool: WorkspaceTool;
 
-	type: "frontend" | "backend" | "fullstack" | "library" | "cli";
-	language: "typescript" | "javascript";
-	structure: "flat" | "src-folder" | "feature-based" | "domain-driven";
+	projectType: ProjectType;
+	language: Language;
+	projectStructure: ProjectStructure;
 
-	formatting: "prettier" | "rome" | "none";
-	linting: "eslint" | "biome" | "none";
-	testing: "vitest" | "jest" | "playwright" | "cypress" | "storybook" | "none";
+	formattingTool: Formatter;
+	lintingTool: Linter;
+	testingTool: TestRunner;
 
 	commitConventions: boolean;
-	editor: "vscode" | "sublime" | "webstorm" | "cursor" | "none";
+	editor: Editor;
 
 	initGit: boolean;
 	createRemote: boolean;
-	repoVisibility?: "public" | "private" | "internal";
+	repoVisibility?: RepoVisibility;
+	projectVisibility?: RepoVisibility;
 	remoteOrg?: string | null;
 
 	setupCI: boolean;
@@ -115,8 +61,7 @@ export interface BaseAnswers {
 	autoOpen?: boolean;
 
 	organization?: string;
-	projectVisibility?: "public" | "private" | "internal";
-	licenseType?: "MIT" | "ISC" | "Apache-2.0" | "Proprietary";
+	licenseType?: LicenseType;
 
 	useAI?: boolean;
 	deploy?: DeployOptions;
@@ -127,34 +72,25 @@ export interface BaseAnswers {
 // ─────────────────────────────────────────────
 export type FrontendAnswers = BaseAnswers &
 	FrontendOptions &
-	DeployOptions & {
-		type: "frontend";
-	} & AuthOptions<"frontend">;
-
+	DeployOptions & { projectType: "frontend" } & AuthOptions<"frontend">;
 // ─────────────────────────────────────────────
 // Backend-only answers
 // ─────────────────────────────────────────────
 export type BackendAnswers = BaseAnswers &
 	BackendOptions &
-	DeployOptions & {
-		type: "backend";
-	} & AuthOptions<"backend">;
-
+	DeployOptions & { projectType: "backend" } & AuthOptions<"backend">;
 // ─────────────────────────────────────────────
 // Fullstack answers (Frontend + Backend)
 // ─────────────────────────────────────────────
 export type FullstackAnswers = BaseAnswers &
 	FrontendOptions &
 	BackendOptions &
-	DeployOptions & {
-		type: "fullstack";
-	} & AuthOptions<"fullstack">;
-
+	DeployOptions & { projectType: "fullstack" } & AuthOptions<"fullstack">;
 // ─────────────────────────────────────────────
 // Library / CLI answers (auth always disabled)
 // ─────────────────────────────────────────────
 export type LibraryAnswers = BaseAnswers & {
-	type: "library" | "cli";
+	projectType: "library" | "cli";
 	auth: "none";
 	authConfig?: undefined;
 };
@@ -167,3 +103,7 @@ export type Answers =
 	| BackendAnswers
 	| FullstackAnswers
 	| LibraryAnswers;
+
+export type ValidatedAnswers<T extends Answers = Answers> = T & {
+	_validated: true;
+};

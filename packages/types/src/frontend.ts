@@ -3,9 +3,8 @@
    Fully strict, framework-scoped, and future-proof
 ────────────────────────────────────────────────── */
 
-// -------------------------------------
-// Frameworks
-// -------------------------------------
+import { CommonFrontendOptions } from "./common";
+
 export type Framework =
 	| "react"
 	| "next"
@@ -19,35 +18,30 @@ export type Framework =
 	| "react-router"
 	| "none";
 
-// -------------------------------------
-// UI libraries per framework
-// -------------------------------------
+// UI Kits: A universal union of all possibilities
+export type TailwindUI = "tailwind";
+export type MinimalUI = TailwindUI | "none";
 export type ReactUI =
-	| "tailwind"
+	| MinimalUI
 	| "mui"
 	| "shadcn"
 	| "chakra"
 	| "antd"
-	| "bootstrap"
-	| "none";
-
+	| "bootstrap";
 export type VueUI =
-	| "tailwind"
+	| MinimalUI
 	| "naiveui"
 	| "vuetify"
 	| "elementplus"
-	| "radixvue"
-	| "none";
+	| "radixvue";
+export type AngularUI = MinimalUI | "material" | "primeng";
+export type SvelteUI = MinimalUI | "skeleton";
+export type UI = ReactUI | VueUI | AngularUI | SvelteUI; // The final universal UI type
 
-export type AngularUI = "tailwind" | "material" | "primeng" | "none";
-
-export type SvelteUI = "tailwind" | "skeleton" | "none";
-
-export type MinimalUI = "tailwind" | "none";
-
-// -------------------------------------
-// Routing per framework
-// -------------------------------------
+export type ReactBasedRouting = "react-router" | "custom" | "none";
+export type NextBasedRouting = "app" | "pages" | "custom" | "none";
+export type VueBasedRouting = "vue-router" | "custom" | "none";
+export type FileSystemRouting = "file-system" | "custom" | "none";
 export type Routing =
 	| "app"
 	| "pages"
@@ -56,132 +50,95 @@ export type Routing =
 	| "vue-router"
 	| "custom"
 	| "none";
-
-// -------------------------------------
-// Store per framework
-// -------------------------------------
 export type ReactStore = "zustand" | "redux" | "jotai" | "recoil" | "none";
-
 export type VueStore = "pinia" | "none";
-
 export type NoStore = "none";
 
-// -------------------------------------
-// Shared lib categories
-// -------------------------------------
-export type Forms = "react-hook-form" | "formik" | "none";
-export type Animation = "framer-motion" | "gsap" | "none";
-export type Validation = "zod" | "yup" | "none";
+export type ReactBasedForms = "react-hook-form" | "formik" | "none";
+export type VueBasedForms =
+	| "vee-validate"
+	| "vuelidate"
+	| "formkit"
+	| "vueform"
+	| "none";
 
-// -------------------------------------
-// Dynamic UI map for CLI prompts
-// -------------------------------------
-export const UI_BY_FRAMEWORK = {
-	react: [
-		"tailwind",
-		"mui",
-		"shadcn",
-		"chakra",
-		"antd",
-		"bootstrap",
-		"none",
-	] as const,
-	next: ["tailwind", "mui", "shadcn", "chakra", "antd", "none"] as const,
-	"react-router": ["tailwind", "mui", "shadcn", "antd", "none"] as const,
-	framer: ["tailwind"] as const,
+// Angular-based forms
+export type AngularBasedForms =
+	| "reactive-forms"
+	| "template-driven-forms"
+	| "ngx-formly"
+	| "none";
+// Svelte-based forms
+export type SvelteBasedForms =
+	| "svelte-forms-lib"
+	| "felte"
+	| "svelte-use-form"
+	| "none";
+export type ReactBasedAnimation = "framer-motion" | "gsap" | "none";
 
-	vue: [
-		"tailwind",
-		"naiveui",
-		"vuetify",
-		"elementplus",
-		"radixvue",
-		"none",
-	] as const,
-
-	angular: ["tailwind", "material", "primeng", "none"] as const,
-
-	svelte: ["tailwind", "skeleton", "none"] as const,
-
-	solid: ["tailwind", "none"] as const,
-	qwik: ["tailwind", "none"] as const,
-	astro: ["tailwind", "none"] as const,
-
-	none: ["none"] as const,
-};
-
+export type CommonAnimation = "gsap" | "none";
 // -------------------------------------
 // FRONTEND OPTIONS
 // Full discriminated union
 // -------------------------------------
+
+export type ReactOptions = CommonFrontendOptions & {
+	framework: "react" | "react-router";
+	ui?: ReactUI;
+	routing?: ReactBasedRouting;
+	store?: ReactStore;
+	forms?: ReactBasedForms;
+	animation?: ReactBasedAnimation;
+};
+
+export type NextOptions = CommonFrontendOptions & {
+	framework: "next" | "framer"; // Framer often sits on top of Next.js setup
+	ui?: ReactUI;
+	routing?: NextBasedRouting; // Explicit Next.js routing
+	store?: ReactStore;
+	forms?: ReactBasedForms;
+	animation?: ReactBasedAnimation;
+};
+
+export type VueOptions = CommonFrontendOptions & {
+	framework: "vue";
+	ui?: VueUI;
+	routing?: VueBasedRouting;
+	store?: VueStore;
+	forms?: VueBasedForms;
+	animation?: CommonAnimation;
+};
+
+export type AngularOptions = CommonFrontendOptions & {
+	framework: "angular";
+	ui?: AngularUI;
+	routing?: FileSystemRouting;
+	store?: NoStore;
+	forms?: AngularBasedForms;
+	animation?: CommonAnimation;
+};
+
+export type SvelteOptions = CommonFrontendOptions & {
+	framework: "svelte";
+	ui?: SvelteUI;
+	routing?: FileSystemRouting;
+	store?: NoStore;
+	forms?: SvelteBasedForms;
+	animation?: CommonAnimation;
+};
+
+export type MinimalOptions = CommonFrontendOptions & {
+	framework: "solid" | "qwik" | "astro" | "none";
+	ui?: MinimalUI;
+	routing?: "file-system" | "custom" | "none";
+	store?: NoStore;
+	forms?: "none";
+	animation?: "none" | "gsap";
+};
 export type FrontendOptions =
-	| {
-			framework: "react" | "next" | "react-router" | "framer";
-			ui?: ReactUI;
-			routing?: "app" | "pages" | "react-router" | "custom" | "none";
-			store?: ReactStore;
-			forms?: Forms;
-			animation?: Animation;
-			validation?: Validation;
-
-			pwa?: boolean;
-			i18n?: boolean;
-			strictMode?: boolean;
-			devServer?: boolean;
-	  }
-	| {
-			framework: "vue";
-			ui?: VueUI;
-			routing?: "vue-router" | "custom" | "none";
-			store?: VueStore;
-			forms?: "none";
-			animation?: "gsap" | "none";
-			validation?: Validation;
-
-			pwa?: boolean;
-			i18n?: boolean;
-			strictMode?: boolean;
-			devServer?: boolean;
-	  }
-	| {
-			framework: "angular";
-			ui?: AngularUI;
-			routing?: "file-system" | "custom" | "none";
-			store?: NoStore;
-			forms?: "none";
-			animation?: "gsap" | "none";
-			validation?: Validation;
-
-			pwa?: boolean;
-			i18n?: boolean;
-			strictMode?: boolean;
-			devServer?: boolean;
-	  }
-	| {
-			framework: "svelte";
-			ui?: SvelteUI;
-			routing?: "file-system" | "custom" | "none";
-			store?: NoStore;
-			forms?: "none";
-			animation?: "gsap" | "none";
-			validation?: Validation;
-
-			pwa?: boolean;
-			i18n?: boolean;
-			strictMode?: boolean;
-			devServer?: boolean;
-	  }
-	| {
-			framework: "solid" | "qwik" | "astro" | "none";
-			ui?: MinimalUI;
-			routing?: "file-system" | "custom" | "none";
-			store?: NoStore;
-			forms?: "none";
-			animation?: "none" | "gsap";
-			validation?: Validation;
-
-			pwa?: boolean;
-			i18n?: boolean;
-			strictMode?: boolean;
-			devServer?: boolean;
-	  };
+	| NextOptions
+	| ReactOptions
+	| VueOptions
+	| AngularOptions
+	| SvelteOptions
+	| MinimalOptions;

@@ -26,3 +26,4 @@ export * from "./npm";
 export * from "./url";
 export * from "./github";
 export * from "./helpers";
+export * from "./default-data";

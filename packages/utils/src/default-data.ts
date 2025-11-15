@@ -1,0 +1,33 @@
+export const UI_BY_FRAMEWORK = {
+	react: [
+		"tailwind",
+		"mui",
+		"shadcn",
+		"chakra",
+		"antd",
+		"bootstrap",
+		"none",
+	] as const,
+	next: ["tailwind", "mui", "shadcn", "chakra", "antd", "none"] as const,
+	"react-router": ["tailwind", "mui", "shadcn", "antd", "none"] as const,
+	framer: ["tailwind"] as const,
+
+	vue: [
+		"tailwind",
+		"naiveui",
+		"vuetify",
+		"elementplus",
+		"radixvue",
+		"none",
+	] as const,
+
+	angular: ["tailwind", "material", "primeng", "none"] as const,
+
+	svelte: ["tailwind", "skeleton", "none"] as const,
+
+	solid: ["tailwind", "none"] as const,
+	qwik: ["tailwind", "none"] as const,
+	astro: ["tailwind", "none"] as const,
+
+	none: ["none"] as const,
+};

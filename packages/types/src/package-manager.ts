@@ -1,6 +1,6 @@
 // packages/types/src/package-manager.ts
 
-export type PackageManager = "npm" | "yarn" | "pnpm" | "bun";
+import { PackageManager } from "./common";
 
 /**
  * Unified package manager API used across:

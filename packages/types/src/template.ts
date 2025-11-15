@@ -4,7 +4,8 @@
    With Hooks, Template Logic Modules, Variables, FS
 ────────────────────────────────────────────────── */
 
-import type { Answers, Language } from "./answers";
+import type { Answers } from "./answers";
+import { Language, Variables } from "./common";
 
 // ================================================
 // Template Origin
@@ -162,18 +163,13 @@ export interface ResolveOptions {
 export interface TemplateContext {
 	/** Final directory where project is written */
 	targetDir: string;
-
-	/** Project name */
 	projectName: string;
-
-	/** Selected language */
 	language: Language;
 
-	/** Answers from the prompt engine (fully typed) */
 	answers: Answers;
 
 	/** Variables created by appinit.template.ts */
-	variables: Record<string, any>;
+	variables: Variables;
 
 	/** Virtual file system being built */
 	files: Map<string, string>;

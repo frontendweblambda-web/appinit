@@ -255,3 +255,8 @@ export type AuthOptions<ProjectType extends string> =
 			: ProjectType extends "fullstack"
 				? FullstackAuthOptions
 				: { auth: "none"; authConfig?: undefined };
+export type AnyAuthOptions =
+	| FrontendAuthOptions
+	| BackendAuthOptions
+	| FullstackAuthOptions
+	| { auth: "none"; authConfig?: undefined };

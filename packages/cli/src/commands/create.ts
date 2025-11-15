@@ -27,10 +27,14 @@ export async function createProject(cmd: CLICommand) {
 	ctx.targetDir = targetDir;
 	await ensureDir(targetDir);
 	await applyTemplate(template, targetDir, {
-		...ctx,
+		projectName: answers.projectName!,
+		framework: answers.framework,
+		language: answers.language!,
+		ui: answers.ui,
 		answers: answers as Answers,
+		inlineVariables: ctx.flags ?? {},
+		mergeStrategy: "overwrite",
 	});
-
 	await startEngine(ctx.targetDir!, answers as Answers);
 
 	// save last answers

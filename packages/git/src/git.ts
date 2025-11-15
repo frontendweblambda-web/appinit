@@ -4,8 +4,8 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { logger } from "@appinit/utils";
 import { GitInitOptions } from "@appinit/types";
-import { isGitInstalled, isInsideGitRepo } from "./detect";
-import { createGitIgnore, hasGitIgnore } from "./ignore";
+import { hasGitIgnore, isGitInstalled, isInsideGitRepo } from "./detect";
+import { createGitIgnore } from "./ignore";
 
 const run = promisify(exec);
 
