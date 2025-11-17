@@ -96,6 +96,24 @@ export type PromptResult = Record<string, any> & {
 	author?: string;
 	license?: string;
 	packageScope?: string | null;
+
+	// ─────────────── AppInit dynamic answer fields ───────────────
+	projectType?: string;
+	framework?: string;
+	ui?: string;
+	form?: string;
+	store?: string;
+	routing?: string;
+
+	// Backend-specific
+	backendFramework?: string;
+	apiStyle?: string;
+	database?: string;
+	orm?: string;
+	authStrategy?: string;
+	deployTarget?: string;
+
+	// Future extensibility — do NOT remove
 };
 
 // -------------------------------------------------

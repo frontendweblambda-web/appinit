@@ -1,27 +1,27 @@
-import { askAnswers } from "../prompt";
-import type {
-	PromptPack,
+import {
 	PromptContext,
-	PromptQuestion,
+	PromptPack,
 	ChoiceOption,
 	PromptResult,
 } from "@appinit/types";
+import { askAnswers } from "../prompt";
 
 export const backendPack: PromptPack = {
 	name: "backend",
-	priority: 45, // Runs after language/environment
+	priority: 45,
 
-	async handler(ctx: PromptContext, accum) {
+	// Only runs when backend functionality is required
+	condition: (_, accum) =>
+		accum.projectType === "backend" || accum.projectType === "fullstack",
+
+	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
+		const nonInteractive = flags.nonInteractive;
 
-		const type = accum.type ?? ctx.flags.type;
-		if (type !== "backend" && type !== "fullstack") {
-			return {};
-		}
-		// ----------------------------------------------------
-		// NON-INTERACTIVE MODE
-		// ----------------------------------------------------
-		if (flags["non-interactive"]) {
+		// ===================================================================================
+		// NON-INTERACTIVE MODE: return flags (no questions)
+		// ===================================================================================
+		if (nonInteractive) {
 			return {
 				backendFramework: flags.backendFramework ?? "express",
 				apiStyle: flags.apiStyle ?? "rest",
@@ -32,151 +32,291 @@ export const backendPack: PromptPack = {
 			};
 		}
 
-		// ----------------------------------------------------
-		// BASE BACKEND QUESTIONS
-		// ----------------------------------------------------
+		// ===================================================================================
+		// 1️⃣ BACKEND FRAMEWORK + API STYLE
+		// ===================================================================================
 		const base = await askAnswers(
 			[
 				{
 					type: "select",
 					name: "backendFramework",
-					message: "🖥️ Choose backend framework:",
+					message: "🧱 Backend Framework:",
 					choices: [
-						{ label: "Express", value: "express" },
-						{ label: "Fastify", value: "fastify" },
-						{ label: "NestJS", value: "nest" },
-						{ label: "Hono", value: "hono" },
-						{ label: "Elysia (Bun)", value: "elysia" },
-					] as ChoiceOption[],
+						{
+							label: "Express",
+							value: "express",
+							hint: "**Most popular Node backend.** Simple routing, middleware based, huge ecosystem.",
+						},
+						{
+							label: "Fastify",
+							value: "fastify",
+							hint: "**High-performance & plugin-based.** Best for APIs requiring throughput.",
+						},
+						{
+							label: "NestJS",
+							value: "nest",
+							hint: "**Enterprise-grade architecture.** Built-in DI, modules, and scalable structure.",
+						},
+						{
+							label: "Hono (Edge-optimized)",
+							value: "hono",
+							hint: "**Tiny + ultra fast for edge runtimes.** Perfect for Cloudflare, Deno, Bun.",
+						},
+						{
+							label: "Elysia (Bun)",
+							value: "elysia",
+							hint: "**Deep Bun integration.** Modern type-safe router + middleware.",
+						},
+					] satisfies ChoiceOption[],
 					initial:
 						flags.backendFramework ?? accum.backendFramework ?? "express",
 				},
 				{
 					type: "select",
 					name: "apiStyle",
-					message: "🔌 API style:",
+					message: "🔌 API Style:",
 					choices: [
-						{ label: "REST", value: "rest" },
-						{ label: "tRPC", value: "trpc" },
-						{ label: "GraphQL", value: "graphql" },
-					] as ChoiceOption[],
+						{
+							label: "REST",
+							value: "rest",
+							hint: "**Standard + universal.** Works everywhere and easy to scale gradually.",
+						},
+						{
+							label: "tRPC",
+							value: "trpc",
+							hint: "**Full end-to-end types.** Great with React/Next fullstack workflows.",
+						},
+						{
+							label: "GraphQL",
+							value: "graphql",
+							hint: "**Flexible querying.** Best for complex relational or mobile apps.",
+						},
+					] satisfies ChoiceOption[],
 					initial: flags.apiStyle ?? accum.apiStyle ?? "rest",
 				},
-			],
+			] as const,
 			accum,
 			ctx,
 		);
 
-		// ----------------------------------------------------
-		// DATABASE QUESTIONS
-		// ----------------------------------------------------
-		const dbPart = await askAnswers(
-			[
-				{
-					type: "select",
-					name: "database",
-					message: "🗄 Database:",
-					choices: [
-						{ label: "none", value: "none" },
-						{ label: "PostgreSQL", value: "postgresql" },
-						{ label: "MySQL", value: "mysql" },
-						{ label: "MongoDB", value: "mongo" },
-						{ label: "SQLite", value: "sqlite" },
-						{ label: "Supabase", value: "supabase" },
-					] as ChoiceOption[],
-					initial: flags.database ?? accum.database ?? "none",
-				},
-			],
-			{ ...accum, ...base },
-			ctx,
-		);
+		const isEdgeRuntime = ["hono"].includes(base.projectType!);
 
-		// ----------------------------------------------------
-		// ORM CHOICES DEPEND ON DATABASE
-		// ----------------------------------------------------
-		let ormChoices: ChoiceOption[];
-
-		switch (dbPart.database) {
-			case "mongo":
-				ormChoices = [
-					{ label: "Mongoose", value: "mongoose" },
-					{ label: "TypeORM", value: "typeorm" },
-					{ label: "None", value: "none" },
-				];
-				break;
-
-			case "none":
-				ormChoices = [{ label: "None", value: "none" }];
-				break;
-
-			default:
-				ormChoices = [
-					{ label: "Prisma", value: "prisma" },
-					{ label: "Drizzle ORM", value: "drizzle" },
-					{ label: "TypeORM", value: "typeorm" },
-					{ label: "None", value: "none" },
-				];
+		// ===================================================================================
+		// 2️⃣ DATABASE (skip automatically for edge-only)
+		// ===================================================================================
+		let dbPart: Partial<PromptResult> = { database: "none" as string };
+		let ormPart: Partial<PromptResult> = { orm: "none" };
+		if (!isEdgeRuntime) {
+			dbPart = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "database",
+						message: "🗄 Database Layer:",
+						choices: [
+							{
+								label: "None",
+								value: "none",
+								hint: "**No DB needed.** Suitable for static / micro endpoints.",
+							},
+							{
+								label: "PostgreSQL",
+								value: "postgresql",
+								hint: "**Best default.** Strong, reliable, relational, scalable.",
+							},
+							{
+								label: "MySQL",
+								value: "mysql",
+								hint: "**Legacy & enterprise-friendly.** Great for transactional workloads.",
+							},
+							{
+								label: "SQLite",
+								value: "sqlite",
+								hint: "**Lightweight & embedded.** Best for prototyping or small apps.",
+							},
+							{
+								label: "MongoDB",
+								value: "mongo",
+								hint: "**Flexible NoSQL.** Best for JSON-like unstructured data.",
+							},
+							{
+								label: "Supabase",
+								value: "supabase",
+								hint: "**Managed Postgres + Auth + Storage.** Best for indie/SaaS teams.",
+							},
+						] satisfies ChoiceOption[],
+						initial: flags.database ?? accum.database ?? "none",
+					},
+				] as const,
+				{ ...accum, ...base },
+				ctx,
+			);
 		}
 
-		const ormPart = await askAnswers(
-			[
-				{
-					type: "select",
-					name: "orm",
-					message: "🧭 ORM:",
-					choices: ormChoices,
-					initial: flags.orm ?? accum.orm ?? "none",
-				},
-			],
-			{ ...accum, ...base, ...dbPart },
-			ctx,
-		);
+		// ===================================================================================
+		// 3️⃣ ORM (database-aware with smart hinting)
+		// ===================================================================================
 
-		// ----------------------------------------------------
-		// AUTH STRATEGY
-		// ----------------------------------------------------
+		if (!isEdgeRuntime && dbPart.database !== "none") {
+			const ormChoices: ChoiceOption[] =
+				dbPart.database === "mongo"
+					? [
+							{
+								label: "Mongoose",
+								value: "mongoose",
+								hint: "**Most used for Mongo.** Schema-based with robust plugins.",
+							},
+							{
+								label: "TypeORM",
+								value: "typeorm",
+								hint: "**Class-based ORM.** Works with SQL + NoSQL including Mongo.",
+							},
+							{
+								label: "None",
+								value: "none",
+								hint: "**Direct native queries.** More freedom, more work.",
+							},
+						]
+					: [
+							{
+								label: "Prisma",
+								value: "prisma",
+								hint: "**Best DX.** Typed client, easy migrations, modern tooling.",
+							},
+							{
+								label: "Drizzle",
+								value: "drizzle",
+								hint: "**Lightweight, compile-time safety.** Great for edge + migrations.",
+							},
+							{
+								label: "TypeORM",
+								value: "typeorm",
+								hint: "**Enterprise-style ORM.** Decorators + traditional patterns.",
+							},
+							{
+								label: "None",
+								value: "none",
+								hint: "**Raw SQL.** Maximum performance, zero abstraction.",
+							},
+						];
+
+			ormPart = await askAnswers(
+				[
+					{
+						type: "select",
+						name: "orm",
+						message: "🧭 ORM / DB Client:",
+						choices: ormChoices,
+						initial: flags.orm ?? accum.orm ?? "none",
+					},
+				] as const,
+				{ ...accum, ...base, ...dbPart },
+				ctx,
+			);
+		}
+
+		// ===================================================================================
+		// 4️⃣ AUTH STRATEGY
+		// ===================================================================================
 		const authPart = await askAnswers(
 			[
 				{
 					type: "select",
 					name: "authStrategy",
-					message: "🔐 Auth strategy:",
+					message: "🔐 Authentication Strategy:",
 					choices: [
-						{ label: "none", value: "none" },
-						{ label: "JWT", value: "jwt" },
-						{ label: "OAuth2", value: "oauth2" },
-						{ label: "Clerk", value: "clerk" },
-						{ label: "Supabase Auth", value: "supabase" },
-					] as ChoiceOption[],
-					initial: flags.authStrategy ?? "none",
+						{
+							label: "None",
+							value: "none",
+							hint: "**For open/public API.** Add later anytime.",
+						},
+						{
+							label: "JWT",
+							value: "jwt",
+							hint: "**Most universal.** Works across browsers, mobile, microservices.",
+						},
+						{
+							label: "Session",
+							value: "session",
+							hint: "**Secure server-side auth.** Works best with SSR frameworks.",
+						},
+						{
+							label: "Clerk",
+							value: "clerk",
+							hint: "**Drop-in auth + user mgmt.** Modern SaaS-friendly solution.",
+						},
+						{
+							label: "Auth.js (NextAuth)",
+							value: "nextauth",
+							hint: "**Fullstack React auth.** Works best with Next.js.",
+						},
+						{
+							label: "Supabase Auth",
+							value: "supabase",
+							hint: "**Managed, built-in auth.** Works with Supabase DB.",
+						},
+					] satisfies ChoiceOption[],
+					initial: flags.authStrategy ?? accum.authStrategy ?? "none",
 				},
-			],
+			] as const,
 			{ ...accum, ...base, ...dbPart, ...ormPart },
 			ctx,
 		);
 
-		// ----------------------------------------------------
-		// DEPLOYMENT TARGET
-		// ----------------------------------------------------
+		// ===================================================================================
+		// 5️⃣ DEPLOYMENT TARGET
+		// ===================================================================================
+		const deployChoices: ChoiceOption[] = isEdgeRuntime
+			? [
+					{
+						label: "Cloudflare Workers",
+						value: "cloudflare",
+						hint: "**Best match for Hono.** Global edge performance.",
+					},
+					{
+						label: "Vercel Edge Runtime",
+						value: "vercel",
+						hint: "**Edge-based compute.** Deploy UI + API together.",
+					},
+				]
+			: [
+					{
+						label: "Node (Self-hosted / VPS)",
+						value: "node",
+						hint: "**Most flexible.** Use PM2, Docker, or systemd.",
+					},
+					{
+						label: "Vercel",
+						value: "vercel",
+						hint: "**Best for fullstack Next.js.** Automatic CI + preview deployments.",
+					},
+					{
+						label: "Docker",
+						value: "docker",
+						hint: "**Containerized & portable.** Works on any cloud provider.",
+					},
+				];
+
 		const deployPart = await askAnswers(
 			[
 				{
 					type: "select",
 					name: "deployTarget",
-					message: "🚀 Deployment target:",
-					choices: [
-						{ label: "Node server", value: "node" },
-						{ label: "Vercel", value: "vercel" },
-						{ label: "Cloudflare Workers", value: "cloudflare" },
-						{ label: "Docker", value: "docker" },
-					] as ChoiceOption[],
-					initial: flags.deployTarget ?? "node",
+					message: "🚀 Deployment Target:",
+					choices: deployChoices,
+					initial:
+						flags.deployTarget ??
+						accum.deployTarget ??
+						(isEdgeRuntime ? "cloudflare" : "node"),
 				},
-			],
+			] as const,
 			{ ...accum, ...base, ...dbPart, ...ormPart, ...authPart },
 			ctx,
 		);
 
+		// ===================================================================================
+		// RETURN FINAL MERGED RESULT
+		// ===================================================================================
 		return {
 			...base,
 			...dbPart,

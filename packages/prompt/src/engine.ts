@@ -11,6 +11,7 @@ import os from "os";
 import { templateResolver } from "@appinit/template-resolver";
 import { logger } from "@appinit/utils";
 import {
+	backendPack,
 	environmentPack,
 	frameworkPack,
 	metaPack,
@@ -30,6 +31,7 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 	frameworkPack,
 	frontendPack,
 	environmentPack,
+	backendPack,
 	// languagePack,
 	// uiPack,
 	// backendPack,
