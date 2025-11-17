@@ -16,55 +16,41 @@ export const frameworkPack: PromptPack = {
 	/**
 	 * Runs only when projectType is frontend or fullstack.
 	 */
-	condition: (_, accum) => {
-		const type = accum.projectType;
-		return type === "frontend" || type === "fullstack";
-	},
+	condition: (_, accum) =>
+		accum.projectType === "frontend" || accum.projectType === "fullstack",
 
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
-		const projectType = accum.projectType ?? flags.projectType;
 		const nonInteractive = flags.nonInteractive;
+		const projectType = accum.projectType;
 		const selectedFramework = accum.framework ?? flags.framework;
 
 		const isFullstack = projectType === "fullstack";
-		// -----------------------------------------
-		// NON-INTERACTIVE MODE
-		// -----------------------------------------
+		// non-interactive mode
 		if (nonInteractive) {
 			return {
 				framework: flags.framework,
 			};
 		}
 
-		// =================================================================
-		// 1️⃣ FRONTEND PROJECTS
-		// =================================================================
+		// ask for framework
 		const base = await askAnswers(
 			[
 				{
 					type: "select",
 					name: "framework",
 					message: `⚙️ ${isFullstack ? "Fullstack" : "Frontend"} Framework:`,
-					choices:
-						accum.projectType === "fullstack"
-							? FULLSTACK_META_FRAMEWORKS
-							: FRONTEND_FRAMEWORK_CHOICES,
-					initial:
-						selectedFramework ??
-						(accum.projectType === "fullstack" ? "next" : "react"),
+					choices: isFullstack
+						? FULLSTACK_META_FRAMEWORKS
+						: FRONTEND_FRAMEWORK_CHOICES,
+					initial: selectedFramework ?? (isFullstack ? "next" : "react"),
 				},
 			],
 			accum,
 			ctx,
 		);
 
-		if (accum.projectType === "frontend") {
-			return base;
-		}
-
-		return {
-			framework: undefined,
-		};
+		// 🚀 ALWAYS RETURN THE SELECTED FRAMEWORK
+		return base;
 	},
 };
