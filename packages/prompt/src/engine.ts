@@ -18,6 +18,7 @@ import {
 	projectTypePack,
 } from "./packs";
 import path from "path";
+import { frontendPack } from "./packs/frontend";
 
 // --------------------------------------------------------
 // DEFAULT PIPELINE (used only when skipDefaultPacks is false)
@@ -27,6 +28,7 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 	metaPack,
 	projectTypePack,
 	frameworkPack,
+	frontendPack,
 	environmentPack,
 	// languagePack,
 	// uiPack,
@@ -77,34 +79,25 @@ export async function runPromptEngine(
 	}
 	for (const pack of pipeline) {
 		try {
+			// 🚫 Skip if conditional function returns false
+			if (pack.condition && !(await pack.condition(ctx, final))) {
+				logger.info(`⏭️  Skipping pack: ${pack.name}`);
+				continue;
+			}
+
 			logger.info(`➡️  Running pack: ${pack.name}`);
 
 			// global beforeEach
-			if (ctx.hooks?.beforeEach) {
-				await ctx.hooks.beforeEach(pack, ctx, final);
-			}
-
-			// pack local before
-			if (pack.before) {
-				await pack.before(ctx, final);
-			}
+			if (ctx.hooks?.beforeEach) await ctx.hooks.beforeEach(pack, ctx, final);
+			if (pack.before) await pack.before(ctx, final);
 
 			const res = await pack.handler(ctx, final);
-
 			// Merge pack output safely
-			if (res && typeof res === "object") {
-				Object.assign(final, res);
-			}
+			if (res && typeof res === "object") Object.assign(final, res);
 
 			// pack local after
-			if (pack.after) {
-				await pack.after(ctx, final);
-			}
-
-			// global afterEach
-			if (ctx.hooks?.afterEach) {
-				await ctx.hooks.afterEach(pack, ctx, final);
-			}
+			if (pack.after) await pack.after(ctx, final);
+			if (ctx.hooks?.afterEach) await ctx.hooks.afterEach(pack, ctx, final);
 		} catch (err) {
 			logger.error(
 				`❌ Prompt pack "${pack.name}" failed:`,

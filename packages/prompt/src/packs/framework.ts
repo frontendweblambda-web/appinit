@@ -1,133 +1,70 @@
 import { askAnswers } from "../prompt";
 import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
 import {
-	FRAMEWORK_CHOICES,
+	FRONTEND_FRAMEWORK_CHOICES,
+	FULLSTACK_META_FRAMEWORKS,
+	getFormChoices,
 	getRoutingChoices,
 	getStoreChoices,
+	getUIChoices,
 } from "../static/framework.data";
 
 export const frameworkPack: PromptPack = {
 	name: "framework",
 	priority: 20,
 
+	/**
+	 * Runs only when projectType is frontend or fullstack.
+	 */
+	condition: (_, accum) => {
+		const type = accum.projectType;
+		return type === "frontend" || type === "fullstack";
+	},
+
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
 		const projectType = accum.projectType ?? flags.projectType;
 		const nonInteractive = flags.nonInteractive;
+		const selectedFramework = accum.framework ?? flags.framework;
 
+		const isFullstack = projectType === "fullstack";
 		// -----------------------------------------
 		// NON-INTERACTIVE MODE
 		// -----------------------------------------
 		if (nonInteractive) {
 			return {
 				framework: flags.framework,
-				routing: flags.routing,
-				store: flags.store,
 			};
 		}
 
 		// =================================================================
 		// 1️⃣ FRONTEND PROJECTS
 		// =================================================================
-		if (projectType === "frontend") {
-			const base = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "framework",
-						message: "⚙️ Frontend Framework:",
-						choices: FRAMEWORK_CHOICES,
-						initial: accum.framework ?? "react",
-					},
-				],
-				accum,
-				ctx,
-			);
+		const base = await askAnswers(
+			[
+				{
+					type: "select",
+					name: "framework",
+					message: `⚙️ ${isFullstack ? "Fullstack" : "Frontend"} Framework:`,
+					choices:
+						accum.projectType === "fullstack"
+							? FULLSTACK_META_FRAMEWORKS
+							: FRONTEND_FRAMEWORK_CHOICES,
+					initial:
+						selectedFramework ??
+						(accum.projectType === "fullstack" ? "next" : "react"),
+				},
+			],
+			accum,
+			ctx,
+		);
 
-			const routingChoices = getRoutingChoices(base.framework);
-			const storeChoices = getStoreChoices(base.framework);
-
-			const rest = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "routing",
-						message: "🗺 Routing:",
-						choices: routingChoices,
-						initial: routingChoices[0].value,
-					},
-					{
-						type: "select",
-						name: "store",
-						message: "🧠 State management:",
-						choices: storeChoices,
-						initial: storeChoices[0].value,
-					},
-				],
-				{ ...accum, ...base },
-				ctx,
-			);
-
-			return { ...base, ...rest };
+		if (accum.projectType === "frontend") {
+			return base;
 		}
 
-		// =================================================================
-		// 2️⃣ BACKEND PROJECTS — no frontend framework
-		// =================================================================
-		if (projectType === "backend") {
-			return {};
-		}
-
-		// =================================================================
-		// 3️⃣ FULLSTACK PROJECTS
-		// =================================================================
-		if (projectType === "fullstack") {
-			const base = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "framework",
-						message: "⚙️ Fullstack Framework:",
-						choices: [
-							{ label: "Next.js", value: "next" },
-							{ label: "Remix", value: "react-router" },
-							{ label: "SvelteKit", value: "svelte" },
-							{ label: "Nuxt (Vue)", value: "vue" },
-						],
-						initial: accum.framework ?? "next",
-					},
-				],
-				accum,
-				ctx,
-			);
-
-			const routingChoices = getRoutingChoices(base.framework);
-			const storeChoices = getStoreChoices(base.framework);
-
-			const rest = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "routing",
-						message: "🗺 Routing:",
-						choices: routingChoices,
-						initial: routingChoices[0].value,
-					},
-					{
-						type: "select",
-						name: "store",
-						message: "🧠 State management:",
-						choices: storeChoices,
-						initial: storeChoices[0].value,
-					},
-				],
-				{ ...accum, ...base },
-				ctx,
-			);
-
-			return { ...base, ...rest };
-		}
-
-		return {};
+		return {
+			framework: undefined,
+		};
 	},
 };

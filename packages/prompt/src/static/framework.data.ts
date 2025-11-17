@@ -197,7 +197,7 @@ export function getStoreChoices(framework: string) {
 			];
 	}
 }
-export const FRAMEWORK_CHOICES = [
+export const FRONTEND_FRAMEWORK_CHOICES = [
 	{
 		label: "React",
 		value: "react",
@@ -252,5 +252,258 @@ export const FRAMEWORK_CHOICES = [
 		label: "None",
 		value: "none",
 		hint: "**Vanilla JavaScript/TypeScript.** No framework or library required.",
+	},
+];
+
+export function getUIChoices(framework: string) {
+	switch (framework) {
+		case "react":
+		case "next":
+		case "react-router":
+			return [
+				{
+					label: "Tailwind CSS",
+					value: "tailwind",
+					hint: "The **most popular utility-first CSS framework.** Highly flexible and fast for custom designs.",
+				},
+				{
+					label: "Shadcn/ui",
+					value: "shadcn",
+					hint: "A set of customizable components built with Radix and Tailwind. Designed for copying and pasting into your project.",
+				},
+				{
+					label: "MUI (Material UI)",
+					value: "mui",
+					hint: "A comprehensive React component library implementing Google's **Material Design** principles.",
+				},
+				{
+					label: "Chakra UI",
+					value: "chakra",
+					hint: "A simple, modular, and accessible component library that supports theming and dark mode out-of-the-box.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use custom CSS, CSS Modules, or another styling solution.",
+				},
+			];
+		case "vue":
+			return [
+				{
+					label: "Tailwind CSS",
+					value: "tailwind",
+					hint: "The **most popular utility-first CSS framework.** Highly flexible and fast for custom designs.",
+				},
+				{
+					label: "Vuetify",
+					value: "vuetify",
+					hint: "A complete UI framework implementing **Material Design** specifically for Vue.js.",
+				},
+				{
+					label: "Quasar",
+					value: "quasar",
+					hint: "A high-performance framework that allows you to build different types of apps (SPA, SSR, Mobile, Desktop) from one codebase.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use custom CSS or plain HTML/CSS.",
+				},
+			];
+		case "angular":
+			return [
+				{
+					label: "Angular Material",
+					value: "angular-material",
+					hint: "The **official UI component library** implementing Material Design, tightly integrated with the Angular ecosystem.",
+				},
+				{
+					label: "Tailwind CSS",
+					value: "tailwind",
+					hint: "Use Tailwind for utility-first styling with Angular's built-in component styling.",
+				},
+				{
+					label: "Bootstrap",
+					value: "bootstrap",
+					hint: "A classic, feature-rich CSS framework for responsive layouts.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use custom CSS or plain HTML/CSS.",
+				},
+			];
+		case "svelte":
+			return [
+				{
+					label: "Tailwind CSS",
+					value: "tailwind",
+					hint: "Utility-first CSS is highly popular in the Svelte ecosystem for lightweight styling.",
+				},
+				{
+					label: "Svelte UI",
+					value: "svelte-ui",
+					hint: "A collection of modern, accessible, and themeable UI components for Svelte.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use custom CSS with Svelte's excellent scoped styling capabilities.",
+				},
+			];
+		case "solid":
+		case "qwik":
+		case "astro":
+			return [
+				{
+					label: "Tailwind CSS",
+					value: "tailwind",
+					hint: "The preferred styling method for these frameworks due to its performance and zero-runtime nature.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use custom CSS or vanilla styling approaches.",
+				},
+			];
+		case "framer":
+			return [
+				{
+					label: "Framer Styles",
+					value: "framer-styles",
+					hint: "Rely on Framer Motion's built-in styling system, optimized for smooth transitions and animation.",
+				},
+				{ label: "None", value: "none", hint: "Custom styles only." },
+			];
+		default:
+			return [{ label: "None", value: "none", hint: "Pure HTML and CSS." }];
+	}
+}
+
+export function getFormChoices(framework: string) {
+	switch (framework) {
+		case "react":
+		case "next":
+		case "react-router":
+			return [
+				{
+					label: "React Hook Form",
+					value: "react-hook-form",
+					hint: "**Recommended.** High performance due to minimal re-renders, leverages HTML standards, and is schema-friendly.",
+				},
+				{
+					label: "Formik",
+					value: "formik",
+					hint: "**Widely adopted.** A comprehensive, configuration-heavy library for full form lifecycle management.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use local component state (useState) and controlled components for simple forms.",
+				},
+			];
+		case "vue":
+			return [
+				{
+					label: "VeeValidate",
+					value: "vee-validate",
+					hint: "**Official-like.** Template and Composition API support with a focus on validation schemas (e.g., Yup, Zod).",
+				},
+				{
+					label: "FormKit",
+					value: "formkit",
+					hint: "**Developer Experience.** Schema-driven form generation, comprehensive validation, and excellent accessibility features.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use Vue's built-in reactivity and basic v-model bindings for simple forms.",
+				},
+			];
+		case "angular":
+			return [
+				{
+					label: "Reactive Forms",
+					value: "reactive-forms",
+					hint: "**Recommended.** Explicit, model-driven approach using RxJS, best for complex, dynamic, and large-scale forms.",
+				},
+				{
+					label: "Template-Driven Forms",
+					value: "template-driven-forms",
+					hint: "Simpler, two-way data binding approach, suitable for basic forms with minimal custom logic.",
+				},
+				{
+					label: "Ngx-Formly",
+					value: "ngx-formly",
+					hint: "A powerful extension to Reactive Forms that helps dynamically generate forms from a JSON configuration.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Form handling is fundamental in Angular; using the built-in solutions is strongly recommended.",
+				},
+			];
+		case "svelte":
+			return [
+				{
+					label: "Felte",
+					value: "felte",
+					hint: "**Modern and Lightweight.** Framework-agnostic (but Svelte-first) form library with stores for field values and validation state.",
+				},
+				{
+					label: "Svelte Forms Lib",
+					value: "svelte-forms-lib",
+					hint: "A simple, Svelte-focused utility wrapper around controlled inputs.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Use Svelte's `bind:value` and simple reactive statements (`$:`) for form handling.",
+				},
+			];
+		case "solid":
+			return [
+				{
+					label: "Solid Forms",
+					value: "solid-forms",
+					hint: "A dedicated library leveraging Solid's fine-grained reactivity for high-performance form management.",
+				},
+				{
+					label: "None",
+					value: "none",
+					hint: "Solid's signals are highly efficient for basic form state management without a library.",
+				},
+			];
+		default:
+			return [
+				{
+					label: "None",
+					value: "none",
+					hint: "Use standard HTML form inputs and vanilla JavaScript/TypeScript event handlers.",
+				},
+			];
+	}
+}
+
+export const FULLSTACK_META_FRAMEWORKS = [
+	{
+		label: "Next.js",
+		value: "next",
+		hint: "**The leading React full-stack framework.** Excellent for server-side rendering (SSR), static site generation (SSG), and API routes.",
+	},
+	{
+		label: "Remix",
+		value: "react-router",
+		hint: "**Full-stack React framework built on web standards.** Focuses on route-level data fetching and seamless integration with React Router.",
+	},
+	{
+		label: "SvelteKit",
+		value: "svelte",
+		hint: "**The full-stack Svelte framework.** Extremely fast, uses a compiler approach, and offers flexible adapters for deployment.",
+	},
+	{
+		label: "Nuxt (Vue)",
+		value: "vue",
+		hint: "**The full-stack Vue framework.** Rich feature set including file-system routing, auto-imports, and powerful module ecosystem.",
 	},
 ];

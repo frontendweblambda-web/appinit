@@ -1,16 +1,11 @@
 import { askAnswers } from "../prompt";
 import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
+import { PROJECT_TYPES } from "../static/project-type.data";
 
 /**
  * Project type
  */
-const PROJECT_TYPES = [
-	{ label: "Frontend Application", value: "frontend" },
-	{ label: "Backend API", value: "backend" },
-	{ label: "Fullstack (UI + API)", value: "fullstack" },
-	{ label: "Library / SDK", value: "library" },
-	{ label: "CLI Tool", value: "cli" },
-];
+
 export const projectTypePack: PromptPack = {
 	name: "project-type",
 	priority: 15,
@@ -36,7 +31,6 @@ export const projectTypePack: PromptPack = {
 					).join(", ")}`,
 				);
 			}
-
 			return { projectType };
 		}
 

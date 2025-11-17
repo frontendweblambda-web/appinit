@@ -104,7 +104,7 @@ export type PromptResult = Record<string, any> & {
 export type PromptPackHandler = (
 	ctx: PromptContext,
 	accum: PromptResult,
-) => Promise<PromptResult>;
+) => Promise<PromptResult | null>;
 
 export interface PromptHooks {
 	// Called once before **any** pack starts
@@ -132,6 +132,15 @@ export interface PromptPack {
 	name: string;
 	priority?: number; // lower = earlier
 	tags?: string[];
+
+	// 🔍 Optional conditional execution
+	condition?: (
+		ctx: PromptContext,
+		accum: PromptResult,
+	) => boolean | Promise<boolean>;
+
+	// ✅ OPTIONAL: pack dependencies by name (for future)
+	dependsOn?: string[];
 
 	// Local hooks – scoped only to this pack
 	before?: (ctx: PromptContext, accum: PromptResult) => void | Promise<void>;

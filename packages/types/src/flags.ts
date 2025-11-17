@@ -18,6 +18,7 @@ export interface Flags {
 
 	template?: string;
 	framework?: string;
+	ui?: string;
 	stack?: string;
 	packageManager?: string;
 

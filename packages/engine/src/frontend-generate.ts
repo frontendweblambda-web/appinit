@@ -25,7 +25,6 @@ export async function generateFrontend(answers: Answers) {
 		formattingTool,
 		projectName,
 		targetDir: targetDirOpt,
-		currentDir,
 	} = answers;
 
 	if (!framework || framework === "none") {
@@ -37,10 +36,7 @@ export async function generateFrontend(answers: Answers) {
 		return;
 	}
 
-	const targetDir = path.resolve(
-		process.cwd(),
-		targetDirOpt || currentDir || projectName,
-	);
+	const targetDir = path.resolve(process.cwd(), targetDirOpt || projectName);
 
 	console.log(
 		chalk.cyan(`⚛️ Generating ${framework} frontend in: ${targetDir}`),
