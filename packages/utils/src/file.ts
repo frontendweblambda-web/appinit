@@ -50,6 +50,10 @@ export async function readFileUtf8(filePath: string) {
 	return await fs.readFile(filePath, "utf8");
 }
 
+export function readFileSync(filePath: string) {
+	return fs.readFileSync(filePath, "utf8");
+}
+
 /**
  * Write UTF-8 file, creating parent directories automatically.
  */

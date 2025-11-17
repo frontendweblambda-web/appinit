@@ -8,19 +8,19 @@ export const previousConfigPack: PromptPack = {
 
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
-		const saved = ctx.config ?? null;
+		const savedConfig = ctx.config ?? null;
+		const api = ctx.runtime === "api";
+		const nonInteractive = flags.nonInteractive;
 
 		// ---------------------------------------------
 		// 1) Non-interactive → skip reuse logic
 		// ---------------------------------------------
-		if (flags["non-interactive"] || ctx.runtime === "api") {
+		// Skip reuse prompts in non-interactive or API mode
+		if (nonInteractive || api) return {};
+		if (!savedConfig) {
+			console.log("NO CONFIG FOUND");
 			return {};
 		}
-
-		// ---------------------------------------------
-		// 2) No previous config → proceed normally
-		// ---------------------------------------------
-		if (!saved) return {};
 
 		// ---------------------------------------------
 		// 3) Ask: reuse previous config?
@@ -45,13 +45,14 @@ export const previousConfigPack: PromptPack = {
 		// ---------------------------------------------
 		// 4) Ask only for projectName override
 		// ---------------------------------------------
+		const initialName = ctx.cliName ?? `${savedConfig.projectName}-2`;
 		const rename = await askAnswers(
 			[
 				{
 					type: "text",
 					name: "projectName",
 					message: "🧱 New project name:",
-					initial: ctx.cliName ?? saved.projectName + "-2",
+					initial: initialName,
 					validate: validateName,
 				},
 			],
@@ -67,10 +68,11 @@ export const previousConfigPack: PromptPack = {
 		// 5) Merge into accum (but override projectName)
 		// ---------------------------------------------
 		const merged = {
-			...saved,
+			...savedConfig,
 			projectName: rename.projectName,
 		};
 
+		console.log("PREVIOUS CONFIG RETURN", merged);
 		return merged;
 	},
 };

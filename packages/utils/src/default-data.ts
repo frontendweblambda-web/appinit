@@ -11,7 +11,6 @@ export const UI_BY_FRAMEWORK = {
 	next: ["tailwind", "mui", "shadcn", "chakra", "antd", "none"] as const,
 	"react-router": ["tailwind", "mui", "shadcn", "antd", "none"] as const,
 	framer: ["tailwind"] as const,
-
 	vue: [
 		"tailwind",
 		"naiveui",
@@ -20,14 +19,10 @@ export const UI_BY_FRAMEWORK = {
 		"radixvue",
 		"none",
 	] as const,
-
 	angular: ["tailwind", "material", "primeng", "none"] as const,
-
 	svelte: ["tailwind", "skeleton", "none"] as const,
-
 	solid: ["tailwind", "none"] as const,
 	qwik: ["tailwind", "none"] as const,
 	astro: ["tailwind", "none"] as const,
-
 	none: ["none"] as const,
 };

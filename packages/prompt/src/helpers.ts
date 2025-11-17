@@ -7,7 +7,12 @@ import {
 	cancel,
 } from "@clack/prompts";
 
-import type { PromptQuestion, ChoiceOption } from "@appinit/types";
+import type {
+	PromptQuestion,
+	ChoiceOption,
+	PromptText,
+	PromptSelect,
+} from "@appinit/types";
 
 function handleCancel(value: unknown) {
 	if (isCancel(value)) {
@@ -19,73 +24,90 @@ function handleCancel(value: unknown) {
 // ------------------------------------
 // TEXT
 // ------------------------------------
-export async function askText(q: PromptQuestion) {
+
+export async function askText(q: PromptText): Promise<string> {
 	const result = await text({
 		message: q.message,
 		initialValue: q.initial,
 	});
 
-	handleCancel(result);
+	if (isCancel(result)) {
+		cancel("Operation cancelled.");
+		process.exit(1);
+	}
+
 	return result;
 }
 
 // ------------------------------------
 // SELECT
 // ------------------------------------
-export async function askSelect(q: PromptQuestion, accum: Record<string, any>) {
-	const rawOptions: ChoiceOption[] =
+export async function askSelect<Value = any>(
+	q: PromptSelect<Value>,
+	accum: Record<string, unknown> = {},
+) {
+	const rawOptions: ChoiceOption<Value>[] =
 		typeof q.choices === "function"
 			? await q.choices(accum)
 			: (q.choices ?? []);
 
-	const mapped = rawOptions.map((opt: ChoiceOption) => ({
+	const mapped = rawOptions.map((opt) => ({
 		label: opt.label ?? opt.title ?? String(opt.value),
-		value: opt.value,
+		value: opt.value as string,
+		hint: opt.hint!,
 	}));
 
 	const result = await select({
-		message: q.message,
+		...q,
 		options: mapped,
-		initialValue: q.initial,
 	});
 
-	handleCancel(result);
+	if (isCancel(result)) {
+		cancel("Operation cancelled.");
+		process.exit(1);
+	}
+
 	return result;
 }
 
 // ------------------------------------
-// CONFIRM
+// CONFIRM / TOGGLE
 // ------------------------------------
-export async function askConfirm(q: PromptQuestion) {
+export async function askConfirm(
+	q: Extract<PromptQuestion, { type: "confirm" | "toggle" }>,
+) {
 	const result = await confirm({
+		...q,
 		message: q.message,
-		initialValue: !!q.initial,
 	});
 
 	handleCancel(result);
-	return result;
+	return result as boolean;
 }
 
 // ------------------------------------
 // MULTISELECT
 // ------------------------------------
-export async function askMulti(q: PromptQuestion, accum: Record<string, any>) {
-	const rawOptions: ChoiceOption[] =
+export async function askMulti<Value = any>(
+	q: Extract<PromptQuestion, { type: "multiselect" }>,
+	accum: Record<string, any> = {},
+) {
+	const rawOptions: ChoiceOption<Value>[] =
 		typeof q.choices === "function"
 			? await q.choices(accum)
 			: (q.choices ?? []);
 
-	const mapped = rawOptions.map((opt: ChoiceOption) => ({
+	const mapped = rawOptions.map((opt) => ({
 		label: opt.label ?? opt.title ?? String(opt.value),
 		value: opt.value,
+		hint: opt.hint,
 	}));
 
 	const result = await multiselect({
-		message: q.message,
+		...q,
 		options: mapped,
-		initialValues: q.initial,
 	});
 
 	handleCancel(result);
-	return result as any[];
+	return result;
 }

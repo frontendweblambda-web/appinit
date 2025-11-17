@@ -12,3 +12,4 @@ export * from "./project-type";
 export * from "./ui";
 export * from "./quality";
 export * from "./previous-config";
+export * from "./save-config";

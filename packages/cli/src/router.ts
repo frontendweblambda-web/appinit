@@ -1,4 +1,4 @@
-import { parseFlags } from "./core/flags.js";
+import { parseFlags } from "./core/parse-flags.js";
 import { createProject } from "./commands/create.js";
 
 /**
@@ -8,7 +8,9 @@ import { createProject } from "./commands/create.js";
  */
 export async function router(argv: string[]) {
 	const cmd = parseFlags(argv);
-
+	console.log("-------------------");
+	console.log("STEP:-1", cmd);
+	console.log("-------------------");
 	switch (cmd.name) {
 		case "create":
 			await createProject(cmd);

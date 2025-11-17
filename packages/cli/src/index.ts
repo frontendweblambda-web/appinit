@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { router } from "./router.js";
 
+/**
+ * Starting point
+ */
 async function main() {
 	try {
 		await router(process.argv);

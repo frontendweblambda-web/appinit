@@ -1,5 +1,10 @@
 import { askAnswers } from "../prompt";
 import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
+import {
+	FRAMEWORK_CHOICES,
+	getRoutingChoices,
+	getStoreChoices,
+} from "../static/framework.data";
 
 export const frameworkPack: PromptPack = {
 	name: "framework",
@@ -7,12 +12,13 @@ export const frameworkPack: PromptPack = {
 
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
-		const projectType = accum.type ?? flags.type;
+		const projectType = accum.projectType ?? flags.projectType;
+		const nonInteractive = flags.nonInteractive;
 
 		// -----------------------------------------
 		// NON-INTERACTIVE MODE
 		// -----------------------------------------
-		if (flags["non-interactive"]) {
+		if (nonInteractive) {
 			return {
 				framework: flags.framework,
 				routing: flags.routing,
@@ -30,15 +36,7 @@ export const frameworkPack: PromptPack = {
 						type: "select",
 						name: "framework",
 						message: "⚙️ Frontend Framework:",
-						choices: [
-							{ label: "React (Vite)", value: "react" },
-							{ label: "Next.js (App Router)", value: "next" },
-							{ label: "Vue (Vite)", value: "vue" },
-							{ label: "Svelte", value: "svelte" },
-							{ label: "SolidJS", value: "solid" },
-							{ label: "Qwik", value: "qwik" },
-							{ label: "Astro", value: "astro" },
-						],
+						choices: FRAMEWORK_CHOICES,
 						initial: accum.framework ?? "react",
 					},
 				],
@@ -133,42 +131,3 @@ export const frameworkPack: PromptPack = {
 		return {};
 	},
 };
-
-// ===============================================
-// Helpers
-// ===============================================
-function getRoutingChoices(framework: string) {
-	switch (framework) {
-		case "next":
-			return [
-				{ label: "App Router", value: "app" },
-				{ label: "Pages Router", value: "pages" },
-			];
-		case "vue":
-			return [{ label: "Vue Router", value: "vue-router" }];
-		case "react-router":
-			return [{ label: "React Router", value: "react-router" }];
-		default:
-			return [{ label: "File-System Router", value: "file-system" }];
-	}
-}
-
-function getStoreChoices(framework: string) {
-	switch (framework) {
-		case "vue":
-			return [
-				{ label: "Pinia", value: "pinia" },
-				{ label: "None", value: "none" },
-			];
-		case "react":
-		case "next":
-			return [
-				{ label: "Zustand", value: "zustand" },
-				{ label: "Redux", value: "redux" },
-				{ label: "Jotai", value: "jotai" },
-				{ label: "None", value: "none" },
-			];
-		default:
-			return [{ label: "None", value: "none" }];
-	}
-}

@@ -18,6 +18,7 @@ export async function askAnswers(
 
 	for (const q of questions) {
 		// Conditional prompt
+
 		if (typeof q.when === "function") {
 			const shouldAsk = await q.when(result);
 			if (!shouldAsk) continue;
@@ -29,35 +30,35 @@ export async function askAnswers(
 			case "text":
 				value = await askText(q);
 				break;
-
 			case "select":
 				value = await askSelect(q, result);
 				break;
-
 			case "confirm":
 			case "toggle":
 				value = await askConfirm(q);
 				break;
-
 			case "multiselect":
 				value = await askMulti(q, result);
 				break;
-
 			default:
-				throw new Error(`Unsupported prompt type "${q ? q.type : ""}"`);
-		}
-
-		// Validation
-		if (typeof q.validate === "function") {
-			const v = await q.validate(value);
-			if (v !== true) {
-				throw new Error(`Validation failed for "${q.name}": ${v}`);
-			}
+				throw new Error(
+					`Unsupported prompt type "${(q as PromptQuestion).type}`,
+				);
 		}
 
 		// Format value
 		if (typeof q.format === "function") {
 			value = q.format(value);
+		}
+
+		// 👉 VALIDATE SANITIZED VALUE (NEW ORDER)
+		if (typeof q.validate === "function") {
+			const validationResult = await q.validate(value);
+			if (validationResult !== true) {
+				throw new Error(
+					`Validation failed for "${q.name}": ${validationResult}`,
+				);
+			}
 		}
 
 		// SAFE ASSIGNMENT

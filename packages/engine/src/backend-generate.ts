@@ -5,19 +5,32 @@ import { execa } from "execa";
 
 import { Answers } from "@appinit/types";
 import { copyTemplate } from "./common/copy.js";
-import { mergePackageJson } from "./common/merge-package-json.js";
+
+import {
+	getPackageManager,
+	mergeJson,
+	pathExists,
+	removeDir,
+	isFrontend,
+	isBackend,
+	isLibrary,
+	ensureDir,
+} from "@appinit/utils";
 
 export async function generateBackend(answers: Answers) {
-	console.log(
-		chalk.cyan(`🧱 Generating backend (${answers.backendFramework})...`),
-	);
+	if (!isBackend(answers)) return; // skip if not backend
 
-	const { backendFramework, orm, database, apiStyle } = answers;
-	const targetDir = path.resolve(process.cwd(), answers.projectName);
+	const { backend, orm, database, api, projectName } = answers;
+	const targetDir = path.resolve(process.cwd(), projectName);
+	// === Step 1: Base backend ===backend
 
-	// === Step 1: Base backend ===
-	const baseTemplate = `backend/${backendFramework}/base`;
+	await ensureDir(targetDir);
+	const baseTemplate = `backend/${backend}/base`;
 	await copyTemplate(baseTemplate, targetDir);
+
+	console.log(
+		chalk.cyan(`🧱 Generating backend (${backend}) in ${targetDir}...`),
+	);
 
 	// === Step 2: Database integration ===
 	if (database && database !== "none") {
@@ -30,21 +43,21 @@ export async function generateBackend(answers: Answers) {
 	}
 
 	// === Step 4: API style (REST, GraphQL, etc.) ===
-	if (apiStyle && apiStyle !== "none") {
-		await copyTemplate(`backend/api/${apiStyle}`, targetDir);
+	if (api && api !== "none") {
+		await copyTemplate(`backend/api/${api}`, targetDir);
 	}
-
 	// === Step 5: Merge package.json ===
 	const pkgFragment = path.join(targetDir, "backend.pkg.json");
-	if (await fs.pathExists(pkgFragment)) {
-		await mergePackageJson(targetDir, pkgFragment);
-		await fs.remove(pkgFragment);
+	if (await pathExists(pkgFragment)) {
+		mergeJson(targetDir, pkgFragment);
+		await removeDir(pkgFragment);
 	}
 
 	// === Step 6: Install dependencies ===
-	const pm = detectPackageManager();
+	const pm = await getPackageManager();
 	try {
-		await execa(pm, ["install"], { cwd: targetDir, stdio: "inherit" });
+		await pm.install(["install"]);
+
 		console.log(chalk.green("✅ Backend dependencies installed"));
 	} catch (err: any) {
 		console.log(

@@ -3,74 +3,106 @@ import type {
 	PromptContext,
 	PromptQuestion,
 	ChoiceOption,
+	PromptResult,
 } from "@appinit/types";
-import { validateName } from "@appinit/utils";
+import {
+	formatName,
+	normalizeScope,
+	shouldAskPackageScope,
+	validateName,
+} from "@appinit/utils";
 import { askAnswers } from "../prompt";
+
+const licenseChoices: ChoiceOption<
+	"MIT" | "Apache-2.0" | "GPL-3.0" | "Unlicense" | "Other"
+>[] = [
+	{ label: "MIT", value: "MIT" },
+	{ label: "Apache-2.0", value: "Apache-2.0" },
+	{ label: "GPL-3.0", value: "GPL-3.0" },
+	{ label: "Unlicense", value: "Unlicense" },
+	{ label: "Other", value: "Other" },
+];
 
 export const metaPack: PromptPack = {
 	name: "meta",
-	priority: 20,
+	priority: 10,
 
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
 		const prev = ctx.config ?? {};
-		const ai = ctx.hooks;
+		const hooks = ctx.hooks;
+		const nonInteractive = ctx.flags.nonInteractive;
+		const api = ctx.runtime === "api";
+		const interactive = ctx.interactive;
 
-		// ----------------------------------------------------
-		// 0. BEFORE HOOK
-		// ----------------------------------------------------
-		if (ai?.beforePrompt) {
-			await ai.beforePrompt(ctx, accum);
-		}
+		// LOCAL UTILITY: get value in correct priority order
+		const get = (flagKey: string, fallback: any, format?: (v: any) => any) => {
+			let raw = flags[flagKey] ?? fallback;
+			return format ? format(raw) : raw;
+		};
 
-		// ----------------------------------------------------
-		// 1. NON-INTERACTIVE MODE
-		// ----------------------------------------------------
-		if (flags["non-interactive"] || ctx.runtime === "api") {
-			return {
-				projectName:
-					flags.projectName ??
-					ctx.cliName ??
-					prev.projectName ??
-					accum.projectName ??
-					"my-app",
+		if (nonInteractive || api || interactive === false) {
+			const result: PromptResult = {
+				projectName: get(
+					"projectName",
+					ctx.cliName ?? prev.projectName ?? accum.projectName ?? "my-app",
+					(v) => String(v),
+				),
 
-				description:
-					flags.description ?? prev.description ?? accum.description ?? "",
+				description: get(
+					"description",
+					prev.description ?? accum.description ?? "",
+					(v) => String(v ?? ""),
+				),
 
-				author: flags.author ?? prev.author ?? accum.author ?? "",
+				author: get("author", prev.author ?? accum.author ?? "", (v) =>
+					String(v ?? ""),
+				),
 
-				license: flags.license ?? prev.license ?? accum.license ?? "MIT",
+				license: get("license", prev.license ?? accum.license ?? "MIT", (v) =>
+					String(v ?? "MIT"),
+				),
 
-				packageScope: flags.packageScope
-					? `@${flags.packageScope.replace(/^@/, "")}`
-					: (prev.packageScope ?? accum.packageScope ?? null),
+				packageScope: normalizeScope(
+					flags.packageScope ?? prev.packageScope ?? accum.packageScope,
+				),
 			};
+
+			return result;
 		}
 
-		// ----------------------------------------------------
-		// 2. INTERACTIVE MODE
-		// ----------------------------------------------------
 		const questions: PromptQuestion[] = [];
 
 		// --------------------------
 		// Project Name
 		// --------------------------
-		if (!flags.projectName && !ctx.cliName) {
+		// Project Name
+		if (!flags.projectName && !ctx.answers?.projectName) {
 			questions.push({
 				type: "text",
 				name: "projectName",
 				message: "🧱 Project name:",
-				initial:
-					accum.projectName ?? prev.projectName ?? ctx.cliName ?? "my-app",
-				validate: validateName,
+				initial: (accum.projectName ??
+					prev.projectName ??
+					ctx.cliName ??
+					"my-app") as string,
+				format: (v) => {
+					if (!v) return null;
+					return formatName(v);
+				},
+				validate: (v) => {
+					const formatted = formatName(v || "");
+
+					// Auto accept sanitized value without blocking
+					if (v !== formatted) return true;
+
+					// Validate sanitized version
+					return validateName(formatted);
+				},
 			});
 		} else {
 			accum.projectName =
-				flags.projectName ??
-				ctx.cliName ??
-				prev.projectName ??
-				accum.projectName;
+				ctx.answers.projectName ?? flags.projectName ?? prev.projectName;
 		}
 
 		// --------------------------
@@ -100,39 +132,34 @@ export const metaPack: PromptPack = {
 			type: "select",
 			name: "license",
 			message: "📜 License:",
-			choices: [
-				{ label: "MIT", value: "MIT" },
-				{ label: "Apache-2.0", value: "Apache-2.0" },
-				{ label: "GPL-3.0", value: "GPL-3.0" },
-				{ label: "Unlicense", value: "Unlicense" },
-				{ label: "Other", value: "Other" },
-			] as ChoiceOption[],
+			choices: licenseChoices,
 			initial: flags.license ?? accum.license ?? prev.license ?? "MIT",
 		});
 
 		// --------------------------
 		// Package Scope
 		// --------------------------
-		questions.push({
-			type: "text",
-			name: "packageScope",
-			message: "📦 Package scope (optional, without @):",
-			initial: flags.packageScope ?? prev.packageScope?.replace(/^@/, "") ?? "",
-			format: (v: string) => (v ? `@${v.replace(/^@/, "")}` : null),
-		});
-
-		// --------------------------
-		// Ask questions
-		// --------------------------
-		const res = await askAnswers(questions, accum, ctx);
-
-		// ----------------------------------------------------
-		// 3. AFTER HOOK
-		// ----------------------------------------------------
-		if (ai?.afterPrompt) {
-			await ai.afterPrompt(ctx, res);
+		if (shouldAskPackageScope(ctx, accum)) {
+			questions.push({
+				type: "text",
+				name: "packageScope",
+				message: "📦 Package scope (optional, without @):",
+				initial:
+					(flags.packageScope as string)?.replace(/^@/, "") ??
+					(prev.packageScope as string)?.replace?.(/^@/, "") ??
+					"",
+				format: (v) => (v ? normalizeScope(v) : null),
+			});
 		}
 
+		const res = await askAnswers(questions, accum, ctx);
+
+		// Normalize scope
+		if (res.packageScope) {
+			res.packageScope = normalizeScope(res.packageScope);
+		}
+
+		console.log("META: RESPONSE: ", res);
 		return res;
 	},
 };

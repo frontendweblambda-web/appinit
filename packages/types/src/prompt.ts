@@ -1,145 +1,201 @@
-import type { Answers } from "./answers";
-import { ResolvedTemplate } from "./template";
+import {
+	TextOptions,
+	SelectOptions,
+	ConfirmOptions,
+	MultiSelectOptions,
+} from "@clack/prompts";
+import { ResolvedTemplate, TemplateMeta } from "./template";
+import { Flags } from "./flags";
+import { ProjectType } from "./common";
 
 // -------------------------------------------------
-// FLAGS (parsed CLI arguments)
+// Choice Option
 // -------------------------------------------------
-export type Flags = Record<string, any>;
+export interface ChoiceOption<T = any> {
+	title?: string;
+	label?: string;
+	value: T;
+	hint?: string;
+}
+
+export type ChoiceUnion<
+	T,
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> =
+	| ChoiceOption<T>[]
+	| ((accum: Accum) => ChoiceOption<T>[] | Promise<ChoiceOption<T>[]>);
 
 // -------------------------------------------------
-// Prompt Result (partial Answers per pack)
+// Base Prompt
 // -------------------------------------------------
+export interface PromptBase<
+	T,
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> {
+	name: string;
+	initial?: T;
+	message: string;
+	when?: (accum: Accum) => boolean | Promise<boolean>;
+	validate?: (value: T) => true | string | Promise<true | string>;
+	format?: (value: T) => T | null; // allow null
+}
+
+// -------------------------------------------------
+// Specific Prompt Types
+// -------------------------------------------------
+export type PromptText<
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> = PromptBase<string, Accum> &
+	Pick<TextOptions, "placeholder" | "defaultValue" | "initialValue"> & {
+		type: "text";
+	};
+
+export interface PromptSelect<
+	Value = unknown,
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> extends PromptBase<Value, Accum>,
+		Omit<SelectOptions<Value>, "options" | "initialValue"> {
+	type: "select";
+	choices?: ChoiceUnion<Value, Accum>;
+}
+
+export interface PromptConfirm<
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> extends PromptBase<boolean, Accum>,
+		Pick<ConfirmOptions, "initialValue"> {
+	type: "confirm" | "toggle";
+}
+
+export interface PromptMulti<
+	Value = unknown,
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> extends PromptBase<Value[], Accum>,
+		Omit<MultiSelectOptions<Value>, "options" | "initialValues"> {
+	type: "multiselect";
+	choices?: ChoiceUnion<Value, Accum>;
+}
+
+export type PromptQuestion<
+	Accum extends Record<string, unknown> = Record<string, unknown>,
+> =
+	| PromptText<Accum>
+	| PromptSelect<any, Accum>
+	| PromptConfirm<Accum>
+	| PromptMulti<any, Accum>;
+
+// -------------------------------------------------
+// Prompt Result Types
+// -------------------------------------------------
+export type PromptResultFromQuestions<Q extends readonly PromptQuestion[]> = {
+	[K in Q[number] as K["name"]]: K extends PromptBase<infer T> ? T : unknown;
+};
+
 export type PromptResult = Record<string, any> & {
-	// You can keep typed fields but avoid spreading entire Answers
 	projectName?: string;
 	description?: string;
 	author?: string;
 	license?: string;
 	packageScope?: string | null;
-	[key: string]: any;
 };
 
 // -------------------------------------------------
-// Prompt Pack Handler
+// Prompt Pack / Hooks
 // -------------------------------------------------
 export type PromptPackHandler = (
 	ctx: PromptContext,
 	accum: PromptResult,
 ) => Promise<PromptResult>;
 
-// -------------------------------------------------
-// Prompt Hooks
-// -------------------------------------------------
 export interface PromptHooks {
-	beforePrompt?: (
+	// Called once before **any** pack starts
+	beforeAll?: (ctx: PromptContext, accum: PromptResult) => void | Promise<void>;
+
+	// Called before **each** pack runs
+	beforeEach?: (
+		pack: PromptPack,
 		ctx: PromptContext,
 		accum: PromptResult,
 	) => void | Promise<void>;
-	afterPrompt?: (
+
+	// Called after **each** pack completes
+	afterEach?: (
+		pack: PromptPack,
 		ctx: PromptContext,
 		result: PromptResult,
 	) => void | Promise<void>;
+
+	// Called once after **all packs** are finished
+	afterAll?: (ctx: PromptContext, final: PromptResult) => void | Promise<void>;
 }
 
-// -------------------------------------------------
-// Prompt Pack
-// -------------------------------------------------
 export interface PromptPack {
 	name: string;
 	priority?: number; // lower = earlier
 	tags?: string[];
+
+	// Local hooks – scoped only to this pack
+	before?: (ctx: PromptContext, accum: PromptResult) => void | Promise<void>;
+	after?: (ctx: PromptContext, result: PromptResult) => void | Promise<void>;
+
 	handler: PromptPackHandler;
 }
 
-// -------------------------------------------------
-// Prompt Pack Definitions
-// -------------------------------------------------
 export type PromptPackDefinition =
 	| { type: "module"; path: string }
 	| { type: "json"; path: string }
 	| PromptPack;
 
 // -------------------------------------------------
-// Base Prompt
-// -------------------------------------------------
-export interface PromptBase<T = any> {
-	name: string;
-	message: string;
-	initial?: T;
-	when?: (accum: Record<string, any>) => boolean | Promise<boolean>;
-	validate?: (value: T) => true | string | Promise<true | string>;
-	format?: (value: T) => any;
-	choices?: ChoiceOption[];
-}
-
-// -------------------------------------------------
-// Prompt Types
-// -------------------------------------------------
-export interface PromptText extends PromptBase<string> {
-	type: "text";
-}
-
-export interface PromptSelect extends PromptBase<any> {
-	type: "select";
-}
-
-export interface PromptConfirm extends PromptBase<boolean> {
-	type: "confirm" | "toggle";
-}
-
-export interface PromptMulti extends PromptBase<any[]> {
-	type: "multiselect";
-}
-
-// Flattened union, avoid recursive `any` hacks
-type CustomPrompt = PromptBase & { type: `custom-${string}` };
-export type PromptQuestion =
-	| PromptText
-	| PromptSelect
-	| PromptConfirm
-	| PromptMulti
-	| CustomPrompt;
-
-export interface PromptBaseContext {
-	command: string;
-	flags: Flags; // Parsed CLI arguments
-	cwd: string; // Current working directory (always present)
-	targetDir?: string | null; // Final output directory (may be resolved later)
-	answers?: PromptResult; // Accumulated prompt results
-}
-// -------------------------------------------------
 // Prompt Context
 // -------------------------------------------------
-export interface PromptContext extends PromptBaseContext {
+export interface PromptBaseContext {
 	command: string;
-	cliName?: string | null;
 	flags: Flags;
 	cwd: string;
 	targetDir?: string | null;
-	packageManager?: string | null;
-	templateId?: string | null;
-	templateName?: string | null;
-	templateMeta?: Record<string, any> | null;
-	templateDir?: string | null;
-	templateResolved?: boolean;
-	templatePromptPacks?: (string | PromptPackDefinition)[];
-	pluginPromptPacks?: PromptPackDefinition[];
-	config?: Record<string, any> | null;
-	previousConfigLoaded?: boolean;
-	skipDefaultPacks?: boolean;
-	runtime?: "cli" | "api" | "web" | "vscode";
-	outputMode?: "text" | "rich" | "minimal" | "json";
-	hooks?: PromptHooks;
-	extra?: Record<string, any>;
-	// answers?: PromptResult;
-	template?: ResolvedTemplate;
+	answers: PromptResult;
 }
 
-// -------------------------------------------------
-// Choice Option
-// -------------------------------------------------
-export interface ChoiceOption {
-	title?: string;
-	label?: string;
-	value: any;
+export interface PromptContext extends PromptBaseContext {
+	// 💻 CLI & OS Environment
+	cliName?: string | null;
+	cliVersion?: string | null;
+	nodeVersion?: string;
+	os?: NodeJS.Platform;
+	// 🔄 Execution Mode
+	interactive?: boolean;
+	debug?: boolean;
+	runtime?: "cli" | "api" | "web" | "vscode";
+	outputMode?: "text" | "rich" | "minimal" | "json";
+	// 🌐 Environment Variables
+	env?: {
+		platform?: string;
+		nodeVersion?: string;
+		ci?: boolean;
+		docker?: boolean;
+		tty?: boolean;
+		npmLifecycle?: boolean;
+	};
+
+	// ⚙️ Configuration & History
+	config?: Record<string, unknown> | null;
+	previousConfigLoaded?: boolean;
+
+	packageManager?: string | null;
+
+	sourceId?: string;
+	templateId?: string | null;
+	templateName?: string | null;
+	templateMeta?: TemplateMeta | null;
+	templateDir?: string | null;
+	template?: ResolvedTemplate;
+	templateResolved?: boolean;
+
+	templatePromptPacks?: (string | PromptPackDefinition)[];
+	pluginPromptPacks?: PromptPackDefinition[];
+
+	skipDefaultPacks?: boolean;
+
+	hooks?: PromptHooks;
+	extra?: Record<string, unknown>;
 }

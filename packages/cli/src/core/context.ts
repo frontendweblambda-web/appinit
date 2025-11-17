@@ -1,30 +1,75 @@
-import type { PromptContext } from "@appinit/types";
+import type { Flags, PromptContext } from "@appinit/types";
 import { loadUserConfig } from "./config-store.js";
+import { getCliName } from "../utils/cli-name.js";
+import {
+	detectPackageManager,
+	isCI,
+	isRunningInNpmLifecycle,
+	shouldUseInteractiveUI,
+} from "@appinit/utils";
 
 export async function buildContext(cmd: {
 	name: string;
 	args: string[];
-	flags: Record<string, any>;
+	flags: Flags;
 }): Promise<PromptContext> {
-	const config = await loadUserConfig();
-
+	const saved = await loadUserConfig();
+	const cwd = process.cwd();
+	console.log("SAVED CONFIG", saved);
 	const ctx: PromptContext = {
+		// from PromptBaseContext
 		command: cmd.name,
-		cliName: cmd.args[0] ?? null,
 		flags: cmd.flags ?? {},
-		cwd: process.cwd(),
-		config: config?.lastCreate ?? null,
-		previousConfigLoaded: !!config,
+		cwd,
+		// cli metadata
+		cliName: getCliName(),
+		cliVersion: process.env.APPINIT_CLI_VERSION ?? null,
+		nodeVersion: process.version,
+		os: process.platform,
+		debug: Boolean(cmd.flags.debug),
+
+		// config & runtime
+		config: saved?.lastCreate ?? null,
+		previousConfigLoaded: !!saved,
+		skipDefaultPacks: false,
+
 		runtime: "cli",
-		outputMode: "text",
+		outputMode: cmd.flags.json ? "json" : "text",
+
+		// template info (will be filled later)
+		templateId: cmd.flags.template ?? null,
+		templateName: null,
+		templateMeta: null,
+		templateDir: null,
+		template: undefined,
+		templateResolved: false,
+		templatePromptPacks: [],
+		pluginPromptPacks: [],
+
+		// environment snapshot
+		env: {
+			ci: isCI(),
+			docker: false, // can be set async later if you want
+			tty: !!(process.stdin.isTTY && process.stdout.isTTY),
+			npmLifecycle: isRunningInNpmLifecycle(),
+		},
+
 		answers: {},
+		hooks: undefined,
 		extra: {},
 	};
 
-	// Prefill templateId if passed via flags
-	if (cmd.flags && cmd.flags.template) {
-		ctx.templateId = cmd.flags.template;
+	// Seed projectName from positional args: `appinit create my-app`
+	if (cmd.args[0]) {
+		ctx.answers!.projectName = cmd.args[0];
 	}
 
+	// Package manager detection (flag wins, else auto-detect)
+	ctx.packageManager =
+		cmd.flags.packageManager ?? (await detectPackageManager(cwd)) ?? null;
+
+	// Determine interactive mode once
+	ctx.interactive = await shouldUseInteractiveUI(cmd.flags);
+	console.log("CLI CONTEXT RETURN", ctx);
 	return ctx;
 }

@@ -24,32 +24,35 @@ import {
 } from "./common";
 
 export interface BaseAnswers {
-	currentDir?: string;
-	targetDir?: string;
+	// 🏷️ Project Identity & Metadata
 	projectName: string;
+	targetDir: string; // Made required for clarity in final answers
 	description?: string;
 	author?: string;
-	license?: string;
-	packageScope?: string | null;
-
-	packageManager: PackageManager;
-	workspaceTool: WorkspaceTool;
+	licenseType: LicenseType; // Made required for configuration completeness
+	packageScope?: string | null; // e.g., @myorg
 
 	projectType: ProjectType;
 	language: Language;
+	packageManager: PackageManager;
 	projectStructure: ProjectStructure;
+	workspaceTool: WorkspaceTool;
 
 	formattingTool: Formatter;
 	lintingTool: Linter;
 	testingTool: TestRunner;
 
+	// ⚙️ Build & Runtime Configuration
+	buildTool?: string; // e.g., webpack, esbuild, rollup, Rust cargo
+	runtimeEnvironment?: string; // e.g., Node.js, Deno, JVM, Browser, WASM
+
+	// 🤝 Collaboration & Quality
 	commitConventions: boolean;
-	editor: Editor;
+	editor: Editor; // Editor configuration (e.g., VSCode settings)
 
 	initGit: boolean;
 	createRemote: boolean;
 	repoVisibility?: RepoVisibility;
-	projectVisibility?: RepoVisibility;
 	remoteOrg?: string | null;
 
 	setupCI: boolean;
@@ -61,10 +64,12 @@ export interface BaseAnswers {
 	autoOpen?: boolean;
 
 	organization?: string;
-	licenseType?: LicenseType;
 
 	useAI?: boolean;
 	deploy?: DeployOptions;
+
+	features?: string[];
+	setting: Record<string, any>;
 }
 
 // ─────────────────────────────────────────────

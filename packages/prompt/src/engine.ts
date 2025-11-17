@@ -7,23 +7,15 @@ import type {
 	Language,
 	Answers,
 } from "@appinit/types";
-import { gitPack } from "./packs/git";
-import { metaPack } from "./packs/meta";
-import { languagePack } from "./packs/language";
-import { environmentPack } from "./packs/environment";
-import { frameworkPack } from "./packs/framework";
-import { qualityPack } from "./packs/quality";
-import { infraPack } from "./packs/infra";
-import { automationPack } from "./packs/automation";
 import os from "os";
 import { templateResolver } from "@appinit/template-resolver";
 import { logger } from "@appinit/utils";
 import {
-	backendPack,
-	deployPack,
+	environmentPack,
+	frameworkPack,
+	metaPack,
 	previousConfigPack,
 	projectTypePack,
-	uiPack,
 } from "./packs";
 import path from "path";
 
@@ -32,18 +24,18 @@ import path from "path";
 // --------------------------------------------------------
 const DEFAULT_PIPELINE: PromptPack[] = [
 	previousConfigPack, // MUST RUN FIRST
-	projectTypePack,
 	metaPack,
-	environmentPack,
-	languagePack,
+	projectTypePack,
 	frameworkPack,
-	uiPack,
-	backendPack,
-	infraPack,
-	qualityPack,
-	gitPack,
-	automationPack,
-	deployPack,
+	environmentPack,
+	// languagePack,
+	// uiPack,
+	// backendPack,
+	// infraPack,
+	// qualityPack,
+	// gitPack,
+	// automationPack,
+	// deployPack,
 ];
 
 // --------------------------------------------------------
@@ -52,7 +44,7 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 export async function runPromptEngine(
 	ctx: PromptContext,
 	packs?: PromptPack[],
-): Promise<{ answers: PromptResult; template: ResolvedTemplate }> {
+): Promise<{ answers: PromptResult; template?: ResolvedTemplate }> {
 	logger.step("Starting prompt engine...");
 
 	const final: PromptResult = {};
@@ -77,16 +69,24 @@ export async function runPromptEngine(
 	// 4️⃣ Sort all packs by priority
 	pipeline.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
 
-	// --------------------------------------------------------
-	// Execute each pack
-	// --------------------------------------------------------
+	console.log("PIPELINE", pipeline);
+
+	// 2️⃣ Global before-all hook
+	if (ctx.hooks?.beforeAll) {
+		await ctx.hooks.beforeAll(ctx, final);
+	}
 	for (const pack of pipeline) {
 		try {
 			logger.info(`➡️  Running pack: ${pack.name}`);
 
-			// Optional: beforePrompt hook
-			if (ctx.hooks?.beforePrompt) {
-				await ctx.hooks.beforePrompt(ctx, final);
+			// global beforeEach
+			if (ctx.hooks?.beforeEach) {
+				await ctx.hooks.beforeEach(pack, ctx, final);
+			}
+
+			// pack local before
+			if (pack.before) {
+				await pack.before(ctx, final);
 			}
 
 			const res = await pack.handler(ctx, final);
@@ -96,9 +96,14 @@ export async function runPromptEngine(
 				Object.assign(final, res);
 			}
 
-			// Optional: afterPrompt hook
-			if (ctx.hooks?.afterPrompt) {
-				await ctx.hooks.afterPrompt(ctx, final);
+			// pack local after
+			if (pack.after) {
+				await pack.after(ctx, final);
+			}
+
+			// global afterEach
+			if (ctx.hooks?.afterEach) {
+				await ctx.hooks.afterEach(pack, ctx, final);
 			}
 		} catch (err) {
 			logger.error(
@@ -109,22 +114,28 @@ export async function runPromptEngine(
 		}
 	}
 
-	logger.info("Prompt engine complete.");
+	// 4️⃣ Global afterAll
+	if (ctx.hooks?.afterAll) {
+		await ctx.hooks.afterAll(ctx, final);
+	}
+
+	console.log(`Prompt engine complete.`, final, ctx, packs);
 
 	// --------------------------------------------------------
 	// 🔥 Resolve Template (this is the missing final step!)
 	// --------------------------------------------------------
-	const template = await templateResolver(
-		final.templateSource ?? `${final.framework}-${final.ui}`, // or explicit template name
-		{
-			cwd: process.cwd(),
-			projectName: final.projectName!,
-			framework: final.framework,
-			ui: final.ui,
-			language: final.language as Language,
-			answers: final as Answers,
-			cacheDir: path.join(os.homedir(), ".appinit/cache"),
-		},
-	);
-	return { answers: final, template };
+
+	// const template = await templateResolver(
+	// 	(final.templateSource ?? `${final.framework}-${final.ui}`) as string, // or explicit template name
+	// 	{
+	// 		cwd: process.cwd(),
+	// 		projectName: final.projectName!,
+	// 		framework: final.framework,
+	// 		ui: final.ui,
+	// 		language: final.language as Language,
+	// 		answers: final as Answers,
+	// 		cacheDir: path.join(os.homedir(), ".appinit/cache"),
+	// 	},
+	// );
+	return { answers: final };
 }

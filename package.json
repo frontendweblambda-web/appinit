@@ -10,6 +10,7 @@
 		"start": "node dist/cli/index.js",
 		"dev": "turbo run dev",
 		"build": "turbo run build",
+		"build:watch": "turbo run build -- --watch",
 		"lint": "turbo run lint",
 		"test": "turbo run test",
 		"prepare": "husky",

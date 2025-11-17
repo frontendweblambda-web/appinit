@@ -18,22 +18,16 @@ export type TemplateSource = "local" | "github" | "npm" | "url" | "market";
 export interface TemplateMeta {
 	/** Template ID used in marketplace */
 	name: string;
-
 	/** Semantic versioning for marketplace */
 	version?: string;
-
 	/** Human description */
 	description?: string;
-
 	/** Categories used for marketplace search */
 	categories?: string[]; // e.g. ["react", "ui", "tailwind"]
-
 	/** Supported frameworks: react, next, vue, svelte, angular... */
 	frameworks?: string[];
-
 	/** Supported languages: TS/JS */
-	languages?: ("typeScript" | "javaScript")[];
-
+	languages?: Language[];
 	/** Template-defined custom prompts (simple mode) */
 	prompts?: Array<{
 		name: string;
@@ -42,19 +36,15 @@ export interface TemplateMeta {
 		default?: any;
 		choices?: { label?: string; value: any }[];
 	}>;
-
 	/** Dependencies on other template packs */
 	requires?: string[];
-
 	/** Marketplace author */
 	author?: {
 		name: string;
 		url?: string;
 	};
-
 	/** Minimum AppInit version required */
 	appinitVersion?: string;
-
 	/** Instructions displayed after installation */
 	postInstall?: string[];
 }

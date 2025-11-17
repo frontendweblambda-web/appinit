@@ -8,6 +8,14 @@ export type JSONValue =
 	| null
 	| JSONValue[]
 	| { [key: string]: JSONValue };
+export type Capability =
+	| "i18n"
+	| "auth"
+	| "cloud"
+	| "ssr"
+	| "edge"
+	| "db"
+	| "cache";
 export type Variables = Record<string, any>;
 export type WorkspaceTool = "single" | "turborepo" | "nx" | "monorepo"; // Workspace toolchains
 export type Language = "typescript" | "javascript";
@@ -32,7 +40,6 @@ export type TestRunner =
 	| "storybook"
 	| "none";
 export type Editor = "vscode" | "sublime" | "webstorm" | "cursor" | "none"; // Git editor preference
-export type LicenseType = "MIT" | "ISC" | "Apache-2.0" | "Proprietary"; // License types
 export type RepoVisibility = "public" | "private" | "internal"; // Repository visibility
 export type CIProvider =
 	| "github-actions"
@@ -50,3 +57,11 @@ export interface CommonFrontendOptions {
 	devServer?: boolean;
 	validation?: Validation;
 }
+export type LicenseType =
+	| "MIT"
+	| "ISC"
+	| "Apache-2.0"
+	| "GPL-3.0"
+	| "UNLICENSED"
+	| "Proprietary"
+	| "Custom";

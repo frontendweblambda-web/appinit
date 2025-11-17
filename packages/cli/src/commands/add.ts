@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import { parseFlags } from "../core/flags";
+import { parseFlags } from "../core/parse-flags";
 import path from "node:path";
 
 export async function runAdd(argv: string[]) {

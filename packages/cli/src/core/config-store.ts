@@ -1,5 +1,11 @@
 import { runPromptEngine } from "@appinit/prompt";
-import { Flags, PromptContext, PromptResult } from "@appinit/types";
+import {
+	Answers,
+	AppInitConfig,
+	Flags,
+	PromptContext,
+	PromptResult,
+} from "@appinit/types";
 import {
 	ensureDir,
 	pathExists,
@@ -16,11 +22,13 @@ import path from "path";
 const CONFIG_DIR = path.join(os.homedir(), ".appinit");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
-export async function loadUserConfig(): Promise<any | null> {
+export async function loadUserConfig(): Promise<AppInitConfig | null> {
 	try {
+		console.log("CONFIG_FILE", CONFIG_DIR);
 		if (await pathExists(CONFIG_FILE)) {
 			const data = await readJson(CONFIG_FILE);
-			if (data.projectName && data.framework && data.ui && data.registry) {
+			console.log("Data", data, data.projectName && data.framework && data.ui);
+			if (data.projectName && data.framework && data.ui) {
 				return data;
 			} else {
 				console.warn(
@@ -38,8 +46,14 @@ export async function loadUserConfig(): Promise<any | null> {
 	}
 }
 
-export async function saveUserConfig(data: Record<string, any>) {
+export async function saveUserConfig(data: Answers) {
 	try {
+		const config: AppInitConfig = {
+			lastCreate: data,
+			date: new Date().toISOString(),
+			hostname: os.hostname(),
+			ipAddress: getLocalIpAddress(), // We'll define this function below
+		};
 		await ensureDir(CONFIG_DIR);
 		await writeJson(CONFIG_FILE, data);
 	} catch (err) {
@@ -58,3 +72,15 @@ export const clearUserConfig = async (): Promise<void> => {
 		console.log(chalk.gray("No saved config found."));
 	}
 };
+// Helper to get the local IP address
+function getLocalIpAddress(): string | undefined {
+	const interfaces = os.networkInterfaces();
+	for (const name of Object.keys(interfaces)) {
+		for (const iface of interfaces[name]!) {
+			if (iface.family === "IPv4" && !iface.internal) {
+				return iface.address;
+			}
+		}
+	}
+	return undefined;
+}
