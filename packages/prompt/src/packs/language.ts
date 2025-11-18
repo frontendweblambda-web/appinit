@@ -1,51 +1,73 @@
 import { askAnswers } from "../prompt";
-import type { PromptContext, PromptPack, ChoiceOption } from "@appinit/types";
+import type {
+	PromptContext,
+	PromptPack,
+	ChoiceOption,
+	Answers,
+} from "@appinit/types";
+import { languageChoices } from "../static/language";
+import { folderStructureChoices } from "../static/framework.data";
 
 export const languagePack: PromptPack = {
 	name: "language",
-	priority: 15,
+	priority: 25,
+
+	// --------------------------------------------------------------------------
+	// Only ask if the project actually contains source code (not docs/config only)
+	// --------------------------------------------------------------------------
+	condition: (_, accum) => {
+		const codeProjects = ["frontend", "backend", "fullstack", "library"];
+		return codeProjects.includes(accum.projectType ?? "");
+	},
 
 	handler: async (ctx: PromptContext, accum) => {
+		const flags = ctx.flags ?? {};
+		const prev = ctx.config ?? {};
+		const nonInteractive = flags.nonInteractive === true;
+
+		const defaultLanguage = flags.language ?? prev.language ?? "typescript";
+		const defaultStructure =
+			flags.structure ??
+			prev.structure ??
+			(defaultLanguage === "typescript" ? "src-folder" : "flat");
 		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
-		if (ctx.flags["non-interactive"]) {
+		if (nonInteractive) {
 			return {
-				language: ctx.flags.language ?? "typescript",
-				structure: ctx.flags.structure ?? "src-folder",
+				language: defaultLanguage,
+				structure: defaultStructure,
 			};
 		}
 
+		console.log("DEFAULT", defaultLanguage);
 		// ----------------------------------------------------
 		// INTERACTIVE MODE
 		// ----------------------------------------------------
-		const res = await askAnswers(
+		const answers = await askAnswers(
 			[
 				{
 					type: "select",
 					name: "language",
 					message: "💬 Language preference:",
-					choices: [
-						{ label: "TypeScript", value: "typescript" },
-						{ label: "JavaScript", value: "javascript" },
-					] as ChoiceOption[],
-					initial: ctx.flags.language ?? accum.language ?? "typescript",
+					choices: languageChoices,
+					initial: defaultLanguage,
 				},
 				{
 					type: "select",
 					name: "structure",
 					message: "📁 Project structure:",
-					choices: [
-						{ label: "Flat (no src folder)", value: "flat" },
-						{ label: "With src/ folder", value: "src-folder" },
-					] as ChoiceOption[],
-					initial: ctx.flags.structure ?? accum.structure ?? "src-folder",
+					choices: folderStructureChoices,
+					initial: (answers: Answers, ctxState: PromptContext) => {
+						const lang = answers?.language ?? defaultLanguage;
+						return lang === "typescript" ? "src-folder" : "flat";
+					},
 				},
 			],
 			accum,
 			ctx,
 		);
 
-		return res;
+		return answers;
 	},
 };

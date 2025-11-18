@@ -2,21 +2,12 @@ import type {
 	PromptPack,
 	PromptContext,
 	PromptQuestion,
-	ChoiceOption,
 	PromptResult,
 } from "@appinit/types";
 import { formatName, normalizeScope, validateName } from "@appinit/utils";
 import { askAnswers } from "../prompt";
 import { shouldAskPackageScope } from "@appinit/core";
-const licenseChoices: ChoiceOption<
-	"MIT" | "Apache-2.0" | "GPL-3.0" | "Unlicense" | "Other"
->[] = [
-	{ label: "MIT", value: "MIT" },
-	{ label: "Apache-2.0", value: "Apache-2.0" },
-	{ label: "GPL-3.0", value: "GPL-3.0" },
-	{ label: "Unlicense", value: "Unlicense" },
-	{ label: "Other", value: "Other" },
-];
+import { licenseChoices } from "../static/license";
 
 export const metaPack: PromptPack = {
 	name: "meta",
@@ -25,7 +16,6 @@ export const metaPack: PromptPack = {
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
 		const prev = ctx.config ?? {};
-		const hooks = ctx.hooks;
 		const nonInteractive = ctx.flags.nonInteractive;
 		const api = ctx.runtime === "api";
 		const interactive = ctx.interactive;

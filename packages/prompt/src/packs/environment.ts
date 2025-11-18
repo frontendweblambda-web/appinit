@@ -3,7 +3,7 @@ import type { PromptPack, PromptContext, ChoiceOption } from "@appinit/types";
 
 export const environmentPack: PromptPack = {
 	name: "environment",
-	priority: 30,
+	priority: 55,
 
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};

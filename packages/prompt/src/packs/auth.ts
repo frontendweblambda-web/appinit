@@ -10,20 +10,25 @@ import type {
 // -------------------------------------------------------------
 // Mapped providers by project type
 // -------------------------------------------------------------
+
+const COMMON = [
+	{ label: "Basic Auth", value: "basic" },
+	{ label: "None", value: "none" },
+	{ label: "Custom JWT", value: "custom-jwt" },
+];
 const FRONTEND_PROVIDERS: ChoiceOption[] = [
 	{ label: "Clerk", value: "clerk" },
 	{ label: "Firebase Auth", value: "firebase" },
 	{ label: "Auth.js Client", value: "authjs-client" },
 	{ label: "Magic.link", value: "magic" },
-	{ label: "None", value: "none" },
+	{ label: "Rest API", value: "rest-api" },
+	...COMMON.filter((o) => o.value !== "custom-jwt"),
 ];
 
 const BACKEND_PROVIDERS: ChoiceOption[] = [
-	{ label: "Custom JWT", value: "custom-jwt" },
 	{ label: "OAuth2 Server", value: "oauth-server" },
 	{ label: "API Key", value: "api-key" },
-	{ label: "Basic Auth", value: "basic" },
-	{ label: "None", value: "none" },
+	...COMMON,
 ];
 
 const FULLSTACK_PROVIDERS: ChoiceOption[] = [
@@ -33,8 +38,7 @@ const FULLSTACK_PROVIDERS: ChoiceOption[] = [
 	{ label: "Firebase Auth", value: "firebase" },
 	{ label: "Magic.link", value: "magic" },
 	{ label: "AWS Cognito", value: "cognito" },
-	{ label: "Custom JWT", value: "custom-jwt" },
-	{ label: "None", value: "none" },
+	...COMMON,
 ];
 
 // -------------------------------------------------------------

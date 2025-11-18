@@ -1,205 +1,76 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
+import type { PromptPack, PromptContext } from "@appinit/types";
+import { getDefaultInfra } from "../utils/get-default-infra";
 
 export const infraPack: PromptPack = {
 	name: "infra",
-	priority: 50, // runs after backend + framework
+	priority: 70, // after backend + before deploy
+
+	condition: (_, accum) => {
+		// Skip for pure tooling projects
+		return !["library", "cli"].includes(accum.projectType ?? "");
+	},
 
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
-		const type = accum.type ?? flags.type;
+		const nonInteractive = flags.nonInteractive === true;
 
-		// ====================================================================
-		// 0️⃣ Early Skip: No infra for library or CLI
-		// ====================================================================
-		if (type === "library" || type === "cli") {
-			return {};
-		}
+		const defaults = getDefaultInfra({
+			projectType: accum.projectType!,
+			framework: accum.framework!,
+		});
 
-		// ====================================================================
-		// 1️⃣ NON-INTERACTIVE MODE
-		// ====================================================================
-		if (flags["non-interactive"]) {
+		// ----------------------
+		// NON-INTERACTIVE MODE
+		// ----------------------
+		if (nonInteractive) {
 			return {
-				database: flags.database ?? "none",
-				orm: flags.orm ?? "none",
-				caching: flags.caching ?? "none",
-				authStrategy: flags.authStrategy ?? "none",
-				analytics: flags.analytics ?? false,
-				monitoring: flags.monitoring ?? false,
+				analytics: flags.analytics ?? accum.analytics ?? false,
+				monitoring: flags.monitoring ?? accum.monitoring ?? defaults.monitoring,
+				logging: flags.logging ?? accum.logging ?? defaults.logging,
+				featureFlags:
+					flags.featureFlags ?? accum.featureFlags ?? defaults.featureFlags,
 			};
 		}
 
-		// ====================================================================
-		// 2️⃣ FRONTEND MODE — minimal infra
-		// ====================================================================
-		if (type === "frontend") {
-			const frontendQuestions: PromptQuestion[] = [
+		// ----------------------
+		// INTERACTIVE MODE
+		// ----------------------
+
+		return askAnswers(
+			[
 				{
-					type: "confirm",
-					name: "analytics",
-					message: "📈 Add analytics (e.g., Vercel / Google Analytics)?",
-					initial: flags.analytics ?? false,
+					type: "select",
+					name: "logging",
+					message: "📝 Logging provider:",
+					choices: [
+						{ label: "Pino (Fast JS logger)", value: "pino" },
+						{ label: "Winston (enterprise)", value: "winston" },
+						{ label: "None", value: "none" },
+					],
+					initial: flags.logging ?? accum.logging ?? defaults.logging,
 				},
 				{
 					type: "confirm",
 					name: "monitoring",
-					message: "🛠 Add monitoring (Sentry, Log Rocket)?",
-					initial: flags.monitoring ?? false,
+					message: "📡 Enable monitoring (Sentry / OTel)?",
+					initial: flags.monitoring ?? accum.monitoring ?? defaults.monitoring,
 				},
-			];
-
-			return await askAnswers(frontendQuestions, accum, ctx);
-		}
-
-		// ====================================================================
-		// 3️⃣ BACKEND / FULLSTACK MODE — full infra flow
-		// ====================================================================
-		if (type === "backend" || type === "fullstack") {
-			// ---------------------------------------------------------------
-			// Database
-			// ---------------------------------------------------------------
-			const dbRes = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "database",
-						message: "🗄 Choose database:",
-						choices: [
-							{ label: "None", value: "none" },
-							{ label: "PostgreSQL", value: "postgresql" },
-							{ label: "MySQL", value: "mysql" },
-							{ label: "MongoDB", value: "mongo" },
-							{ label: "SQLite", value: "sqlite" },
-							{ label: "Supabase", value: "supabase" },
-						],
-						initial: flags.database ?? accum.database ?? "none",
-					},
-				],
-				accum,
-				ctx,
-			);
-
-			// ---------------------------------------------------------------
-			// ORM based on selected DB
-			// ---------------------------------------------------------------
-			let ormChoices;
-
-			switch (dbRes.database) {
-				case "mongo":
-					ormChoices = [
-						{ label: "Mongoose", value: "mongoose" },
-						{ label: "TypeORM", value: "typeorm" },
-						{ label: "None", value: "none" },
-					];
-					break;
-
-				case "none":
-					ormChoices = [{ label: "None", value: "none" }];
-					break;
-
-				default:
-					ormChoices = [
-						{ label: "Prisma", value: "prisma" },
-						{ label: "Drizzle ORM", value: "drizzle" },
-						{ label: "TypeORM", value: "typeorm" },
-						{ label: "None", value: "none" },
-					];
-			}
-
-			const ormRes = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "orm",
-						message: "🧭 Choose ORM:",
-						choices: ormChoices,
-						initial: flags.orm ?? "none",
-					},
-				],
-				{ ...accum, ...dbRes },
-				ctx,
-			);
-
-			// ---------------------------------------------------------------
-			// Auth strategy
-			// ---------------------------------------------------------------
-			const authRes = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "authStrategy",
-						message: "🔐 Authentication strategy:",
-						choices: [
-							{ label: "None", value: "none" },
-							{ label: "JWT", value: "jwt" },
-							{ label: "OAuth2", value: "oauth2" },
-							{ label: "Clerk", value: "clerk" },
-							{ label: "Supabase Auth", value: "supabase" },
-						],
-						initial: flags.authStrategy ?? "none",
-					},
-				],
-				{ ...accum, ...dbRes, ...ormRes },
-				ctx,
-			);
-
-			// ---------------------------------------------------------------
-			// Caching
-			// ---------------------------------------------------------------
-			const cachingRes = await askAnswers(
-				[
-					{
-						type: "select",
-						name: "caching",
-						message: "⚡ Caching strategy:",
-						choices: [
-							{ label: "None", value: "none" },
-							{ label: "API Cache (short-lived)", value: "api-cache" },
-							{ label: "Edge Cache", value: "edge" },
-							{ label: "Redis", value: "redis" },
-						],
-						initial: flags.caching ?? "none",
-					},
-				],
-				{ ...accum, ...dbRes, ...ormRes, ...authRes },
-				ctx,
-			);
-
-			// ---------------------------------------------------------------
-			// Monitoring & Analytics
-			// ---------------------------------------------------------------
-			const optionalInfraRes = await askAnswers(
-				[
-					{
-						type: "confirm",
-						name: "analytics",
-						message: "📈 Add analytics?",
-						initial: flags.analytics ?? false,
-					},
-					{
-						type: "confirm",
-						name: "monitoring",
-						message: "🛠 Add monitoring?",
-						initial: flags.monitoring ?? false,
-					},
-				],
-				{ ...accum, ...dbRes, ...ormRes, ...authRes, ...cachingRes },
-				ctx,
-			);
-
-			return {
-				...dbRes,
-				...ormRes,
-				...authRes,
-				...cachingRes,
-				...optionalInfraRes,
-			};
-		}
-
-		// ====================================================================
-		// Safety fallback
-		// ====================================================================
-		return {};
+				{
+					type: "confirm",
+					name: "analytics",
+					message: "📈 Add analytics?",
+					initial: flags.analytics ?? accum.analytics ?? defaults.analytics,
+				},
+				{
+					type: "confirm",
+					name: "featureFlags",
+					message: "🚩 Include feature flagging (LaunchDarkly / Unleash)?",
+					initial: flags.featureFlags ?? accum.featureFlags ?? false,
+				},
+			],
+			accum,
+			ctx,
+		);
 	},
 };

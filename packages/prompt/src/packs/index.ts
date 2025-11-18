@@ -9,7 +9,6 @@ export * from "./infra";
 export * from "./language";
 export * from "./meta";
 export * from "./project-type";
-export * from "./ui";
 export * from "./quality";
 export * from "./previous-config";
 export * from "./save-config";

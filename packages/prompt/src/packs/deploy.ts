@@ -178,7 +178,7 @@ function questionsForTarget(target: string): PromptQuestion[] {
 // -------------------------------------------------------------
 export const deployPack: PromptPack = {
 	name: "deploy",
-	priority: 55,
+	priority: 75,
 
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};

@@ -9,6 +9,7 @@ import type { BackendOptions } from "./backend";
 import type { AuthOptions } from "./auth.js";
 import type { DeployOptions } from "./deploy";
 import {
+	Architecture,
 	CIProvider,
 	Editor,
 	Formatter,
@@ -37,6 +38,9 @@ export interface BaseAnswers {
 	packageManager: PackageManager;
 	projectStructure: ProjectStructure;
 	workspaceTool: WorkspaceTool;
+
+	// 🧩 Architecture — applies to any buildable app
+	architecture?: Architecture;
 
 	formattingTool: Formatter;
 	lintingTool: Linter;

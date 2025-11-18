@@ -9,7 +9,7 @@ import type {
 
 export const gitPack: PromptPack = {
 	name: "git",
-	priority: 10,
+	priority: 80,
 
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};

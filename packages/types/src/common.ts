@@ -65,3 +65,30 @@ export type LicenseType =
 	| "UNLICENSED"
 	| "Proprietary"
 	| "Custom";
+
+export type Architecture =
+	| "clean" // Clean architecture
+	| "mvc" // Model-View-Controller
+	| "mvvm" // Model-View-ViewModel
+	| "modular" // Feature-based modular design
+	| "hexagonal" // Ports & adapters
+	| "ddd" // Domain Driven Design
+	| "layered";
+export type SQLDatabase =
+	| "postgres"
+	| "mysql"
+	| "sqlite"
+	| "cockroach"
+	| "planetscale";
+export type NoSQLDatabase = "mongo";
+export type HostedDatabase = "supabase";
+export type Database = SQLDatabase | NoSQLDatabase | HostedDatabase | "none";
+export type DatabaseProvider =
+	| "postgresql"
+	| "mysql"
+	| "sqlite"
+	| "cockroachdb"
+	| "planetscale"
+	| "mongodb"
+	| "supabase"
+	| "none";

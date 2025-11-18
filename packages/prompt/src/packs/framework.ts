@@ -1,12 +1,8 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
+import type { PromptPack, PromptContext } from "@appinit/types";
 import {
 	FRONTEND_FRAMEWORK_CHOICES,
 	FULLSTACK_META_FRAMEWORKS,
-	getFormChoices,
-	getRoutingChoices,
-	getStoreChoices,
-	getUIChoices,
 } from "../static/framework.data";
 
 export const frameworkPack: PromptPack = {

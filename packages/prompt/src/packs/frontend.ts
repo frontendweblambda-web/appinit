@@ -1,5 +1,5 @@
 import { Answers, PromptContext, PromptPack } from "@appinit/types";
-import { isFrontend } from "@appinit/utils";
+
 import { askAnswers } from "../prompt";
 import {
 	getFormChoices,
@@ -10,7 +10,7 @@ import {
 
 export const frontendPack: PromptPack = {
 	name: "frontend",
-	priority: 25,
+	priority: 35,
 
 	/**
 	 * Runs when the project requires a UI layer.

@@ -4,22 +4,26 @@ import type {
 	PromptResult,
 	PromptPack,
 	ResolvedTemplate,
-	Language,
-	Answers,
 } from "@appinit/types";
-import os from "os";
-import { templateResolver } from "@appinit/template-resolver";
-import { logger } from "@appinit/utils";
+import { logger, theme } from "@appinit/core";
 import {
+	authPack,
 	backendPack,
+	deployPack,
 	environmentPack,
 	frameworkPack,
+	gitPack,
+	infraPack,
+	languagePack,
 	metaPack,
 	previousConfigPack,
 	projectTypePack,
+	qualityPack,
 } from "./packs";
-import path from "path";
+
 import { frontendPack } from "./packs/frontend";
+import { architecturePack } from "./packs/architecture";
+import { database } from "./packs/database";
 
 // --------------------------------------------------------
 // DEFAULT PIPELINE (used only when skipDefaultPacks is false)
@@ -29,17 +33,17 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 	metaPack,
 	projectTypePack,
 	frameworkPack,
+	languagePack,
+	architecturePack,
 	frontendPack,
-	environmentPack,
 	backendPack,
-	// languagePack,
-	// uiPack,
-	// backendPack,
-	// infraPack,
-	// qualityPack,
-	// gitPack,
-	// automationPack,
-	// deployPack,
+	database,
+	authPack,
+	environmentPack,
+	qualityPack,
+	infraPack,
+	deployPack,
+	gitPack,
 ];
 
 // --------------------------------------------------------
@@ -52,42 +56,29 @@ export async function runPromptEngine(
 	logger.step("Starting prompt engine...");
 
 	const final: PromptResult = {};
-
-	// 1️⃣ Load default packs unless user/template disables them
 	let pipeline: PromptPack[] = [];
-	if (!ctx.skipDefaultPacks) {
-		pipeline = [...DEFAULT_PIPELINE];
-	}
 
-	// 2️⃣ Load dynamic packs (plugin/template/JSON-based)
-	// const dynamicPacks = await loadDynamicPromptPacks(ctx);
-	// if (dynamicPacks.length) {
-	// 	pipeline = [...pipeline, ...dynamicPacks];
-	// }
+	// 1️⃣ Build Pipeline
+	if (!ctx.skipDefaultPacks) pipeline = [...DEFAULT_PIPELINE];
+	if (Array.isArray(packs)) pipeline = [...pipeline, ...packs];
 
-	// 3️⃣ User-supplied packs (API/CLI override) take highest priority
-	if (Array.isArray(packs)) {
-		pipeline = [...pipeline, ...packs];
-	}
-
-	// 4️⃣ Sort all packs by priority
+	// Sort by priority and freeze for safety
 	pipeline.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+	Object.freeze(pipeline);
 
-	// console.log("PIPELINE", pipeline);
+	logger.info(`📦 Pipeline Loaded (${pipeline.length} packs)`);
 
-	// 2️⃣ Global before-all hook
-	if (ctx.hooks?.beforeAll) {
-		await ctx.hooks.beforeAll(ctx, final);
-	}
+	// 2️⃣ Global beforeAll hook
+	if (ctx.hooks?.beforeAll) await ctx.hooks.beforeAll(ctx, final);
+
 	for (const pack of pipeline) {
+		logger.info(`➡️  Running pack: ${pack.name}`);
 		try {
 			// 🚫 Skip if conditional function returns false
 			if (pack.condition && !(await pack.condition(ctx, final))) {
 				logger.info(`⏭️  Skipping pack: ${pack.name}`);
 				continue;
 			}
-
-			logger.info(`➡️  Running pack: ${pack.name}`);
 
 			// global beforeEach
 			if (ctx.hooks?.beforeEach) await ctx.hooks.beforeEach(pack, ctx, final);
@@ -101,20 +92,17 @@ export async function runPromptEngine(
 			if (pack.after) await pack.after(ctx, final);
 			if (ctx.hooks?.afterEach) await ctx.hooks.afterEach(pack, ctx, final);
 		} catch (err) {
-			logger.error(
-				`❌ Prompt pack "${pack.name}" failed:`,
-				(err as Error).message,
-			);
+			logger.error(`❌ Pack failed: "${pack.name}"`);
+			logger.error(`Reason: ${(err as Error).message}`);
 			throw err;
 		}
 	}
 
 	// 4️⃣ Global afterAll
-	if (ctx.hooks?.afterAll) {
-		await ctx.hooks.afterAll(ctx, final);
-	}
+	if (ctx.hooks?.afterAll) await ctx.hooks.afterAll(ctx, final);
 
-	console.log(`Prompt engine complete.`, final, ctx, packs);
+	theme.success("🎉 Prompt engine complete.");
+	logger.debug("🧩 Final Answers:", final);
 
 	// --------------------------------------------------------
 	// 🔥 Resolve Template (this is the missing final step!)

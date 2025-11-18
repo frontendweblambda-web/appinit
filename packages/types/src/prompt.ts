@@ -6,7 +6,6 @@ import {
 } from "@clack/prompts";
 import { ResolvedTemplate, TemplateMeta } from "./template";
 import { Flags } from "./flags";
-import { ProjectType } from "./common";
 
 // -------------------------------------------------
 // Choice Option
@@ -100,6 +99,7 @@ export type PromptResult = Record<string, any> & {
 	// ─────────────── AppInit dynamic answer fields ───────────────
 	projectType?: string;
 	framework?: string;
+	architecture?: string;
 
 	form?: string;
 	store?: string;
@@ -107,6 +107,7 @@ export type PromptResult = Record<string, any> & {
 
 	// Backend-specific
 	backendFramework?: string;
+	backendMode?: string;
 	apiStyle?: string;
 	database?: string;
 	orm?: string;

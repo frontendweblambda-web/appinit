@@ -1,5 +1,8 @@
 // ===============================================
 // Helpers
+
+import { ChoiceOption } from "@appinit/types";
+
 // ===============================================
 export function getRoutingChoices(framework: string) {
 	switch (framework) {
@@ -505,5 +508,18 @@ export const FULLSTACK_META_FRAMEWORKS = [
 		label: "Nuxt (Vue)",
 		value: "vue",
 		hint: "**The full-stack Vue framework.** Rich feature set including file-system routing, auto-imports, and powerful module ecosystem.",
+	},
+];
+
+export const folderStructureChoices: ChoiceOption<"flat" | "src-folder">[] = [
+	{
+		label: "Flat (no src folder)",
+		value: "flat",
+		hint: "Puts all source files directly in the project's root directory (e.g., `project/index.js`, `project/main.js`). Common for small projects, simple scripts, or libraries.",
+	},
+	{
+		label: "With src/ folder",
+		value: "src-folder",
+		hint: "Organizes all production source code inside a dedicated `src/` directory (e.g., `project/src/index.js`). Recommended for medium-to-large applications for better separation.",
 	},
 ];

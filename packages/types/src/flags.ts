@@ -15,6 +15,7 @@ export interface Flags {
 	projectType?: string;
 	workspace?: string;
 	lang?: string;
+	architecture?: string;
 
 	template?: string;
 	framework?: string;

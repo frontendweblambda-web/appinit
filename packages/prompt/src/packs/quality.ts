@@ -1,90 +1,149 @@
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
+import type {
+	PromptPack,
+	PromptContext,
+	PromptQuestion,
+	ChoiceOption,
+} from "@appinit/types";
+import {
+	editorChoices,
+	formatterChoices,
+	lintingToolChoices,
+	testingToolChoices,
+} from "../static/quality.data";
 
 export const qualityPack: PromptPack = {
 	name: "quality",
-	priority: 70,
+	priority: 60,
 
-	handler: async (ctx: PromptContext, accum) => {
+	// Only ask if code exists
+	condition: (_, accum) => {
+		const codeProjects = ["frontend", "backend", "fullstack", "library", "cli"];
+		return codeProjects.includes(accum.projectType ?? "");
+	},
+
+	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
+		const prev = ctx.config ?? {};
+
+		const nonInteractive = flags.nonInteractive === true;
+
+		// ---------------------------------------------------------
+		// Smart defaults based on project type
+		// ---------------------------------------------------------
+		const determineDefaults = (type?: string) => {
+			switch (type) {
+				case "backend":
+					return {
+						testing: "vitest",
+						linting: "biome",
+						formatting: "prettier",
+						editor: "vscode",
+					};
+				case "library":
+					return {
+						testing: "vitest",
+						linting: "biome",
+						formatting: "prettier",
+						editor: "vscode",
+					};
+				case "cli":
+					return {
+						testing: "none",
+						linting: "biome",
+						formatting: "prettier",
+						editor: "vscode",
+					};
+				default:
+					return {
+						testing: "vitest",
+						linting: "eslint",
+						formatting: "prettier",
+						editor: "vscode",
+					};
+			}
+		};
+
+		const smartDefault = determineDefaults(accum.projectType);
+
+		const editorDefault =
+			flags.editor ?? accum.editor ?? prev.editor ?? smartDefault.editor;
+		const testingDefault =
+			flags.testing ?? accum.testing ?? prev.testing ?? smartDefault.testing;
+		const lintingDefault =
+			flags.linting ?? accum.linting ?? prev.linting ?? smartDefault.linting;
+		const formattingDefault =
+			flags.formatting ??
+			accum.formatting ??
+			prev.formatting ??
+			smartDefault.formatting;
+		const commitDefault =
+			flags.commitConventions ??
+			accum.commitConventions ??
+			prev.commitConventions ??
+			true;
 
 		// ---------------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ---------------------------------------------------------
-		if (flags["non-interactive"]) {
+		if (nonInteractive) {
 			return {
-				editor: flags.editor ?? "vscode",
-				testing: flags.testing ?? "vitest",
-				linting: flags.linting ?? "eslint",
-				formatting: flags.formatting ?? "prettier",
-				commitConventions: flags.commitConventions ?? true,
+				editor: editorDefault,
+				testing: testingDefault,
+				linting: lintingDefault,
+				formatting: formattingDefault,
+				commitConventions: commitDefault,
 			};
 		}
 
 		// ---------------------------------------------------------
-		// INTERACTIVE MODE
+		// UI with recommended tag
 		// ---------------------------------------------------------
+		const withRecommended = (choices: ChoiceOption[], recommended: string) =>
+			choices.map((c) => ({
+				...c,
+				label:
+					c.value === recommended ? `⭐ ${c.label} (Recommended)` : c.label,
+			}));
+
 		const questions: PromptQuestion[] = [
 			{
 				type: "select",
 				name: "editor",
 				message: "🧠 Preferred editor:",
-				choices: [
-					{ label: "VS Code", value: "vscode" },
-					{ label: "Sublime", value: "sublime" },
-					{ label: "WebStorm", value: "webstorm" },
-					{ label: "Cursor", value: "cursor" },
-					{ label: "None", value: "none" },
-				],
-				initial: flags.editor ?? accum.editor ?? "vscode",
+				choices: withRecommended(editorChoices, editorDefault),
+				initial: editorDefault,
 			},
 			{
 				type: "select",
 				name: "testing",
 				message: "🧪 Testing framework:",
-				choices: [
-					{ label: "Vitest", value: "vitest" },
-					{ label: "Jest", value: "jest" },
-					{ label: "Playwright", value: "playwright" },
-					{ label: "Cypress", value: "cypress" },
-					{ label: "Storybook", value: "storybook" },
-					{ label: "None", value: "none" },
-				],
-				initial: flags.testing ?? accum.testing ?? "vitest",
+				choices: withRecommended(testingToolChoices, testingDefault),
+				initial: testingDefault,
 			},
 			{
 				type: "select",
 				name: "linting",
-				message: "🔍 Linting:",
-				choices: [
-					{ label: "ESLint", value: "eslint" },
-					{ label: "Biome", value: "biome" },
-					{ label: "None", value: "none" },
-				],
-				initial: flags.linting ?? accum.linting ?? "eslint",
+				message: "🔍 Linting engine:",
+				choices: withRecommended(lintingToolChoices, lintingDefault),
+				initial: lintingDefault,
 			},
 			{
 				type: "select",
 				name: "formatting",
 				message: "🎨 Code formatter:",
-				choices: [
-					{ label: "Prettier", value: "prettier" },
-					{ label: "Rome", value: "rome" },
-					{ label: "None", value: "none" },
-				],
-				initial: flags.formatting ?? accum.formatting ?? "prettier",
+				choices: withRecommended(formatterChoices, formattingDefault),
+				initial: formattingDefault,
 			},
 			{
 				type: "confirm",
 				name: "commitConventions",
 				message: "🔁 Use Conventional Commits?",
-				initial: flags.commitConventions ?? accum.commitConventions ?? true,
+				initial: commitDefault,
 			},
 		];
 
-		// Run prompt engine
-		const result = await askAnswers(questions, accum, ctx);
-
-		return result;
+		const answers = await askAnswers(questions, accum, ctx);
+		return answers;
 	},
 };
