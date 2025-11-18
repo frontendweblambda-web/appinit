@@ -1,17 +1,11 @@
 import fs from "fs-extra";
 import path from "path";
 import chalk from "chalk";
-import { execa } from "execa";
 
 import { Answers } from "@appinit/types";
 import { copyTemplate } from "./common/copy.js";
-
-import {
-	getPackageManager,
-	isFrontend,
-	mergeJson,
-	pathExists,
-} from "@appinit/utils";
+import { isFrontend, getPackageManager } from "@appinit/core";
+import { mergeJson, pathExists } from "@appinit/utils";
 
 export async function generateFrontend(answers: Answers) {
 	if (!isFrontend(answers)) return; // skip if not backend

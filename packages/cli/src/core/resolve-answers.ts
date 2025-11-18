@@ -3,8 +3,9 @@ import { Answers, PromptContext, PromptResult } from "@appinit/types";
 import { REQUIRED_BY_TYPE } from "../data";
 import { runPromptEngine } from "@appinit/prompt";
 import { getValuesFromFlags } from "../utils/value-from-flags";
-import { isInteractive, merge } from "@appinit/utils";
+import { merge } from "@appinit/utils";
 import { extractDefaultsFromMeta, normalizeAnswers } from "../utils/common";
+import { isInteractive } from "@appinit/core";
 
 /**
  * resolve answers

@@ -1,6 +1,5 @@
 // packages/@appinit/utils/shell.ts
 
-import os from "node:os";
 import process from "node:process";
 
 /**

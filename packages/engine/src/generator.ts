@@ -1,15 +1,10 @@
 import fs from "fs-extra";
 import path from "path";
 import chalk from "chalk";
-import { execa } from "execa";
-import {
-	mergeJson,
-	getPackageManager,
-	pathExists,
-	readJson,
-} from "@appinit/utils";
-import { copyTemplate } from "./common/copy";
 
+import { mergeJson, pathExists, readJson } from "@appinit/utils";
+import { copyTemplate } from "./common/copy";
+import { getPackageManager } from "@appinit/core";
 /**
  * Generates a fully configured React template.
  * - Copies base + UI templates

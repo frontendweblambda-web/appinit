@@ -4,13 +4,13 @@
 	"description": "Unified template resolver for Appinit OS (local, GitHub, URL, npm, marketplace).",
 	"private": true,
 	"type": "module",
-	"main": "./dist/cjs/index.cjs",
-	"module": "./dist/esm/index.js",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/esm/index.js",
-			"require": "./dist/cjs/index.cjs"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
 		}
 	},
 	"files": [

@@ -6,17 +6,14 @@ import { execa } from "execa";
 import { Answers } from "@appinit/types";
 import { copyTemplate } from "./common/copy.js";
 
+import { mergeJson, pathExists, removeDir, ensureDir } from "@appinit/utils";
 import {
-	getPackageManager,
-	mergeJson,
-	pathExists,
-	removeDir,
-	isFrontend,
 	isBackend,
+	isFrontend,
 	isLibrary,
-	ensureDir,
-} from "@appinit/utils";
-
+	isFullstack,
+	getPackageManager,
+} from "@appinit/core";
 export async function generateBackend(answers: Answers) {
 	if (!isBackend(answers)) return; // skip if not backend
 

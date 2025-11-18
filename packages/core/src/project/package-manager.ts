@@ -2,7 +2,7 @@ import { exec as _exec } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { DEFAULT_SHELL } from "./shell";
+import { DEFAULT_SHELL } from "../utils/shell";
 import type { PackageManager, PackageManagerAPI } from "@appinit/types";
 
 const exec = promisify(_exec);

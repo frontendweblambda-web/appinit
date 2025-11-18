@@ -19,13 +19,6 @@ export const gitPack: PromptPack = {
 		const nonInteractive = flags["non-interactive"] || ctx.runtime === "api";
 
 		// ----------------------------------------------------
-		// BEFORE HOOK
-		// ----------------------------------------------------
-		if (ai?.beforePrompt) {
-			await ai.beforePrompt(ctx, accum);
-		}
-
-		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
 		if (nonInteractive) {
@@ -149,13 +142,6 @@ export const gitPack: PromptPack = {
 
 		// ASK
 		const result = await askAnswers(questions, accum, ctx);
-
-		// ----------------------------------------------------
-		// AFTER HOOK
-		// ----------------------------------------------------
-		if (ai?.afterPrompt) {
-			await ai.afterPrompt(ctx, result);
-		}
 
 		return result;
 	},

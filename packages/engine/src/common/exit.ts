@@ -1,7 +1,7 @@
 // src/core/exit.ts
-import chalk from "chalk";
 
 // import { stopSpinner } from "./spinner.js";
+import { theme } from "@appinit/core";
 import { cleanupRegisteredPaths } from "./cleanup.js";
 
 let exitHandled = false;
@@ -15,13 +15,13 @@ export function setupGracefulExit() {
 		exitHandled = true;
 
 		console.log(
-			chalk.yellow(`\n⚠️  Caught ${signal || "exit"} — cleaning up...`),
+			theme.warning(`\n⚠️  Caught ${signal || "exit"} — cleaning up...`),
 		);
 		// stopSpinner(false);
 
 		await cleanupRegisteredPaths();
 
-		console.log(chalk.gray("\n👋 Exiting Codex App Generator gracefully.\n"));
+		console.log(theme.dim("\n👋 Exiting Codex App Generator gracefully.\n"));
 		process.exit(signal === "SIGINT" ? 130 : 1);
 	};
 
@@ -29,12 +29,12 @@ export function setupGracefulExit() {
 	process.on("SIGTERM", () => handleExitGracefully("SIGTERM"));
 
 	process.on("uncaughtException", async (err) => {
-		console.error(chalk.red("\n❌ Uncaught error:"), err);
+		console.error(theme.danger("\n❌ Uncaught error:"), err);
 		await handleExitGracefully("uncaughtException");
 	});
 
 	process.on("unhandledRejection", async (reason) => {
-		console.error(chalk.red("\n❌ Unhandled promise rejection:"), reason);
+		console.error(theme.danger("\n❌ Unhandled promise rejection:"), reason);
 		await handleExitGracefully("unhandledRejection");
 	});
 

@@ -1,4 +1,3 @@
-// tsconfig.json - root file
 {
 	"files": [],
 	"references": [
@@ -10,6 +9,7 @@
 		{ "path": "./packages/utils" },
 		{ "path": "./packages/engine" },
 		{ "path": "./packages/git" },
-		{ "path": "./packages/github" }
+		{ "path": "./packages/github" },
+		{ "path": "./packages/core" }
 	]
 }

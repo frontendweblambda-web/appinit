@@ -2,11 +2,12 @@ import type { Flags, PromptContext } from "@appinit/types";
 import { loadUserConfig } from "./config-store.js";
 import { getCliName } from "../utils/cli-name.js";
 import {
-	detectPackageManager,
 	isCI,
 	isRunningInNpmLifecycle,
 	shouldUseInteractiveUI,
-} from "@appinit/utils";
+	detectPackageManager,
+	getPackageManager,
+} from "@appinit/core";
 
 export async function buildContext(cmd: {
 	name: string;
@@ -15,7 +16,7 @@ export async function buildContext(cmd: {
 }): Promise<PromptContext> {
 	const saved = await loadUserConfig();
 	const cwd = process.cwd();
-	console.log("SAVED CONFIG", saved);
+	// console.log("SAVED CONFIG", saved);
 	const ctx: PromptContext = {
 		// from PromptBaseContext
 		command: cmd.name,
@@ -29,7 +30,7 @@ export async function buildContext(cmd: {
 		debug: Boolean(cmd.flags.debug),
 
 		// config & runtime
-		config: saved?.lastCreate ?? null,
+		config: saved ?? null,
 		previousConfigLoaded: !!saved,
 		skipDefaultPacks: false,
 
@@ -70,6 +71,6 @@ export async function buildContext(cmd: {
 
 	// Determine interactive mode once
 	ctx.interactive = await shouldUseInteractiveUI(cmd.flags);
-	console.log("CLI CONTEXT RETURN", ctx);
+	// console.log("CLI CONTEXT RETURN", ctx);
 	return ctx;
 }

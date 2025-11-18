@@ -73,7 +73,7 @@ export async function runPromptEngine(
 	// 4️⃣ Sort all packs by priority
 	pipeline.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
 
-	console.log("PIPELINE", pipeline);
+	// console.log("PIPELINE", pipeline);
 
 	// 2️⃣ Global before-all hook
 	if (ctx.hooks?.beforeAll) {

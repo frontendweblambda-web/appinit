@@ -1,6 +1,6 @@
 // src/core/cleanup.ts
+import { theme } from "@appinit/core";
 import fs from "fs-extra";
-import chalk from "chalk";
 
 const cleanupPaths: string[] = [];
 
@@ -12,14 +12,14 @@ export function registerCleanupPath(path: string) {
 /** Remove all registered paths (e.g., incomplete project directories). */
 export async function cleanupRegisteredPaths() {
 	if (!cleanupPaths.length) return;
-	console.log(chalk.yellow("\n🧹 Cleaning up incomplete project files..."));
+	theme.info("\n🧹 Cleaning up incomplete project files...");
 	for (const dir of cleanupPaths) {
 		try {
 			if (await fs.pathExists(dir)) await fs.remove(dir);
-			console.log(chalk.gray(`  Removed: ${dir}`));
+			theme.dim(`  Removed: ${dir}`);
 		} catch (err) {
 			console.warn(
-				chalk.red(`⚠️ Failed to remove ${dir}:`),
+				theme.danger(`⚠️ Failed to remove ${dir}:`),
 				(err as Error).message,
 			);
 		}

@@ -1,0 +1,52 @@
+{
+	"name": "@appinit/core",
+	"version": "1.0.0",
+	"description": "AppInit OS core runtime: environment, UX mode, theme system, header & common platform logic.",
+	"private": false,
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"keywords": [
+		"appinit",
+		"developer-os",
+		"cli-engine",
+		"scaffolding-runtime",
+		"monorepo",
+		"typescript",
+		"platform-core"
+	],
+	"scripts": {
+		"clean": "node ../../scripts/clean-dist.mjs dist",
+		"prebuild": "pnpm clean",
+		"build": "tsup src/index.ts --format esm,cjs --dts --clean",
+		"dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@appinit/types": "workspace:*",
+		"@appinit/utils": "workspace:*",
+		"kleur": "latest",
+		"log-symbols": "latest"
+	},
+	"devDependencies": {
+		"tsup": "latest",
+		"typescript": "latest",
+		"vitest": "latest"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"author": "frontendweb-sg",
+	"license": "MIT"
+}

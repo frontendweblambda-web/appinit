@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import { theme } from "@appinit/core";
 import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -40,7 +40,7 @@ export const copyTemplate = async (templateName: string, targetDir: string) => {
 			throw new Error(`❌ Template not found: ${templatePath}`);
 		}
 
-		console.log(chalk.cyan(`📂 Copying template from: ${templatePath}`));
+		theme.info(`📂 Copying template from: ${templatePath}`);
 
 		await fs.copy(templatePath, targetDir, {
 			filter: (src) =>
@@ -49,9 +49,9 @@ export const copyTemplate = async (templateName: string, targetDir: string) => {
 				!src.includes(".git"),
 		});
 
-		console.log(chalk.green(`✅ Template copied to ${targetDir}`));
+		theme.success(`✅ Template copied to ${targetDir}`);
 	} catch (err: any) {
-		console.error(chalk.red("❌ Failed to copy template:"), err.message);
+		console.error("❌ Failed to copy template:", err.message);
 		process.exit(1);
 	}
 };

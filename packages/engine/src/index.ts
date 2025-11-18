@@ -1,15 +1,8 @@
 // packages/engine
 import { setupGracefulExit } from "./common/exit.js";
-import { PromptContext } from "@appinit/types";
+
 import { Answers } from "@appinit/types";
-import {
-	isFrontend,
-	isBackend,
-	ensureDir,
-	isFullstack,
-	pathExists,
-	isLibrary,
-} from "@appinit/utils";
+import { ensureDir, pathExists } from "@appinit/utils";
 import path from "path";
 import fs from "fs-extra";
 import { logger, runStep } from "./common/logger.js";
@@ -19,7 +12,7 @@ import { cleanupRegisteredPaths } from "./common/cleanup.js";
 import { initGit } from "./common/git.js";
 import { generateBackend } from "./backend-generate.js";
 import { generateFrontend } from "./frontend-generate.js";
-
+import { isBackend, isFrontend, isFullstack, isLibrary } from "@appinit/core";
 /**
  * Start engine
  * @param answers

@@ -100,7 +100,7 @@ export type PromptResult = Record<string, any> & {
 	// ─────────────── AppInit dynamic answer fields ───────────────
 	projectType?: string;
 	framework?: string;
-	ui?: string;
+
 	form?: string;
 	store?: string;
 	routing?: string;

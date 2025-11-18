@@ -28,11 +28,15 @@
 		"@appinit/types": "workspace:*",
 		"@appinit/engine": "workspace:*",
 		"@appinit/utils": "workspace:*",
+		"@appinit/core": "workspace:*",
 		"@appinit/template-resolver": "workspace:*"
 	},
 	"devDependencies": {
 		"tsup": "latest",
 		"typescript": "latest",
 		"vitest": "latest"
+	},
+	"engines": {
+		"node": ">=18"
 	}
 }

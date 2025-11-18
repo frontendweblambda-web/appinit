@@ -5,14 +5,9 @@ import type {
 	ChoiceOption,
 	PromptResult,
 } from "@appinit/types";
-import {
-	formatName,
-	normalizeScope,
-	shouldAskPackageScope,
-	validateName,
-} from "@appinit/utils";
+import { formatName, normalizeScope, validateName } from "@appinit/utils";
 import { askAnswers } from "../prompt";
-
+import { shouldAskPackageScope } from "@appinit/core";
 const licenseChoices: ChoiceOption<
 	"MIT" | "Apache-2.0" | "GPL-3.0" | "Unlicense" | "Other"
 >[] = [

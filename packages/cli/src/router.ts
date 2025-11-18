@@ -1,6 +1,10 @@
 import { parseFlags } from "./core/parse-flags.js";
 import { createProject } from "./commands/create.js";
-
+import { logger, printHeader } from "@appinit/core";
+import { normalizeCommand } from "./utils/normalize-cmd";
+import { printHelp } from "./utils/print-help";
+import { printVersion } from "./utils/node.utils.js";
+import pkg from "../package.json" assert { type: "json" };
 /**
  * @appinit/cli
  * Rotuer
@@ -8,22 +12,49 @@ import { createProject } from "./commands/create.js";
  */
 export async function router(argv: string[]) {
 	const cmd = parseFlags(argv);
-	console.log("-------------------");
-	console.log("STEP:-1", cmd);
-	console.log("-------------------");
-	switch (cmd.name) {
-		case "create":
-			await createProject(cmd);
-			break;
-		case "add":
-			break;
-		case "doctor":
-			break;
-		case "deploy":
-			break;
-		case "ai":
-			break;
-		default:
-			console.log(`Appinit CLI\n\nUsage:\n  appinit create <project-name>\n`);
+
+	// Always show header only once per process
+	await printHeader({ version: pkg.version ?? cmd.flags?.version! });
+
+	logger.debug("Parsed command", cmd);
+
+	// Normalize aliases
+	const name = normalizeCommand(cmd.name);
+
+	try {
+		switch (name) {
+			case "create":
+				await createProject(cmd);
+				break;
+
+			case "add":
+				// await addCapability(cmd);
+				break;
+
+			case "doctor":
+				// await runDoctor(cmd);
+				break;
+
+			case "deploy":
+				// await runDeploy(cmd);
+				break;
+
+			case "ai":
+				// await runAi(cmd);
+				break;
+
+			case "help":
+				return printHelp();
+
+			case "version":
+				return printVersion();
+
+			default:
+				logger.warn(`Unknown command "${name}"`);
+				printHelp();
+		}
+	} catch (err: any) {
+		logger.error("CLI command failed", err);
+		process.exitCode = 1;
 	}
 }

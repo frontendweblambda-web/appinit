@@ -1,7 +1,7 @@
 import { runPromptEngine } from "@appinit/prompt";
 import {
 	Answers,
-	AppInitConfig,
+	AppInitSavedUserConfig,
 	Flags,
 	PromptContext,
 	PromptResult,
@@ -14,7 +14,7 @@ import {
 	removeDir,
 	writeJson,
 } from "@appinit/utils";
-import chalk from "chalk";
+import k from "kleur";
 
 import os from "os";
 import path from "path";
@@ -22,7 +22,7 @@ import path from "path";
 const CONFIG_DIR = path.join(os.homedir(), ".appinit");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
-export async function loadUserConfig(): Promise<AppInitConfig | null> {
+export async function loadUserConfig(): Promise<AppInitSavedUserConfig | null> {
 	try {
 		console.log("CONFIG_FILE", CONFIG_DIR);
 		if (await pathExists(CONFIG_FILE)) {
@@ -32,9 +32,7 @@ export async function loadUserConfig(): Promise<AppInitConfig | null> {
 				return data;
 			} else {
 				console.warn(
-					chalk.yellow(
-						"⚠️ Saved config is missing required fields — ignoring.",
-					),
+					k.yellow("⚠️ Saved config is missing required fields — ignoring."),
 				);
 				return null;
 			}
@@ -48,7 +46,7 @@ export async function loadUserConfig(): Promise<AppInitConfig | null> {
 
 export async function saveUserConfig(data: Answers) {
 	try {
-		const config: AppInitConfig = {
+		const config: AppInitSavedUserConfig = {
 			lastCreate: data,
 			date: new Date().toISOString(),
 			hostname: os.hostname(),
@@ -67,9 +65,9 @@ export async function saveUserConfig(data: Answers) {
 export const clearUserConfig = async (): Promise<void> => {
 	if (await pathExists(CONFIG_FILE)) {
 		await removeDir(CONFIG_FILE);
-		console.log(chalk.yellow("🧹 Cleared saved Codex config."));
+		console.log(k.yellow("🧹 Cleared saved Codex config."));
 	} else {
-		console.log(chalk.gray("No saved config found."));
+		console.log(k.gray("No saved config found."));
 	}
 };
 // Helper to get the local IP address

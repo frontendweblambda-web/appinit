@@ -25,7 +25,7 @@ export function getValuesFromFlags(flags: Flags): Partial<PromptResult> {
 		}
 	}
 
-	console.log("OUT", out);
+	// console.log("OUT", out);
 
 	return out;
 }
