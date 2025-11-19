@@ -1,8 +1,6 @@
-// packages/template-resolver/src/templateResolver.ts
-
 import path from "path";
 import fs from "fs-extra";
-
+import os from "node:os";
 import {
 	downloadGithubTemplate,
 	downloadMarketTemplate,
@@ -12,14 +10,14 @@ import {
 	mergeJson,
 	removeDir,
 	ensureDir,
-	logger,
 	detectSourceType,
+	pathExists,
+	joinPath,
 } from "@appinit/utils";
 
 import { readDirRecursive } from "./utils/read-dir-recursive";
 
 import type {
-	TemplateSource,
 	ResolveOptions,
 	TemplateMeta,
 	ResolvedTemplate,
@@ -30,6 +28,7 @@ import { loadJsonIfExists } from "./utils/load-json-if-exists";
 import { loadTemplateModule } from "./utils/load-template-module";
 import { normalizePath } from "./utils/normalize-path";
 import { resolveBuiltinTemplate } from "./utils/builtin-map";
+import { logger } from "@appinit/core";
 
 /**
  * Used to resolve template
@@ -45,7 +44,7 @@ export async function templateResolver(
 
 	// Temp directory for unpacked template
 	const tempDir = path.join(
-		cacheDir ?? path.join(cwd, ".appinit"),
+		cacheDir ?? path.join(os.homedir(), ".appinit/cache"),
 		"temp",
 		answers?.projectType ?? "frontend",
 		projectName,
@@ -88,35 +87,42 @@ export async function templateResolver(
 			throw new Error(`Unsupported template source: ${source}`);
 	}
 
+	const templateDir = path.join(tempDir, "template");
+	if (!(await pathExists(templateDir))) {
+		throw new Error(
+			`❌ Template folder not found: ${templateDir}\n` +
+				`Your template package must contain a "template/" directory.`,
+		);
+	}
+
 	// ----------------------------------------------
 	// LOAD TEMPLATE META
 	// ----------------------------------------------
-	const templateJsonPath = path.join(tempDir, "appinit.template.json");
-	const packageJsonPath = path.join(tempDir, "package.json");
+	const metaCandidates = [
+		joinPath(templateDir, "appinit.template.json"),
+		joinPath(templateDir, "template.meta.json"),
+	];
 
-	const meta = (await loadJsonIfExists(
-		templateJsonPath,
-	)) as TemplateMeta | null;
+	let meta: TemplateMeta | null = null;
+	for (const p of metaCandidates) {
+		meta = await loadJsonIfExists(p);
+		if (meta) break;
+	}
 
-	const packageJson = await loadJsonIfExists(packageJsonPath);
+	const packageJson = await loadJsonIfExists(joinPath(tempDir, "package.json"));
 
-	console.log(
-		"-----AFTER RESOLVING-----",
-		templateJsonPath,
-		packageJsonPath,
-		packageJson,
-		meta,
-	);
-	// ----------------------------------------------
+	console.log("-----META + PKG-----", meta, packageJson);
+
 	// LOAD TEMPLATE MODULE
-	// ----------------------------------------------
-	const templateModule = await loadTemplateModule(tempDir);
+	const templateModule = await loadTemplateModule(templateDir);
 
 	// ----------------------------------------------
 	// BUILD VIRTUAL FILE SYSTEM
 	// ----------------------------------------------
 	const files = new Map<string, string>();
 	const entries = await readDirRecursive(tempDir);
+
+	console.log("ENTRIES", entries);
 
 	for (const relPath of entries) {
 		if (relPath.startsWith("node_modules")) continue;

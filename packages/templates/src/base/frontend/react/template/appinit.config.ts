@@ -1,0 +1,34 @@
+// appinit.config.ts
+
+import { defineAppInitConfig } from "@appinit/config";
+
+export default defineAppInitConfig({
+  projectName: "my-app",
+  projectType: "frontend",
+  framework: "react",
+  language: "javascript",
+  ui: "tailwind",
+
+  plugins: [
+    "@appinit/plugin-auth",
+    "@appinit/plugin-deploy-vercel"
+  ],
+
+  // Future: AI integration
+  ai: {
+    enabled: true,
+    model: "gpt-5",
+    autoGenerateComponents: true
+  },
+
+  // Future: deployment config
+  deploy: {
+    provider: "vercel",
+    region: "bom1"
+  },
+
+  // Future: automatic upgrade support
+  upgrades: {
+    enabled: true
+  }
+});

@@ -12,7 +12,7 @@ import {
 	readJson,
 	remove,
 	removeDir,
-	writeJson,
+	writeJsonSafe,
 } from "@appinit/utils";
 import k from "kleur";
 
@@ -53,7 +53,7 @@ export async function saveUserConfig(data: Answers) {
 			ipAddress: getLocalIpAddress(), // We'll define this function below
 		};
 		await ensureDir(CONFIG_DIR);
-		await writeJson(CONFIG_FILE, data);
+		await writeJsonSafe(CONFIG_FILE, data);
 	} catch (err) {
 		console.warn("Failed to save Appinit config:", err);
 	}

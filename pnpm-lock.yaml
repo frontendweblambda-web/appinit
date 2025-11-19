@@ -34,6 +34,9 @@ importers:
       kleur:
         specifier: 4.1.5
         version: 4.1.5
+      minimatch:
+        specifier: 10.1.1
+        version: 10.1.1
       mri:
         specifier: 1.2.0
         version: 1.2.0
@@ -144,6 +147,9 @@ importers:
       "@appinit/template-resolver":
         specifier: workspace:*
         version: link:../template-resolver
+      "@appinit/templates":
+        specifier: workspace:*
+        version: link:../templates
       "@appinit/types":
         specifier: workspace:*
         version: link:../types
@@ -409,6 +415,12 @@ importers:
 
   packages/template-resolver:
     dependencies:
+      "@appinit/core":
+        specifier: workspace:*
+        version: link:../core
+      "@appinit/templates":
+        specifier: workspace:*
+        version: link:../templates
       "@appinit/types":
         specifier: workspace:*
         version: link:../types
@@ -446,6 +458,9 @@ importers:
 
   packages/templates:
     dependencies:
+      "@appinit/core":
+        specifier: workspace:*
+        version: link:../core
       "@appinit/engine":
         specifier: workspace:*
         version: link:../engine

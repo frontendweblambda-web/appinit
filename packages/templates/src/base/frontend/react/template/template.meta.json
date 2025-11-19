@@ -1,11 +1,18 @@
 {
-  "name": "react/typescript",
-  "title": "React + JavaScript",
-  "description": "React + Vite + JavaScript base template for AppInit OS.",
-  "version": "1.0.0",
+  "name": "react/javascript",
+  "title": "React + Vite + JavaScript",
+  "description": "Fast React template using Vite with JavaScript.",
+  "version": "1.2.0",
   "framework": "react",
-  "language": "js",
+  "language": "javascript",
   "builder": "vite",
-  "features": ["react", "javascript", "vite"],
-  "tags": ["frontend", "react"]
+  "tags": ["frontend", "react", "vite", "javascript"],
+  "features": ["react", "vite", "js"],
+  "minNode": "20.0.0",
+  "author": "AppInit Team",
+  "compatibility": {
+    "projectType": "frontend",
+    "ui": ["tailwind", "mui"],
+    "store": ["zustand", "redux"]
+  }
 }

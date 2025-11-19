@@ -1,7 +1,6 @@
 // packages/template-resolver/src/utils/readDirRecursive.ts
 
-import fs from "fs-extra";
-import path from "path";
+import { isDirectory, joinPath, readDir } from "@appinit/utils";
 
 export async function readDirRecursive(
 	dir: string,
@@ -9,13 +8,12 @@ export async function readDirRecursive(
 ): Promise<string[]> {
 	const output: string[] = [];
 
-	const items = await fs.readdir(dir);
+	const items = await readDir(dir);
 	for (const item of items) {
-		const abs = path.join(dir, item);
-		const rel = path.join(prefix, item);
+		const abs = joinPath(dir, item);
+		const rel = joinPath(prefix, item);
 
-		const stat = await fs.stat(abs);
-		if (stat.isDirectory()) {
+		if (await isDirectory(abs)) {
 			const nested = await readDirRecursive(abs, rel);
 			output.push(...nested);
 		} else {

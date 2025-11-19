@@ -4,7 +4,7 @@
 	"description": "Unified template resolver for Appinit OS (local, GitHub, URL, npm, marketplace).",
 	"private": true,
 	"type": "module",
-	"main": "./dist/index.cjs",
+	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
@@ -28,6 +28,7 @@
 		"@appinit/types": "workspace:*",
 		"@appinit/utils": "workspace:*",
 		"@appinit/templates": "workspace:*",
+		"@appinit/core": "workspace:*",
 		"fs-extra": "^11.3.2",
 		"node-fetch": "^3.3.2",
 		"tar": "^6.1.11",

@@ -1,8 +1,9 @@
 // packages/template-resolver/src/utils/templateSources/github.ts
 
 import path from "path";
-import fs from "fs-extra";
+
 import { downloadZip, extractZip } from "./download-zip";
+import { copySafe, pathExists, removeDir } from "./file";
 
 export async function downloadGithubTemplate(repo: string, tempDir: string) {
 	const [user, name] = repo.split("/");
@@ -16,9 +17,9 @@ export async function downloadGithubTemplate(repo: string, tempDir: string) {
 	// GitHub ZIPs wrap content in folder <repo>-<branch>/
 	const root = path.join(tempDir, `${name}-${branch}`);
 
-	if (await fs.pathExists(root)) {
-		await fs.copy(root, tempDir, { overwrite: true });
-		await fs.remove(root);
+	if (await pathExists(root)) {
+		await copySafe(root, tempDir, { overwrite: true });
+		await removeDir(root);
 	}
 
 	return { ok: true, type: "github", tempDir };

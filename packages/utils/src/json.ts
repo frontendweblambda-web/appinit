@@ -1,12 +1,12 @@
 // packages/@appinit/utils/json.ts
 
-import { pathExists, readJson as readJsonRaw, writeFileUtf8 } from "./file";
-import fs from "fs-extra";
 import { isArray, isObject } from "./helpers";
 import { JsonArray, JsonObject, JsonValue } from "@appinit/types";
+import { move, pathExists, readJson, writeFileUtf8 } from "./file";
 
 /**
- * Safely read JSON, returning fallback if missing or invalid.
+ * Read JSON safely.
+ * Returns fallback if file missing or invalid.
  */
 export async function readJsonSafe<T = any>(
 	filePath: string,
@@ -14,31 +14,35 @@ export async function readJsonSafe<T = any>(
 ): Promise<T> {
 	try {
 		if (!(await pathExists(filePath))) return fallback as T;
-		return (await readJsonRaw(filePath)) as T;
+		return (await readJson(filePath)) as T;
 	} catch {
 		return fallback as T;
 	}
 }
 
 /**
- * Atomic JSON write using your existing writeFileUtf8() + fs.move().
+ * Write JSON atomically.
+ * Uses .tmp file + fs.move() for crash-safe writes.
  */
 export async function writeJsonSafe(filePath: string, data: any, spaces = 2) {
 	const tmpPath = filePath + ".tmp";
 
-	// Write to temporary file
 	await writeFileUtf8(tmpPath, JSON.stringify(data, null, spaces));
 
-	// Move atomically
-	await fs.move(tmpPath, filePath, { overwrite: true });
+	// Move over existing file (atomic on most OS)
+	await move(tmpPath, filePath, { overwrite: true });
 }
 
 /**
- * Deep merge two JSON objects.
+ * Deep merge two JSON values.
+ * - arrays: union merge
+ * - objects: recursive merge
+ * - primitives or mismatched types: patch overwrites base
  */
 export function mergeJson(base: any, patch: any): JsonValue {
 	// Array merge → union
 	if (isArray(base) && isArray(patch)) {
+		// Array union
 		return Array.from(new Set([...base, ...patch])) as JsonArray;
 	}
 
@@ -72,7 +76,7 @@ export async function mergeJsonFile(filePath: string, patch: any) {
 }
 
 /**
- * Update JSON file using a function.
+ * Update JSON by providing a modifier fn.
  */
 export async function updateJson(
 	filePath: string,

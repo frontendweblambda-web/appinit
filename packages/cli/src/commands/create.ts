@@ -12,7 +12,7 @@ import {
 	templateResolver,
 } from "@appinit/template-resolver";
 import path from "path";
-import { ensureDir, logger } from "@appinit/utils";
+import { ensureDir } from "@appinit/utils";
 import { resolveAnswers } from "../core/resolve-answers.js";
 import { isBackend, isFrontend } from "@appinit/core";
 

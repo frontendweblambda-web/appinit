@@ -1,130 +1,100 @@
 import fs from "fs-extra";
 import path from "node:path";
+import { joinPath } from "./path";
+import { minimatch } from "minimatch";
 
-/**
- * Check whether a file or folder exists.
- */
-export async function pathExists(filePath: string) {
-	return await fs.pathExists(filePath);
-}
+export const pathExists = fs.pathExists;
+export const writeFileSafe = fs.outputFile;
+export const appendFileSafe = fs.appendFile;
+export const deleteFileSafe = fs.remove;
 
-/**
- * Write a file safely by creating missing directories.
- */
-export async function writeFileSafe(filePath: string, content: string) {
-	await fs.outputFile(filePath, content);
-}
+export const readFileUtf8 = (p: string) => fs.readFile(p, "utf8");
+export const readFileSync = (p: string) => fs.readFileSync(p, "utf8");
 
-/**
- * Append to a file safely (creates file if missing).
- */
-export async function appendFileSafe(filePath: string, content: string) {
-	await fs.appendFile(filePath, content);
-}
-
-/**
- * Delete file or folder safely.
- */
-export async function deleteFileSafe(filePath: string) {
-	await fs.remove(filePath);
-}
-
-/**
- * Resolve absolute path from cwd.
- */
-export function resolvePath(cwd: string, filePath: string) {
-	return path.resolve(cwd, filePath);
-}
-
-/**
- * Read a JSON file without validation.
- */
-export async function readJson<T = any>(filePath: string): Promise<T> {
-	return await fs.readJson(filePath);
-}
-
-/**
- * Read UTF-8 text file.
- */
-export async function readFileUtf8(filePath: string) {
-	return await fs.readFile(filePath, "utf8");
-}
-
-export function readFileSync(filePath: string) {
-	return fs.readFileSync(filePath, "utf8");
-}
-
-/**
- * Write UTF-8 file, creating parent directories automatically.
- */
 export async function writeFileUtf8(filePath: string, data: string) {
 	await fs.mkdir(path.dirname(filePath), { recursive: true });
 	await fs.writeFile(filePath, data, "utf8");
 }
 
-/**
- * Copy a file or folder safely.
- */
-export async function copySafe(
+export const copySafe = async (
 	src: string,
 	dest: string,
-	options?: fs.CopyOptions | undefined,
-) {
-	await fs.copy(src, dest, {
-		overwrite: true,
-		errorOnExist: false,
-		...options,
-	});
-}
+	opts?: fs.CopyOptions,
+) => fs.copy(src, dest, { overwrite: true, errorOnExist: false, ...opts });
 
-/**
- * Ensure a directory exists.
- */
-export async function ensureDir(dirPath: string) {
-	return await fs.ensureDir(dirPath);
-}
-
-/**
- * Remove a directory (safe).
- */
-export async function removeDir(dirPath: string) {
-	return await fs.remove(dirPath);
-}
-
-/**
- * Read directory (list files/folders).
- */
-export async function readDir(dirPath: string) {
-	return await fs.readdir(dirPath);
-}
-
-/**
- * Check if path is a directory.
- */
-export async function isDirectory(pathStr: string) {
-	try {
-		const stats = await fs.stat(pathStr);
-		return stats.isDirectory();
-	} catch {
-		return false;
-	}
-}
-
-/**
- * Check if path is a file.
- */
 export async function isFile(pathStr: string) {
 	try {
-		const stats = await fs.stat(pathStr);
-		return stats.isFile();
+		return (await fs.stat(pathStr)).isFile();
 	} catch {
 		return false;
 	}
 }
 
-export async function writeJson(
-	CONFIG_FILE: string,
-	data: Record<string, any>,
-) {
-	return fs.writeJSON(CONFIG_FILE, { lastCreate: data }, { spaces: 2 });
+export async function listFiles(dirPath: string): Promise<string[]> {
+	const entries = await fs.readdir(dirPath);
+	const files: string[] = [];
+
+	for (const entry of entries) {
+		const abs = joinPath(dirPath, entry);
+		if (await isFile(abs)) files.push(entry);
+	}
+
+	return files;
+}
+
+export const ensureDir = fs.ensureDir;
+export const removeDir = fs.remove;
+export const readDir = fs.readdir;
+
+export async function isDirectory(pathStr: string): Promise<boolean> {
+	try {
+		return (await fs.stat(pathStr)).isDirectory();
+	} catch {
+		return false;
+	}
+}
+
+export async function listDirectories(dirPath: string): Promise<string[]> {
+	const entries = await fs.readdir(dirPath);
+	const dirs: string[] = [];
+
+	for (const entry of entries) {
+		const abs = joinPath(dirPath, entry);
+		if (await isDirectory(abs)) dirs.push(entry);
+	}
+
+	return dirs;
+}
+
+export async function readDirRecursive(
+	dir: string,
+	prefix = "",
+	ignore: string[] = [],
+): Promise<string[]> {
+	const result: string[] = [];
+	const items = await fs.readdir(dir);
+	await Promise.all(
+		items.map(async (item) => {
+			const abs = path.join(dir, item);
+			const rel = path.join(prefix, item).replace(/\\/g, "/");
+			if (ignore.some((pattern) => minimatch(rel, pattern))) return;
+			const stat = await fs.lstat(abs);
+			if (stat.isSymbolicLink()) return; // skip symlinks for safety (optionally allow)
+			if (stat.isDirectory()) {
+				const nested = await readDirRecursive(abs, rel, ignore);
+				result.push(...nested);
+			} else {
+				result.push(rel);
+			}
+		}),
+	);
+	return result;
+}
+export async function walkFiles(dir: string, ignore: string[] = []) {
+	return readDirRecursive(dir, "", ignore);
+}
+
+export const move = fs.move;
+export async function readJson(filePath: string) {
+	return fs.readJson(filePath);
 }
