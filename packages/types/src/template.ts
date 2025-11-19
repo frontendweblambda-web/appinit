@@ -109,6 +109,7 @@ export interface ResolvedTemplate {
 
 	/** Merged computed variables (meta + logic + CLI) */
 	variables?: Record<string, any>;
+	targetDir?: string;
 }
 
 // ================================================
@@ -120,7 +121,7 @@ export interface ResolveOptions {
 
 	/** Cache directory for downloading templates */
 	cacheDir?: string;
-
+	targetDir?: string;
 	/** Project folder name */
 	projectName: string;
 

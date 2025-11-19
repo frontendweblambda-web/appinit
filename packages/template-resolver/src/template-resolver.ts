@@ -19,27 +19,34 @@ import { readDirRecursive } from "./utils/read-dir-recursive";
 import type {
 	ResolvedTemplate,
 	ResolveOptions,
-	TemplateContext,
 	TemplateMeta,
 } from "@appinit/types";
 
-import { logger } from "@appinit/core";
 import { resolveBuiltinTemplate } from "./utils/builtin-map";
 import { loadJsonIfExists } from "./utils/load-json-if-exists";
 import { loadTemplateModule } from "./utils/load-template-module";
-import { normalizePath } from "./utils/normalize-path";
+import { VFS } from "./vfs";
 
 /**
- * Used to resolve template
- * @param source
- * @param options
- * @returns
+ * Template Resolver — PURE FUNCTION
+ * --------------------------------
+ * Responsible ONLY for:
+ *  - detecting template source
+ *  - downloading / copying template into temp dir
+ *  - locating templateDir
+ *  - loading metadata + logic module
+ *  - building an in-memory VFS (Map<string,string>)
+ *
+ * NO HOOK EXECUTION
+ * NO VARIABLE COMPUTATION
+ * NO FILE WRITING
+ * NO RENAME/FILTER LOGIC
  */
 export async function templateResolver(
 	source: string, // appinit:react, appinit:vue, appinit:express etc
 	options: ResolveOptions,
 ): Promise<ResolvedTemplate> {
-	const { cwd = process.cwd(), cacheDir, projectName, answers } = options;
+	const { cacheDir, projectName, answers } = options;
 
 	// Temp directory for unpacked template
 	const tempDir = path.join(
@@ -51,8 +58,8 @@ export async function templateResolver(
 	await removeDir(tempDir);
 	await ensureDir(tempDir);
 
-	// source type: [appinit, github, npm, market, https,http]
-	const type = detectSourceType(source); // default appinit
+	// source type: [appinit, github, npm, market, https,http], default appinit
+	const type = detectSourceType(source);
 
 	// ----------------------------------------------
 	// DOWNLOAD / RESOLVE TEMPLATE
@@ -110,18 +117,14 @@ export async function templateResolver(
 
 	const packageJson = await loadJsonIfExists(joinPath(tempDir, "package.json"));
 
-	console.log("-----META + PKG-----", meta, packageJson);
-
 	// LOAD TEMPLATE MODULE
 	const templateModule = await loadTemplateModule(templateDir);
 
 	// ----------------------------------------------
 	// BUILD VIRTUAL FILE SYSTEM
 	// ----------------------------------------------
-	const files = new Map<string, string>();
+	const vfs = new VFS();
 	const entries = await readDirRecursive(tempDir);
-
-	// console.log("ENTRIES", entries);
 
 	for (const relPath of entries) {
 		if (relPath.startsWith("node_modules")) continue;
@@ -132,78 +135,27 @@ export async function templateResolver(
 		if (!stat.isFile()) continue;
 
 		const content = await fs.readFile(fullPath, "utf8");
-		files.set(normalizePath(relPath), content);
+
+		vfs.write(relPath, content);
 	}
 
-	// ----------------------------------------------
-	// PREPARE LANGUAGE MODE
-	// ----------------------------------------------
-	const language =
-		options.language === "javascript" ? "javascript" : "typescript";
-
-	// ----------------------------------------------
-	// COMPOSE RESOLVED TEMPLATE
-	// ----------------------------------------------
-	const resolved: ResolvedTemplate = {
+	// ---------------------------------
+	// RETURN PURE RESOLVED TEMPLATE
+	// ---------------------------------
+	return {
 		source: type,
 		sourceLocator: source,
 
 		tempDir,
-		templateDir: tempDir,
-		files,
+		templateDir, // IMPORTANT: now correct
+
+		files: vfs.files,
 
 		meta,
 		packageJson,
 		templateModule,
 
-		language,
-
-		variables: {},
+		language: options.language,
+		variables: {}, // engine will fill this later
 	};
-
-	// ----------------------------------------------
-	// COMPUTE VARIABLES (if module exports .variables)
-	// ----------------------------------------------
-	if (templateModule?.variables) {
-		resolved.variables = await templateModule.variables({
-			targetDir: "",
-			projectName,
-			answers: options.answers ?? {},
-			language,
-			files,
-			variables: {},
-			log: logger,
-			framework: options.framework,
-			ui: options.ui,
-			inlineVariables: options.inlineVariables,
-			tempDir,
-			templateDir: tempDir,
-			meta,
-			fs,
-		} as TemplateContext);
-	}
-
-	// ----------------------------------------------
-	// HOOK: beforeWrite
-	// ----------------------------------------------
-	if (templateModule?.beforeWrite) {
-		await templateModule.beforeWrite({
-			targetDir: "",
-			projectName,
-			answers: options.answers ?? {},
-			language,
-			files,
-			variables: resolved.variables,
-			log: logger,
-			framework: options.framework,
-			ui: options.ui,
-			inlineVariables: options.inlineVariables,
-			tempDir,
-			templateDir: tempDir,
-			meta,
-			fs,
-		} as TemplateContext);
-	}
-
-	return resolved;
 }

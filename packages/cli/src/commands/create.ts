@@ -23,17 +23,14 @@ export async function createProject(cmd: CLICommand) {
 	// 1. Build initial context
 	const ctx = await buildContext(cmd);
 
-	console.log("CTX", ctx);
+	// 2. Resolve answers (prompt engine inside this)
 	const answers = await resolveAnswers(ctx);
 	ctx.answers = answers;
 
+	// 3. Resolve template
 	const templateId = selectBaseTemplate(answers);
-	// console.log("ANSWERS", ctx, templateId);
-
 	const cacheDir = path.join(os.homedir(), ".appinit/cache");
 	const targetDir = path.join(ctx.cwd, answers.projectName);
-
-	console.log("targetDir", targetDir);
 	const resolvedTemplate = await templateResolver(templateId, {
 		cwd: ctx.cwd,
 		cacheDir,
@@ -41,9 +38,10 @@ export async function createProject(cmd: CLICommand) {
 		framework: isFrontend(answers) ? answers.framework : "",
 		language: answers.language!,
 		answers,
+		targetDir,
 	});
+
 	console.log("\n✅ Project created. Next steps:", answers, resolvedTemplate);
-	//console.log(`  cd ${answers.projectName}`);
 	console.log("  npm install");
 	console.log("  npm run dev\n");
 }
