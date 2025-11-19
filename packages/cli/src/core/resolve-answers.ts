@@ -1,11 +1,11 @@
 import { Answers, PromptContext, PromptResult } from "@appinit/types";
 
-import { REQUIRED_BY_TYPE } from "../data";
-import { runPromptEngine } from "@appinit/prompt";
-import { getValuesFromFlags } from "../utils/value-from-flags";
-import { merge } from "@appinit/utils";
-import { extractDefaultsFromMeta, normalizeAnswers } from "../utils/common";
 import { isInteractive } from "@appinit/core";
+import { runPromptEngine } from "@appinit/prompt";
+import { merge } from "@appinit/utils";
+import { REQUIRED_BY_TYPE } from "../data";
+import { extractDefaultsFromMeta, normalizeAnswers } from "../utils/common";
+import { getValuesFromFlags } from "../utils/value-from-flags";
 
 /**
  * resolve answers
@@ -32,11 +32,11 @@ export async function resolveAnswers(ctx: PromptContext): Promise<Answers> {
 	// 4️⃣ Prompt only missing values
 	if (interactive) {
 		const result = await runPromptEngine(ctx);
-		console.log("RE", ctx, result);
+		// console.log("RE", ctx, result);
 		ctx.answers = { ...ctx.answers, ...result };
 	}
 
-	console.log("MERGE CTX AND RESULT", ctx);
+	// console.log("MERGE CTX AND RESULT", ctx);
 	// 5️⃣ Validate answers (non-interactive must error)
 	validateRequiredAnswers(ctx.answers!, interactive);
 	const finalAnswers = normalizeAnswers(ctx.answers!) as Answers;
@@ -49,7 +49,7 @@ export async function resolveAnswers(ctx: PromptContext): Promise<Answers> {
 }
 
 function validateRequiredAnswers(answers: PromptResult, interactive: boolean) {
-	console.log("VALIDATION", answers, interactive);
+	// console.log("VALIDATION", answers, interactive);
 	const type = (answers.projectName &&
 		answers.projectType) as keyof typeof REQUIRED_BY_TYPE;
 	if (!type) {

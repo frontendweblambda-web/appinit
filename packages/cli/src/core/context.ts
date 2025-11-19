@@ -1,13 +1,11 @@
-import type { Flags, PromptContext } from "@appinit/types";
-import { loadUserConfig } from "./config-store.js";
-import { getCliName } from "../utils/cli-name.js";
 import {
 	isCI,
 	isRunningInNpmLifecycle,
 	shouldUseInteractiveUI,
-	detectPackageManager,
-	getPackageManager,
 } from "@appinit/core";
+import type { Flags, PromptContext } from "@appinit/types";
+import { getCliName } from "../utils/cli-name.js";
+import { loadUserConfig } from "./config-store.js";
 
 export async function buildContext(cmd: {
 	name: string;
@@ -66,11 +64,10 @@ export async function buildContext(cmd: {
 	}
 
 	// Package manager detection (flag wins, else auto-detect)
-	ctx.packageManager =
-		cmd.flags.packageManager ?? (await detectPackageManager(cwd)) ?? null;
+	ctx.packageManager = cmd.flags.packageManager ?? null;
 
 	// Determine interactive mode once
 	ctx.interactive = await shouldUseInteractiveUI(cmd.flags);
-	// console.log("CLI CONTEXT RETURN", ctx);
+
 	return ctx;
 }

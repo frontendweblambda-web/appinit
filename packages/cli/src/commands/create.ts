@@ -1,20 +1,16 @@
 import { buildContext } from "../core/context.js";
-import { runPromptEngine } from "@appinit/prompt";
-import { scaffoldProject } from "../core/scaffold.js";
-import { saveUserConfig } from "../core/config-store";
+
 import os from "node:os";
 import { CLICommand } from "../core/parse-flags.js";
-import { startEngine } from "@appinit/engine";
-import { Answers, Language } from "@appinit/types";
+
 import {
-	applyTemplate,
 	selectBaseTemplate,
 	templateResolver,
 } from "@appinit/template-resolver";
 import path from "path";
-import { ensureDir } from "@appinit/utils";
+
+import { isFrontend } from "@appinit/core";
 import { resolveAnswers } from "../core/resolve-answers.js";
-import { isBackend, isFrontend } from "@appinit/core";
 
 /**
  * Start creating project
@@ -31,7 +27,7 @@ export async function createProject(cmd: CLICommand) {
 	ctx.answers = answers;
 
 	const templateId = selectBaseTemplate(answers);
-	console.log("ANSWERS", ctx, templateId);
+	// console.log("ANSWERS", ctx, templateId);
 
 	const cacheDir = path.join(os.homedir(), ".appinit/cache");
 	const targetDir = path.join(ctx.cwd, answers.projectName);

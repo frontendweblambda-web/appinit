@@ -1,34 +1,33 @@
-import path from "path";
-import fs from "fs-extra";
-import os from "node:os";
 import {
+	detectSourceType,
 	downloadGithubTemplate,
 	downloadMarketTemplate,
 	downloadNpmTemplate,
 	downloadUrlTemplate,
-	resolveLocalTemplate,
-	mergeJson,
-	removeDir,
 	ensureDir,
-	detectSourceType,
-	pathExists,
 	joinPath,
+	pathExists,
+	removeDir,
+	resolveLocalTemplate,
 } from "@appinit/utils";
+import fs from "fs-extra";
+import os from "node:os";
+import path from "path";
 
 import { readDirRecursive } from "./utils/read-dir-recursive";
 
 import type {
-	ResolveOptions,
-	TemplateMeta,
 	ResolvedTemplate,
+	ResolveOptions,
 	TemplateContext,
+	TemplateMeta,
 } from "@appinit/types";
 
+import { logger } from "@appinit/core";
+import { resolveBuiltinTemplate } from "./utils/builtin-map";
 import { loadJsonIfExists } from "./utils/load-json-if-exists";
 import { loadTemplateModule } from "./utils/load-template-module";
 import { normalizePath } from "./utils/normalize-path";
-import { resolveBuiltinTemplate } from "./utils/builtin-map";
-import { logger } from "@appinit/core";
 
 /**
  * Used to resolve template
@@ -122,12 +121,12 @@ export async function templateResolver(
 	const files = new Map<string, string>();
 	const entries = await readDirRecursive(tempDir);
 
-	console.log("ENTRIES", entries);
+	// console.log("ENTRIES", entries);
 
 	for (const relPath of entries) {
 		if (relPath.startsWith("node_modules")) continue;
 
-		const fullPath = path.join(tempDir, relPath);
+		const fullPath = joinPath(tempDir, relPath);
 		const stat = await fs.stat(fullPath);
 
 		if (!stat.isFile()) continue;
