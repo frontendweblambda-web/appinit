@@ -13,9 +13,7 @@ export const projectTypePack: PromptPack = {
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
 		const fallback = flags?.projectType ?? "frontend";
-		const hooks = ctx.hooks;
 		const nonInteractive = flags.nonInteractive;
-		const api = ctx.runtime === "api";
 		const interactive = ctx.interactive;
 
 		// -----------------------------------------
@@ -49,7 +47,6 @@ export const projectTypePack: PromptPack = {
 
 		const result = await askAnswers(questions, accum, ctx);
 
-		console.log("PROJECT TYPE RETURN", result);
 		return { projectType: result.projectType };
 	},
 };

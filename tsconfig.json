@@ -1,15 +1,17 @@
 {
 	"files": [],
 	"references": [
-		{ "path": "./tsconfig.base.json" },
 		{ "path": "./packages/cleanup" },
 		{ "path": "./packages/cli" },
 		{ "path": "./packages/config" },
-		{ "path": "./packages/types" },
-		{ "path": "./packages/utils" },
+		{ "path": "./packages/core" },
 		{ "path": "./packages/engine" },
 		{ "path": "./packages/git" },
 		{ "path": "./packages/github" },
-		{ "path": "./packages/core" }
+		{ "path": "./packages/prompt" },
+		{ "path": "./packages/template-resolver" },
+		{ "path": "./packages/templates" },
+		{ "path": "./packages/types" },
+		{ "path": "./packages/utils" }
 	]
 }

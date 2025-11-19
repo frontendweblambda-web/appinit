@@ -1,7 +1,6 @@
 packages:
   - packages/*
   - apps/*
-  - templates/*
   - scripts/*
 
 ignoredBuiltDependencies:

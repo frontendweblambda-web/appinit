@@ -2,14 +2,19 @@ import { buildContext } from "../core/context.js";
 import { runPromptEngine } from "@appinit/prompt";
 import { scaffoldProject } from "../core/scaffold.js";
 import { saveUserConfig } from "../core/config-store";
-
+import os from "node:os";
 import { CLICommand } from "../core/parse-flags.js";
 import { startEngine } from "@appinit/engine";
-import { Answers } from "@appinit/types";
-import { applyTemplate } from "@appinit/template-resolver";
+import { Answers, Language } from "@appinit/types";
+import {
+	applyTemplate,
+	selectBaseTemplate,
+	templateResolver,
+} from "@appinit/template-resolver";
 import path from "path";
 import { ensureDir, logger } from "@appinit/utils";
 import { resolveAnswers } from "../core/resolve-answers.js";
+import { isBackend, isFrontend } from "@appinit/core";
 
 /**
  * Start creating project
@@ -25,9 +30,22 @@ export async function createProject(cmd: CLICommand) {
 	const answers = await resolveAnswers(ctx);
 	ctx.answers = answers;
 
-	console.log("ANSWERS", ctx);
+	const templateId = selectBaseTemplate(answers);
+	console.log("ANSWERS", ctx, templateId);
 
-	console.log("\n✅ Project created. Next steps:", answers);
+	const cacheDir = path.join(os.homedir(), ".appinit/cache");
+	const targetDir = path.join(ctx.cwd, answers.projectName);
+
+	console.log("targetDir", targetDir);
+	const resolvedTemplate = await templateResolver(templateId, {
+		cwd: ctx.cwd,
+		cacheDir,
+		projectName: answers.projectName!,
+		framework: isFrontend(answers) ? answers.framework : "",
+		language: answers.language!,
+		answers,
+	});
+	console.log("\n✅ Project created. Next steps:", answers, resolvedTemplate);
 	//console.log(`  cd ${answers.projectName}`);
 	console.log("  npm install");
 	console.log("  npm run dev\n");

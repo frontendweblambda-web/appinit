@@ -24,3 +24,4 @@ export * from "./url";
 export * from "./github";
 export * from "./helpers";
 export * from "./default-data";
+export * from "./template-helper";

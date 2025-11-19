@@ -92,3 +92,10 @@ export type DatabaseProvider =
 	| "mongodb"
 	| "supabase"
 	| "none";
+export type TemplateSource =
+	| "appinit"
+	| "local"
+	| "github"
+	| "npm"
+	| "url"
+	| "market";

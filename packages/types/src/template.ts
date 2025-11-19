@@ -5,12 +5,11 @@
 ────────────────────────────────────────────────── */
 
 import type { Answers } from "./answers";
-import { Language, Variables } from "./common";
+import { Language, TemplateSource, Variables } from "./common";
 
 // ================================================
 // Template Origin
 // ================================================
-export type TemplateSource = "local" | "github" | "npm" | "url" | "market";
 
 // ================================================
 // Template Metadata (template.json or appinit.meta.json)
@@ -129,7 +128,8 @@ export interface ResolveOptions {
 	ui?: string;
 
 	/** Framework (react / next / vue / etc.) */
-	framework: string;
+	framework?: string;
+	backend?: string;
 
 	/** Language mode */
 	language: Language;

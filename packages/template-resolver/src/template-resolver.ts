@@ -10,6 +10,10 @@ import {
 	downloadUrlTemplate,
 	resolveLocalTemplate,
 	mergeJson,
+	removeDir,
+	ensureDir,
+	logger,
+	detectSourceType,
 } from "@appinit/utils";
 
 import { readDirRecursive } from "./utils/read-dir-recursive";
@@ -25,30 +29,43 @@ import type {
 import { loadJsonIfExists } from "./utils/load-json-if-exists";
 import { loadTemplateModule } from "./utils/load-template-module";
 import { normalizePath } from "./utils/normalize-path";
+import { resolveBuiltinTemplate } from "./utils/builtin-map";
 
+/**
+ * Used to resolve template
+ * @param source
+ * @param options
+ * @returns
+ */
 export async function templateResolver(
-	source: string,
+	source: string, // appinit:react, appinit:vue, appinit:express etc
 	options: ResolveOptions,
 ): Promise<ResolvedTemplate> {
-	const { cwd = process.cwd(), cacheDir, projectName } = options;
+	const { cwd = process.cwd(), cacheDir, projectName, answers } = options;
 
 	// Temp directory for unpacked template
-	const tempDir = path.join(cacheDir ?? path.join(cwd, ".appinit"), "temp");
-	await fs.remove(tempDir);
-	await fs.ensureDir(tempDir);
+	const tempDir = path.join(
+		cacheDir ?? path.join(cwd, ".appinit"),
+		"temp",
+		answers?.projectType ?? "frontend",
+		projectName,
+	);
+	await removeDir(tempDir);
+	await ensureDir(tempDir);
 
-	// ----------------------------------------------
-	// DETECT SOURCE TYPE
-	// ----------------------------------------------
-
-	const type: TemplateSource = detectSourceType(source);
+	// source type: [appinit, github, npm, market, https,http]
+	const type = detectSourceType(source); // default appinit
 
 	// ----------------------------------------------
 	// DOWNLOAD / RESOLVE TEMPLATE
 	// ----------------------------------------------
 	switch (type) {
-		case "local":
-			await resolveLocalTemplate(source, tempDir);
+		case "appinit":
+			const builtinPath = await resolveBuiltinTemplate(
+				source,
+				options.answers?.projectType!,
+			);
+			await resolveLocalTemplate(builtinPath, tempDir);
 			break;
 
 		case "github":
@@ -83,6 +100,13 @@ export async function templateResolver(
 
 	const packageJson = await loadJsonIfExists(packageJsonPath);
 
+	console.log(
+		"-----AFTER RESOLVING-----",
+		templateJsonPath,
+		packageJsonPath,
+		packageJson,
+		meta,
+	);
 	// ----------------------------------------------
 	// LOAD TEMPLATE MODULE
 	// ----------------------------------------------
@@ -143,7 +167,7 @@ export async function templateResolver(
 			language,
 			files,
 			variables: {},
-			log: silentLogger,
+			log: logger,
 			framework: options.framework,
 			ui: options.ui,
 			inlineVariables: options.inlineVariables,
@@ -165,7 +189,7 @@ export async function templateResolver(
 			language,
 			files,
 			variables: resolved.variables,
-			log: silentLogger,
+			log: logger,
 			framework: options.framework,
 			ui: options.ui,
 			inlineVariables: options.inlineVariables,
@@ -178,26 +202,3 @@ export async function templateResolver(
 
 	return resolved;
 }
-
-// ------------------------------------------------------------------
-// Utilities
-// ------------------------------------------------------------------
-
-function detectSourceType(source: string): TemplateSource {
-	if (source.startsWith("github:")) return "github";
-	if (source.startsWith("npm:")) return "npm";
-	if (source.startsWith("market:")) return "market";
-	if (source.startsWith("http://") || source.startsWith("https://"))
-		return "url";
-
-	// Otherwise → local path
-	return "local";
-}
-
-const silentLogger = {
-	info() {},
-	warn() {},
-	error(msg: string) {
-		console.error(msg);
-	},
-};

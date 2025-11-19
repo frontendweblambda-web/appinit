@@ -13,9 +13,7 @@
 			"types": "./dist/index.d.ts"
 		}
 	},
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"scripts": {
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
@@ -27,7 +25,8 @@
 	"dependencies": {
 		"@appinit/types": "workspace:*",
 		"@appinit/engine": "workspace:*",
-		"@appinit/utils": "workspace:*"
+		"@appinit/utils": "workspace:*",
+		"@appinit/core": "workspace:*"
 	},
 	"devDependencies": {
 		"tsup": "latest",

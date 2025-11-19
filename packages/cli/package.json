@@ -35,6 +35,7 @@
 		"@appinit/utils": "workspace:*",
 		"@appinit/core": "workspace:*",
 		"@appinit/template-resolver": "workspace:*",
+		"@appinit/templates": "workspace:*",
 		"@octokit/auth-oauth-device": "^8.0.3",
 		"@octokit/rest": "^22.0.1",
 		"boxen": "^8.0.1",

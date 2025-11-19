@@ -92,7 +92,7 @@ export type ReactOptions = CommonFrontendOptions & {
 };
 
 export type NextOptions = CommonFrontendOptions & {
-	framework: "next" | "framer"; // Framer often sits on top of Next.js setup
+	framework: "next" | "framer" | "nuxt"; // Framer often sits on top of Next.js setup
 	ui?: ReactUI;
 	routing?: NextBasedRouting; // Explicit Next.js routing
 	store?: ReactStore;

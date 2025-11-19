@@ -79,9 +79,6 @@
 		"rimraf": "^6.1.0",
 		"tsx": "latest"
 	},
-	"workspaces": [
-		"packages/plugins"
-	],
 	"dependencies": {
 		"@appinit/cli": "link:packages/cli",
 		"@clack/prompts": "0.11.0",

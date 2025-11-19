@@ -4,7 +4,10 @@ import type {
 	PromptResult,
 	PromptPack,
 	ResolvedTemplate,
+	Language,
+	Answers,
 } from "@appinit/types";
+
 import { logger, theme } from "@appinit/core";
 import {
 	authPack,
@@ -24,6 +27,8 @@ import {
 import { frontendPack } from "./packs/frontend";
 import { architecturePack } from "./packs/architecture";
 import { database } from "./packs/database";
+import { templateResolver } from "@appinit/template-resolver";
+import path from "node:path";
 
 // --------------------------------------------------------
 // DEFAULT PIPELINE (used only when skipDefaultPacks is false)
@@ -40,10 +45,10 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 	database,
 	authPack,
 	environmentPack,
-	qualityPack,
-	infraPack,
-	deployPack,
-	gitPack,
+	// qualityPack,
+	// infraPack,
+	// deployPack,
+	// gitPack,
 ];
 
 // --------------------------------------------------------
@@ -52,7 +57,7 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 export async function runPromptEngine(
 	ctx: PromptContext,
 	packs?: PromptPack[],
-): Promise<{ answers: PromptResult; template?: ResolvedTemplate }> {
+): Promise<PromptResult> {
 	logger.step("Starting prompt engine...");
 
 	const final: PromptResult = {};
@@ -108,17 +113,5 @@ export async function runPromptEngine(
 	// 🔥 Resolve Template (this is the missing final step!)
 	// --------------------------------------------------------
 
-	// const template = await templateResolver(
-	// 	(final.templateSource ?? `${final.framework}-${final.ui}`) as string, // or explicit template name
-	// 	{
-	// 		cwd: process.cwd(),
-	// 		projectName: final.projectName!,
-	// 		framework: final.framework,
-	// 		ui: final.ui,
-	// 		language: final.language as Language,
-	// 		answers: final as Answers,
-	// 		cacheDir: path.join(os.homedir(), ".appinit/cache"),
-	// 	},
-	// );
-	return { answers: final };
+	return final;
 }

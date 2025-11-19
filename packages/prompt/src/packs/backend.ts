@@ -45,7 +45,7 @@ export const backendPack: PromptPack = {
 			[
 				{
 					type: "select",
-					name: "backendFramework",
+					name: "backend",
 					message: "🧱 Backend Framework:",
 					choices: [
 						{

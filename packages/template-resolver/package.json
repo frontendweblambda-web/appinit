@@ -27,6 +27,7 @@
 	"dependencies": {
 		"@appinit/types": "workspace:*",
 		"@appinit/utils": "workspace:*",
+		"@appinit/templates": "workspace:*",
 		"fs-extra": "^11.3.2",
 		"node-fetch": "^3.3.2",
 		"tar": "^6.1.11",

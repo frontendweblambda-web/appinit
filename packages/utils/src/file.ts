@@ -65,8 +65,16 @@ export async function writeFileUtf8(filePath: string, data: string) {
 /**
  * Copy a file or folder safely.
  */
-export async function copySafe(src: string, dest: string) {
-	await fs.copy(src, dest, { overwrite: true, errorOnExist: false });
+export async function copySafe(
+	src: string,
+	dest: string,
+	options?: fs.CopyOptions | undefined,
+) {
+	await fs.copy(src, dest, {
+		overwrite: true,
+		errorOnExist: false,
+		...options,
+	});
 }
 
 /**

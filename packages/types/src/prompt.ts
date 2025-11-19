@@ -106,15 +106,13 @@ export type PromptResult = Record<string, any> & {
 	routing?: string;
 
 	// Backend-specific
-	backendFramework?: string;
+	backend?: string;
 	backendMode?: string;
 	apiStyle?: string;
 	database?: string;
 	orm?: string;
 	authStrategy?: string;
 	deployTarget?: string;
-
-	// Future extensibility — do NOT remove
 };
 
 // -------------------------------------------------
