@@ -1,7 +1,6 @@
 import { buildContext } from "../core/context.js";
 
 import os from "node:os";
-import { CLICommand } from "../core/parse-flags.js";
 
 import {
 	selectBaseTemplate,
@@ -10,6 +9,7 @@ import {
 import path from "path";
 
 import { isFrontend } from "@appinit/core";
+import { CLICommand } from "@appinit/types";
 import { resolveAnswers } from "../core/resolve-answers.js";
 
 /**
@@ -23,6 +23,7 @@ export async function createProject(cmd: CLICommand) {
 	// 1. Build initial context
 	const ctx = await buildContext(cmd);
 
+	console.log("CTX", ctx);
 	const answers = await resolveAnswers(ctx);
 	ctx.answers = answers;
 

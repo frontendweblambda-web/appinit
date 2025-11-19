@@ -1,10 +1,10 @@
-import { parseFlags } from "./core/parse-flags.js";
-import { createProject } from "./commands/create.js";
 import { logger, printHeader } from "@appinit/core";
+import pkg from "../package.json" assert { type: "json" };
+import { createProject } from "./commands/create.js";
+import { parseFlags } from "./core/parse-flags.js";
+import { printVersion } from "./utils/node.utils.js";
 import { normalizeCommand } from "./utils/normalize-cmd";
 import { printHelp } from "./utils/print-help";
-import { printVersion } from "./utils/node.utils.js";
-import pkg from "../package.json" assert { type: "json" };
 /**
  * @appinit/cli
  * Rotuer
