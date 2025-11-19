@@ -9,8 +9,7 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"import": "./dist/index.js"
 		}
 	},
 	"files": [
@@ -19,8 +18,8 @@
 	"scripts": {
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"build": "tsup src/index.ts --format esm,cjs --dts --clean",
-		"dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest"
 	},
@@ -36,7 +35,14 @@
 		"typescript": "latest",
 		"vitest": "latest"
 	},
+	"publishConfig": {
+		"access": "restricted"
+	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=20.11.0"
+	},
+	"author": {
+		"name": "Pradeep Kumar",
+		"url": "https://github.com/frontendweblambda-web/appinit"
 	}
 }

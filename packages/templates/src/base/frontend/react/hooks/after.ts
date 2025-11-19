@@ -1,4 +1,4 @@
-export async function after(ctx) {
+export async function after(ctx:any) {
   ctx.log.info("React JS template: after hook");
 
   if (ctx.answers?.automation?.installDependencies) {

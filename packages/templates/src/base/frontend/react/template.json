@@ -1,0 +1,15 @@
+{
+  "name": "react-basic",
+  "description": "Basic React + Vite template",
+  "type": "frontend",
+  "variables": {
+    "projectName": { "type": "string", "required": true },
+    "useTailwind": { "type": "boolean", "default": false }
+  },
+  "hooks": {
+    "before": "./hooks/before.ts",
+    "after": "./hooks/after.ts"
+  },
+  "logic": "./template.logic.ts",
+  "files": "./files"
+}

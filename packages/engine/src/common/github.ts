@@ -1,8 +1,8 @@
 import { Octokit } from "@octokit/rest";
 import { createOAuthDeviceAuth } from "@octokit/auth-oauth-device";
 import chalk from "chalk";
-import ora from "ora";
-import { execa } from "execa";
+import { spinner } from "@clack/prompts";
+import { color, runCommand, theme } from "@appinit/core";
 
 export const createGitHubRepo = async ({
 	projectName,
@@ -15,7 +15,8 @@ export const createGitHubRepo = async ({
 	org?: string | null;
 	cwd: string;
 }) => {
-	const spinner = ora("Authenticating with GitHub...").start();
+	const s = spinner();
+	s.start("Authenticating with GitHub...");
 
 	try {
 		const clientId = "Iv1.1234567890abcdef"; // replace with your actual GitHub OAuth App ID
@@ -25,7 +26,7 @@ export const createGitHubRepo = async ({
 			clientId,
 			scopes: ["repo"],
 			onVerification(verification) {
-				spinner.stop();
+				s.stop();
 				console.log(chalk.yellowBright(`\n🔑 Please complete authentication:`));
 				console.log(chalk.cyan(`👉 ${verification.verification_uri}`));
 				console.log(chalk.gray(`Your code: ${verification.user_code}\n`));
@@ -33,11 +34,11 @@ export const createGitHubRepo = async ({
 		});
 
 		const tokenAuth = await auth({ type: "oauth" });
-		spinner.succeed("✅ Authenticated with GitHub!");
+		s.message("✅ Authenticated with GitHub!");
 
 		const octokit = new Octokit({ auth: tokenAuth.token });
 
-		const repoSpinner = ora("📦 Creating repository on GitHub...").start();
+		s.message("📦 Creating repository on GitHub...");
 		let repo;
 
 		if (org) {
@@ -53,22 +54,22 @@ export const createGitHubRepo = async ({
 			});
 		}
 
-		repoSpinner.succeed(
-			`✅ GitHub repository created: ${chalk.cyan(repo.data.html_url)}`,
+		s.message(
+			`✅ GitHub repository created: ${theme.info(repo.data.html_url)}`,
 		);
 
 		// Link local repo → remote
-		await execa("git", ["remote", "add", "origin", repo.data.ssh_url], {
+		await runCommand("git", ["remote", "add", "origin", repo.data.ssh_url], {
 			cwd,
-			shell: true,
 		});
-		await execa("git", ["branch", "-M", "main"], { cwd, shell: true });
-		await execa("git", ["push", "-u", "origin", "main"], { cwd, shell: true });
+		await runCommand("git", ["branch", "-M", "main"], { cwd });
+		await runCommand("git", ["push", "-u", "origin", "main"], { cwd });
 
-		console.log(chalk.greenBright("\n🚀 Pushed initial commit to GitHub!\n"));
+		console.log(color.success("\n🚀 Pushed initial commit to GitHub!\n"));
+		s.stop();
 		return repo.data.html_url;
 	} catch (error: any) {
-		spinner.fail("❌ GitHub repo creation failed");
+		s.stop("❌ GitHub repo creation failed");
 		console.error(error.message || error);
 		return null;
 	}

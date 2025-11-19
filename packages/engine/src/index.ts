@@ -5,14 +5,20 @@ import { Answers } from "@appinit/types";
 import { ensureDir, pathExists } from "@appinit/utils";
 import path from "path";
 import fs from "fs-extra";
-import { logger, runStep } from "./common/logger.js";
 import { generateReactTemplate } from "./generator.js";
 import { runInstaller } from "./common/install.js";
 import { cleanupRegisteredPaths } from "./common/cleanup.js";
 import { initGit } from "./common/git.js";
 import { generateBackend } from "./backend-generate.js";
 import { generateFrontend } from "./frontend-generate.js";
-import { isBackend, isFrontend, isFullstack, isLibrary } from "@appinit/core";
+import {
+	isBackend,
+	isFrontend,
+	isFullstack,
+	isLibrary,
+	logger,
+	runStep,
+} from "@appinit/core";
 /**
  * Start engine
  * @param answers

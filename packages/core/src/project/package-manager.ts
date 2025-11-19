@@ -1,4 +1,4 @@
-import { exec as _exec } from "node:child_process";
+import { exec as _exec, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 import fs from "node:fs/promises";
@@ -6,6 +6,35 @@ import { DEFAULT_SHELL } from "../utils/shell";
 import type { PackageManager, PackageManagerAPI } from "@appinit/types";
 
 const exec = promisify(_exec);
+
+/* -----------------------------------------------------
+   SAFE, STREAMING, CROSS-PLATFORM COMMAND EXECUTOR
+   (better than exec, similar to execa behavior)
+------------------------------------------------------ */
+export function runCommand(
+	cmd: string,
+	args: string[],
+	opts: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
+) {
+	return new Promise((resolve, reject) => {
+		const child = spawn(cmd, args, {
+			cwd: opts.cwd,
+			env: { ...process.env, ...opts.env },
+			stdio: "inherit",
+			shell: false, // MOST IMPORTANT: prevents shell injection
+		});
+
+		child.on("error", reject);
+		child.on("exit", (code) => {
+			if (code === 0) return resolve(code);
+			reject(
+				new Error(
+					`Command failed: ${cmd} ${args.join(" ")} (exit code ${code})`,
+				),
+			);
+		});
+	});
+}
 
 /** Detect package manager by lockfile */
 export async function detectPackageManager(
@@ -22,7 +51,9 @@ export async function detectPackageManager(
 		try {
 			await fs.access(path.join(cwd, file));
 			return pm;
-		} catch {}
+		} catch {
+			throw new Error("No package manager find!");
+		}
 	}
 
 	return "npm";
@@ -34,45 +65,72 @@ export async function getPackageManager(
 ): Promise<PackageManagerAPI> {
 	const pm = await detectPackageManager(cwd);
 
-	const runCmd = async (parts: string[]) => {
-		await exec(parts.join(" "), { cwd, shell: DEFAULT_SHELL });
-	};
+	const bin = {
+		npm: "npm",
+		yarn: "yarn",
+		pnpm: "pnpm",
+		bun: "bun",
+	}[pm];
+
+	const installCmd = {
+		npm: ["install"],
+		yarn: ["add"],
+		pnpm: ["add"],
+		bun: ["add"],
+	}[pm];
+
+	const installDevCmd = {
+		npm: ["install", "-D"],
+		yarn: ["add", "-D"],
+		pnpm: ["add", "-D"],
+		bun: ["add", "-d"],
+	}[pm];
+
+	const removeCmd = {
+		npm: ["uninstall"],
+		yarn: ["remove"],
+		pnpm: ["remove"],
+		bun: ["remove"],
+	}[pm];
+
+	const runScriptCmd = {
+		npm: ["run"],
+		yarn: [],
+		pnpm: ["run"],
+		bun: [],
+	}[pm];
+
 	return {
 		name: pm,
 
+		/* Install regular deps */
 		async install(deps) {
 			if (!deps.length) return;
-			if (pm === "npm") return runCmd(["npm", "install", ...deps]);
-			if (pm === "yarn") return runCmd(["yarn", "add", ...deps]);
-			if (pm === "pnpm") return runCmd(["pnpm", "add", ...deps]);
-			if (pm === "bun") return runCmd(["bun", "add", ...deps]);
+			await runCommand(bin, [...installCmd, ...deps], { cwd });
 		},
 
+		/* Install dev-deps */
 		async installDev(deps) {
 			if (!deps.length) return;
-			if (pm === "npm") return runCmd(["npm", "install", "-D", ...deps]);
-			if (pm === "yarn") return runCmd(["yarn", "add", "-D", ...deps]);
-			if (pm === "pnpm") return runCmd(["pnpm", "add", "-D", ...deps]);
-			if (pm === "bun") return runCmd(["bun", "add", "-d", ...deps]);
+			await runCommand(bin, [...installDevCmd, ...deps], { cwd });
 		},
 
+		/* Remove deps */
 		async remove(deps) {
 			if (!deps.length) return;
-			if (pm === "npm") return runCmd(["npm", "uninstall", ...deps]);
-			if (pm === "yarn") return runCmd(["yarn", "remove", ...deps]);
-			if (pm === "pnpm") return runCmd(["pnpm", "remove", ...deps]);
-			if (pm === "bun") return runCmd(["bun", "remove", ...deps]);
+			await runCommand(bin, [...removeCmd, ...deps], { cwd });
 		},
 
+		/* Run a package.json script */
 		async run(script) {
-			if (pm === "npm") return runCmd(["npm", "run", script]);
-			if (pm === "yarn") return runCmd(["yarn", script]);
-			if (pm === "pnpm") return runCmd(["pnpm", "run", script]);
-			if (pm === "bun") return runCmd(["bun", script]);
+			if (!script) return;
+			await runCommand(bin, [...runScriptCmd, script], { cwd });
 		},
-		/** NEW: run arbitrary PM commands */
+
+		/* Run arbitrary package manager command */
 		async runRaw(args) {
-			return runCmd([pm, ...args]);
+			if (!args.length) return;
+			await runCommand(bin, args, { cwd });
 		},
 	};
 }

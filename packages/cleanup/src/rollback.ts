@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { logger } from "@appinit/utils";
+import { logger } from "@appinit/core";
 import { RollbackContext } from "@appinit/types";
 
 export async function rollback(context: RollbackContext) {

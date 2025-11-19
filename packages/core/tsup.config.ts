@@ -4,15 +4,17 @@ const isDev = process.env.npm_lifecycle_event === "dev";
 
 export default defineConfig({
 	entry: ["src/index.ts"],
-	format: ["esm", "cjs"], // keep if you need dual-format consumers
+	format: ["esm"], // ESM only (best for AppInit)
 	dts: true,
-	minify: false, // keep readable — core debugging matters
-	target: "node18",
+	minify: false, // preserve readable core output
+	target: "es2022", // ✨ more accurate for ESM
 	clean: true,
 	sourcemap: isDev,
-	splitting: false, // true only if multiple entry points in the future
+	splitting: false,
 	outDir: "dist",
 	shims: false,
-	treeshake: true, // ensures better dead-code elimination
+	treeshake: true,
+	skipNodeModulesBundle: true, // ✨ important for ESM monorepo
+	external: ["fs-extra"], // ✨ required if using fs-extra
 	onSuccess: isDev ? "node dist/index.js" : undefined,
 });

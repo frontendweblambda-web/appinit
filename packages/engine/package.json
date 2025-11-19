@@ -4,13 +4,12 @@
 	"description": "Core scaffolding and configuration engine for the AppInit ecosystem.",
 	"private": false,
 	"type": "module",
-	"main": "./dist/index.cjs",
+	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
+			"import": "./dist/index.js"
 		}
 	},
 	"files": [
@@ -27,12 +26,7 @@
 	"dependencies": {
 		"@appinit/types": "workspace:*",
 		"chalk": "^5.6.2",
-		"deepmerge": "^4.3.1",
-		"execa": "^9.6.0",
 		"fs-extra": "^11.3.2",
-		"ora": "^9.0.0",
-		"path": "0.12.7",
-		"which": "^6.0.0",
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {
@@ -48,12 +42,15 @@
 		"appinit",
 		"typescript"
 	],
-	"author": "frontendweb-sg",
 	"license": "MIT",
 	"publishConfig": {
-		"access": "public"
+		"access": "restricted"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=20.11.0"
+	},
+	"author": {
+		"name": "Pradeep Kumar",
+		"url": "https://github.com/frontendweblambda-web/appinit"
 	}
 }

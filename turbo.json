@@ -11,6 +11,7 @@
 			"inputs": ["src/**/*.ts", "src/**/*.tsx"],
 			"outputs": []
 		},
+
 		"lint": {
 			"dependsOn": ["^lint"],
 			"inputs": ["src/**/*", ".eslintrc.*", ".eslintignore"],
@@ -28,11 +29,12 @@
 			"inputs": ["src/**/*", "test/**/*", "vitest.config.*", "jest.config.*"],
 			"outputs": []
 		},
+
 		"dev": {
 			"cache": false,
-			"persistent": true,
-			"dependsOn": ["^dev"]
+			"persistent": true
 		},
+
 		"release": {
 			"dependsOn": ["build"],
 			"inputs": ["CHANGELOG.md", ".changeset/**"],

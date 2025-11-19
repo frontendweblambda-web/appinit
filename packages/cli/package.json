@@ -4,13 +4,10 @@
 	"description": "The command-line interface for Appinit OS.",
 	"private": false,
 	"type": "module",
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
+			"import": "./dist/index.js"
 		}
 	},
 	"bin": {
@@ -23,8 +20,8 @@
 	"scripts": {
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"build": "tsup src/index.ts --format esm,cjs --dts --clean",
-		"dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
 		"start": "node dist/index.js"
 	},
 	"dependencies": {
@@ -36,33 +33,19 @@
 		"@appinit/core": "workspace:*",
 		"@appinit/template-resolver": "workspace:*",
 		"@appinit/templates": "workspace:*",
-		"@octokit/auth-oauth-device": "^8.0.3",
-		"@octokit/rest": "^22.0.1",
-		"boxen": "^8.0.1",
 		"chalk": "^5.6.2",
 		"chalk-table": "^1.0.2",
-		"cli-progress": "^3.12.0",
-		"commander": "^14.0.2",
-		"deepmerge": "^4.3.1",
 		"dotenv": "^17.2.3",
 		"ejs": "^3.1.10",
-		"execa": "^9.6.0",
 		"fs-extra": "^11.3.2",
 		"globby": "^15.0.0",
-		"inquirer": "^12.11.1",
 		"json5": "^2.2.3",
-		"node-fetch": "^3.3.2",
 		"openai": "^6.9.0",
-		"ora": "^9.0.0",
 		"semver": "^7.7.3",
-		"simple-git": "^3.30.0",
-		"validate-npm-package-name": "^7.0.0",
-		"which": "^6.0.0",
-		"yaml": "^2.8.1"
+		"simple-git": "^3.30.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.19.25",
-		"rimraf": "^6.1.0",
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3"
 	},
@@ -70,6 +53,10 @@
 		"access": "public"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=20.11.0"
+	},
+	"author": {
+		"name": "Pradeep Kumar",
+		"url": "https://github.com/frontendweblambda-web/appinit"
 	}
 }

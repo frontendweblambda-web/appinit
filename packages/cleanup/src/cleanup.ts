@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 
-import { logger } from "@appinit/utils";
 import { listTemp, clearTemp } from "./temp-registry";
+import { logger } from "@appinit/core";
 
 export async function cleanupAll() {
 	const items = listTemp();

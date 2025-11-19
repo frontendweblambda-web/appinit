@@ -3,14 +3,14 @@
 	"version": "1.0.0",
 	"description": "AppInit OS core runtime: environment, UX mode, theme system, header & common platform logic.",
 	"private": false,
+	"license": "MIT",
 	"type": "module",
-	"types": "./dist/index.d.ts",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
+			"import": "./dist/index.js"
 		}
 	},
 	"files": [
@@ -29,8 +29,8 @@
 	"scripts": {
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"build": "tsup src/index.ts --format esm,cjs --dts --clean",
-		"dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
 		"test": "vitest"
 	},
 	"dependencies": {
@@ -42,11 +42,17 @@
 	"devDependencies": {
 		"tsup": "latest",
 		"typescript": "latest",
-		"vitest": "latest"
+		"vitest": "latest",
+		"fs-extra": "^11.3.2"
+	},
+	"publishConfig": {
+		"access": "restricted"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=20.11.0"
 	},
-	"author": "frontendweb-sg",
-	"license": "MIT"
+	"author": {
+		"name": "Pradeep Kumar",
+		"url": "https://github.com/frontendweblambda-web/appinit"
+	}
 }

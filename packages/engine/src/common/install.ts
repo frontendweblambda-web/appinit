@@ -1,17 +1,21 @@
-import { execa } from "execa";
-import which from "which";
-import ora from "ora";
-import { detectPackageManager } from "./package-manager.js";
+import { spinner } from "@clack/prompts";
+
+import { detectPackageManager, runCommand } from "@appinit/core";
 
 export const runInstaller = async (cwd: string) => {
-	const manager = detectPackageManager();
-	const spinner = ora(`Installing with ${manager}...`).start();
+	const manager = await detectPackageManager(cwd);
+
+	const s = spinner();
+
+	s.start(`Installing with ${manager}...`);
 	try {
 		const args = manager === "yarn" ? ["install"] : ["install"];
-		await execa(manager, args, { cwd, stdio: "inherit", shell: true });
-		spinner.succeed(`Dependencies installed with ${manager}`);
+		await runCommand(manager, args, { cwd });
+		s.message(`Dependencies installed with ${manager}`);
 	} catch (err) {
-		spinner.fail("Install failed");
+		s.message("Install failed");
 		throw err;
+	} finally {
+		s.stop();
 	}
 };

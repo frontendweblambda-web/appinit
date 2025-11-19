@@ -1,19 +1,11 @@
-import fs from "fs-extra";
 import path from "path";
 import chalk from "chalk";
-import { execa } from "execa";
 
 import { Answers } from "@appinit/types";
 import { copyTemplate } from "./common/copy.js";
 
 import { mergeJson, pathExists, removeDir, ensureDir } from "@appinit/utils";
-import {
-	isBackend,
-	isFrontend,
-	isLibrary,
-	isFullstack,
-	getPackageManager,
-} from "@appinit/core";
+import { isBackend, getPackageManager } from "@appinit/core";
 export async function generateBackend(answers: Answers) {
 	if (!isBackend(answers)) return; // skip if not backend
 

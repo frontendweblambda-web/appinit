@@ -10,6 +10,7 @@ import type {
 	Language,
 	Answers,
 } from "@appinit/types";
+import { isFrontend } from "@appinit/core";
 
 /**
  * Apply the resolved template VFS to a target directory.
@@ -40,7 +41,9 @@ export async function applyTemplate(
 		answers: options.answers as Answers,
 		variables,
 		files,
-		framework,
+		framework: isFrontend(options.answers!)
+			? options.answers.framework
+			: "react",
 		ui,
 		inlineVariables,
 		tempDir: template.tempDir,

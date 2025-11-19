@@ -4,13 +4,12 @@
 	"description": "Shared utility helpers for Appinit OS.",
 	"private": false,
 	"type": "module",
-	"main": "./dist/index.cjs",
+	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
+			"import": "./dist/index.js"
 		}
 	},
 	"files": [
@@ -19,8 +18,9 @@
 	"scripts": {
 		"clean": "node ../../scripts/clean-dist.mjs dist",
 		"prebuild": "pnpm clean",
-		"build": "tsup src/index.ts --format esm,cjs --dts --clean",
-		"dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest"
 	},
 	"dependencies": {
@@ -32,9 +32,15 @@
 		"typescript": "latest",
 		"vitest": "latest"
 	},
-	"engines": {
-		"node": ">=18"
+	"publishConfig": {
+		"access": "restricted"
 	},
-	"author": "frontendweb-sg",
+	"engines": {
+		"node": ">=20.11.0"
+	},
+	"author": {
+		"name": "Pradeep Kumar",
+		"url": "https://github.com/frontendweblambda-web/appinit"
+	},
 	"license": "MIT"
 }
