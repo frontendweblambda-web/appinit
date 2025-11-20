@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
-import { parseFlags } from "../core/parse-flags";
 import path from "node:path";
+import { parseFlags } from "../core/parse-flags";
 
 export async function runAdd(argv: string[]) {
 	console.clear();
@@ -9,7 +9,7 @@ export async function runAdd(argv: string[]) {
 	const cwd = process.cwd();
 
 	// If user provided --yes or --defaults, skip prompts
-	const skipPrompts = flags.yes || flags.y || false;
+	const skipPrompts = flags.nonInteractive || false;
 
 	// 1) Check for existing appinit.config.* files
 	const candidates = [

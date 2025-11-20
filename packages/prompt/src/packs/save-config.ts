@@ -1,6 +1,6 @@
 import { askAnswers } from "../prompt";
 
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
+import type { PromptContext, PromptPack, PromptQuestion } from "@appinit/types";
 
 export const saveConfigPack: PromptPack = {
 	name: "save-config",
@@ -8,11 +8,11 @@ export const saveConfigPack: PromptPack = {
 
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
-
+		const nonInteractive = flags.nonInteractive;
 		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
-		if (flags["non-interactive"]) {
+		if (nonInteractive) {
 			return { saveConfig: Boolean(flags.saveConfig) };
 		}
 

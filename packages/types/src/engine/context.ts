@@ -1,13 +1,13 @@
 // --- src/engine/context.ts (Synchronized) ---
 
-import type { ResolvedTemplate } from "../template";
-import type { AppinitPlugin } from "../plugin";
 import { PackageManagerAPI } from "../package-manager";
-import { Answers } from "../answers";
+import type { AppinitPlugin } from "../plugin";
+import { PromptResult } from "../prompt";
+import type { ResolvedTemplate } from "../template";
 
 export interface EngineContext {
 	/** Final project configuration (fully validated Answers) */
-	answers: Answers;
+	answers: PromptResult;
 
 	/** Current working directory (where CLI was run) */
 	cwd: string;
@@ -22,10 +22,10 @@ export interface EngineContext {
 	pkg: PackageManagerAPI; // (Imported from package-manager.ts)
 
 	/** All currently enabled plugins */
-	plugins: AppinitPlugin[];
+	plugins?: AppinitPlugin[];
 
 	/** Shared utility for file operations (like fs-extra) */
-	fs: typeof import("fs-extra");
+	utils: typeof import("@appinit/utils");
 
 	/** Project-wide computed variables (meta + template logic) */
 	variables: Record<string, any>;
@@ -36,6 +36,14 @@ export interface EngineContext {
 		warn(msg: string): void;
 		error(msg: string): void;
 	};
+	run: (
+		cmd: string,
+		args: string[],
+		opts?: {
+			cwd?: string | undefined;
+			env?: NodeJS.ProcessEnv | undefined;
+		},
+	) => Promise<unknown>;
 
-	// ... Any other core system utilities
+	files?: Map<string, string>;
 }

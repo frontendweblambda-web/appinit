@@ -3,31 +3,23 @@
    Supports: Local, GitHub, NPM, URL, Marketplace
    With Hooks, Template Logic Modules, Variables, FS
 ────────────────────────────────────────────────── */
-
-import type { Answers } from "./answers";
 import { Language, TemplateSource, Variables } from "./common";
-
-// ================================================
-// Template Origin
-// ================================================
+import { EngineContext } from "./engine";
+import { Framework } from "./frontend";
+import { PromptResult } from "./prompt";
 
 // ================================================
 // Template Metadata (template.json or appinit.meta.json)
 // ================================================
 export interface TemplateMeta {
-	/** Template ID used in marketplace */
-	name: string;
-	/** Semantic versioning for marketplace */
+	name?: string; // Marketplace / registry ID
 	version?: string;
-	/** Human description */
 	description?: string;
-	/** Categories used for marketplace search */
-	categories?: string[]; // e.g. ["react", "ui", "tailwind"]
-	/** Supported frameworks: react, next, vue, svelte, angular... */
+	categories?: string[];
 	frameworks?: string[];
-	/** Supported languages: TS/JS */
 	languages?: Language[];
-	/** Template-defined custom prompts (simple mode) */
+
+	// Simple template-defined prompt questions
 	prompts?: Array<{
 		name: string;
 		message: string;
@@ -35,116 +27,104 @@ export interface TemplateMeta {
 		default?: any;
 		choices?: { label?: string; value: any }[];
 	}>;
-	/** Dependencies on other template packs */
+
 	requires?: string[];
-	/** Marketplace author */
-	author?: {
-		name: string;
-		url?: string;
-	};
-	/** Minimum AppInit version required */
+
+	author?: { name: string; url?: string };
+
 	appinitVersion?: string;
-	/** Instructions displayed after installation */
 	postInstall?: string[];
+
+	// 📌 renames from template.json (optional)
+	rename?: Record<string, string>;
 }
 
 // ================================================
 // Template Logic Module (appinit.template.ts)
 // ================================================
 export interface TemplateLogicModule {
-	/** Compute variables inserted in template files */
-	variables?: (ctx: TemplateContext) => Record<string, any>;
+	/** Compute variables inserted into template files */
+	variables?: (ctx: TemplateContext) => Promise<Record<string, any>>;
 
-	/** Filter which template files are included */
-	filter?: (ctx: TemplateContext, filepath: string) => boolean;
+	/** Pattern-based file filtering */
+	filters?: Record<
+		string,
+		(ctx: TemplateContext, filepath?: string) => boolean
+	>;
 
-	/** Runs before writing files to project */
+	/** Pre-write hook */
 	beforeWrite?: (ctx: TemplateContext) => Promise<void>;
 
-	/** Runs after project is generated */
+	/** Post-write hook */
 	afterWrite?: (ctx: TemplateContext) => Promise<void>;
+
+	/** Additional file renames */
+	rename?: Record<string, string>;
+
+	/** Package.json overrides */
+	package?: {
+		dependencies?: Record<string, string>;
+		devDependencies?: Record<string, string>;
+		peerDependencies?: Record<string, string>;
+		scripts?: Record<string, string>;
+	};
+
+	/** File transform step (optional) */
+	transform?: (ctx: TemplateContext) => Promise<void>;
 }
 
 // ================================================
 // Template Hook Files (/hooks/before.ts, /hooks/after.ts)
 // ================================================
 export interface TemplateHooks {
-	before?: (ctx: TemplateContext) => Promise<void>;
-	after?: (ctx: TemplateContext) => Promise<void>;
+	before?: (ctx: EngineContext) => Promise<void>;
+	after?: (ctx: EngineContext) => Promise<void>;
 }
 
 // ================================================
 // Template Resolution Output
 // ================================================
 export interface ResolvedTemplate {
-	/** Where the template was loaded from */
-	source: TemplateSource;
-
-	/** Resolver locator (npm:package, path, url...) */
+	sourceType: TemplateSource;
 	sourceLocator: string;
-
-	/** Temporary extraction directory (isolated) */
 	tempDir: string;
-
-	/** Actual template directory inside the pack */
 	templateDir: string;
-
-	/** Virtual file system to be written to target */
-	files: Map<string, string>;
-
-	/** Metadata defined in template.json / appinit.meta.json */
-	meta: TemplateMeta | null;
-
-	/** Raw package.json if template is a Node package */
-	packageJson?: Record<string, any>;
-
-	/** Loaded template logic module */
-	templateModule?: TemplateLogicModule;
-
-	/** Additional lifecycle hooks from /hooks folder */
-	hooks?: TemplateHooks;
-
-	/** Computed language value (TS/JS) */
-	language: Language;
-
-	/** Merged computed variables (meta + logic + CLI) */
-	variables?: Record<string, any>;
 	targetDir?: string;
+	packageJson?: Record<string, any>;
+	templateJson?: Record<string, any> | null;
+	loadDocs?: string;
+	files?: Map<string, string>;
+	meta?: TemplateMeta | null;
+	templateModule?: TemplateLogicModule;
+	hooks?: TemplateHooks;
+	language?: Language;
+	variables?: Record<string, any>;
+	inlineVariables?: Record<string, any>;
+	templateConfig?: Record<string, any> | null;
+	registry?: Record<string, any> | null;
+	appInitConfig?: Record<string, any> | null;
+	variablesFolder?: {
+		default?: string | null;
+		schema?: string | null;
+		transform?: string | null;
+	};
 }
 
 // ================================================
 // Template Resolver Options
 // ================================================
 export interface ResolveOptions {
-	/** Current working directory */
 	cwd?: string;
-
-	/** Cache directory for downloading templates */
 	cacheDir?: string;
 	targetDir?: string;
-	/** Project folder name */
 	projectName: string;
-
-	/** UI pack selected by user (tailwind / mui / shadcn / none) */
 	ui?: string;
-
-	/** Framework (react / next / vue / etc.) */
 	framework?: string;
 	backend?: string;
-
-	/** Language mode */
 	language: Language;
-
-	/** Answers from prompt packs */
-	answers?: Answers;
-
-	/** Additional variables from CLI flags */
+	answers?: PromptResult;
 	inlineVariables?: Record<string, any>;
-
-	/** If true, TSX files are down-converted to JSX */
 	convertToJavaScript?: boolean;
-
-	/** When file conflicts occur */
 	mergeStrategy?: "ask" | "overwrite" | "skip";
 }
 
@@ -152,44 +132,36 @@ export interface ResolveOptions {
 // Template Context — The brain passed to all hooks
 // ================================================
 export interface TemplateContext {
-	/** Final directory where project is written */
+	/** Directory where final project is written */
 	targetDir: string;
+
 	projectName: string;
 	language: Language;
 
-	answers: Answers;
+	answers: PromptResult;
 
-	/** Variables created by appinit.template.ts */
+	/** Variables created from appinit.template.ts + meta */
 	variables: Variables;
 
-	/** Virtual file system being built */
+	/** All template files (virtual filesystem) */
 	files: Map<string, string>;
 
-	/** Minimal logger utilities */
 	log: {
 		info(msg: string): void;
 		warn(msg: string): void;
 		error(msg: string): void;
 	};
 
-	/** Framework chosen by user */
-	framework: string;
-
-	/** UI library chosen by user */
+	framework: Framework;
 	ui?: string;
 
-	/** CLI override variables */
 	inlineVariables?: Record<string, any>;
 
-	/** Temp workspace used during template resolution */
-	tempDir: string;
+	tempDir: string; // extraction workspace
+	templateDir: string; // inside pack
 
-	/** Actual directory inside template pack */
-	templateDir: string;
-
-	/** Template metadata (parsed) */
 	meta?: TemplateMeta;
 
-	/** fs-extra for easy file ops */
-	fs: typeof import("fs-extra");
+	/** All helpers from @appinit/utils */
+	utils: typeof import("@appinit/utils");
 }

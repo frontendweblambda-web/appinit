@@ -1,22 +1,16 @@
-import { Answers } from "@appinit/types";
+import { ProjectType } from "@appinit/types";
 
-export const isFrontend = (a: Answers) =>
-	a.projectType === "frontend" || a.projectType === "fullstack";
+export const isFrontend = (p: ProjectType): boolean => p === "frontend";
+export const isFullstack = (p: ProjectType): boolean => p === "fullstack";
+export const isBackend = (p: ProjectType): boolean => p === "backend";
+export const isLibrary = (p: ProjectType): boolean => p === "library";
+export const isCli = (p: ProjectType): boolean => p === "cli";
 
-export const isBackend = (a: Answers) =>
-	a.projectType === "backend" || a.projectType === "fullstack";
+// export const is = (a: Answers) =>
+// 	isFrontend(a) && a.deploymentStrategy === "static";
 
-export const isStaticFrontend = (a: Answers) =>
-	isFrontend(a) && a.deploymentStrategy === "static";
-
-export const isServerlessBackend = (a: Answers) =>
-	isBackend(a) && a.backendDeployTarget === "lambda";
-
-export const isFullstack = (a: Answers) => a.projectType === "fullstack";
-export const isLibrary = (a: Answers) => a.projectType === "library";
-
-export const isCliProject = (input: { projectType?: string }): boolean =>
-	input.projectType === "cli";
+// export const isServerlessBackend = (a: Answers) =>
+// 	isBackend(a) && a.backendDeployTarget === "lambda";
 
 export const isPluginProject = (input: { projectType?: string }): boolean =>
 	input.projectType === "plugin";

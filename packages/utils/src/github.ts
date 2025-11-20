@@ -3,7 +3,7 @@
 import path from "path";
 
 import { downloadZip, extractZip } from "./download-zip";
-import { copySafe, pathExists, removeDir } from "./file";
+import { copySafe, pathExists, removeDir } from "./filesystem";
 
 export async function downloadGithubTemplate(repo: string, tempDir: string) {
 	const [user, name] = repo.split("/");

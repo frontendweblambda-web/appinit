@@ -1,6 +1,6 @@
+import { logger } from "@appinit/core";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { logger } from "@appinit/utils";
 
 const DEFAULT_GITIGNORE = `
 # Appinit defaults

@@ -1,34 +1,20 @@
 // @appinit/prompt/engine.ts
-import type {
-	PromptContext,
-	PromptResult,
-	PromptPack,
-	ResolvedTemplate,
-	Language,
-	Answers,
-} from "@appinit/types";
+import type { PromptContext, PromptPack, PromptResult } from "@appinit/types";
 
 import { logger, theme } from "@appinit/core";
 import {
-	authPack,
 	backendPack,
-	deployPack,
 	environmentPack,
 	frameworkPack,
-	gitPack,
-	infraPack,
 	languagePack,
 	metaPack,
 	previousConfigPack,
 	projectTypePack,
-	qualityPack,
 } from "./packs";
 
-import { frontendPack } from "./packs/frontend";
 import { architecturePack } from "./packs/architecture";
 import { database } from "./packs/database";
-import { templateResolver } from "@appinit/template-resolver";
-import path from "node:path";
+import { frontendPack } from "./packs/frontend";
 
 // --------------------------------------------------------
 // DEFAULT PIPELINE (used only when skipDefaultPacks is false)
@@ -43,7 +29,7 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 	frontendPack,
 	backendPack,
 	database,
-	authPack,
+	// authPack,
 	environmentPack,
 	// qualityPack,
 	// infraPack,

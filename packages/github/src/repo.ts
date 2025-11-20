@@ -1,8 +1,8 @@
-import { githubRequest } from "./github";
+import { logger } from "@appinit/core";
+import { CreateRepoOptions } from "@appinit/types";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import { CreateRepoOptions } from "@appinit/types";
-import { logger } from "@appinit/utils";
+import { githubRequest } from "./github";
 
 const run = promisify(exec);
 

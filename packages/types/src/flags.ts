@@ -1,30 +1,45 @@
 export interface Flags {
-	// Core CLI
 	help?: boolean;
 	version?: boolean;
+	debug?: boolean;
+	json?: boolean;
+	nonInteractive?: boolean;
+
+	// Project basics
+	projectName?: string;
+	description?: string;
+	author?: string;
+	license?: string;
+
+	// Technical overrides
+	projectType?: string;
+	language?: string;
+	framework?: string;
+	ui?: string;
+	routing?: string;
+	store?: string;
+	backend?: string;
+
 	verbose?: boolean;
 	quiet?: boolean;
-	json?: boolean;
-	debug?: boolean;
-	nonInteractive?: boolean;
 	noConsole?: boolean;
 	ignoreConfig?: boolean;
 
 	// Project Setup
-	projectName?: string;
 	targetDir?: string;
-	projectType?: string;
+
 	workspace?: string;
 	lang?: string;
 	architecture?: string;
 	packageManager?: string;
 	template?: string;
-
+	testing?: string;
+	linting?: boolean;
+	formatting?: boolean;
+	commitConventions?: boolean;
+	saveConfig?: boolean;
 	// Frontend
-	framework?: string;
-	ui?: string;
-	routing?: string;
-	store?: string;
+
 	forms?: string;
 	animation?: string;
 	pwa?: boolean;
@@ -33,7 +48,7 @@ export interface Flags {
 
 	// Backend
 	runtime?: string;
-	backend?: string;
+
 	apiStyle?: string;
 	database?: string;
 	orm?: string;
@@ -94,6 +109,18 @@ export interface Flags {
 	registry?: string;
 	registryAuth?: boolean;
 	source?: string;
+
+	createRemote?: boolean;
+	remoteOrg?: boolean;
+	repoVisibility?: string;
+
+	setupCI?: boolean;
+	ciProvider?: boolean;
+	setupCD?: boolean;
+
+	structure?: string;
+
+	packageScope?: string;
 }
 
 export type FlagOption = Flags & {

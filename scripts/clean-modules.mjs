@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { rm } from "node:fs/promises";
-import { glob } from "node:fs/promises";
 import path from "node:path";
 
 async function cleanModules() {
 	console.log("🧨 Cleaning all node_modules across monorepo...");
 	// Match all node_modules in root + sub-packages
-	const modules = await glob([
+
+	const patterns = [
 		"node_modules",
 		"packages/*/node_modules",
 		"apps/*/node_modules",
@@ -19,7 +19,16 @@ async function cleanModules() {
 		"apps/*/build",
 		"templates/*/dist",
 		"plugins/*/dist",
-	]);
+	];
+
+	const modules = [];
+	for (const pattern of patterns) {
+		for await (const match of import(pattern)) {
+			console.log("match", m, match);
+			modules.push(match);
+		}
+	}
+	console.log("modules--------", modules);
 
 	if (modules.length === 0) {
 		console.log("✔ Nothing to remove.");

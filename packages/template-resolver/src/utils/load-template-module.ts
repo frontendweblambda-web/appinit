@@ -1,19 +1,23 @@
 import { joinPath, pathExists } from "@appinit/utils";
-import { pathToFileURL } from "node:url";
+import { loadFile } from "./loader-file";
 
-export async function loadTemplateModule(templateDir: string) {
-	const moduleTs = joinPath(templateDir, "appinit.template.ts");
-	const moduleJs = joinPath(templateDir, "appinit.template.js");
+/**
+ * Load template module
+ * appinit.template.ts
+ * @param tempDir
+ * @returns
+ */
+export async function loadTemplateModule(tempDir: string) {
+	const file = "appinit.template.ts";
+	const fullPath = joinPath(tempDir, file);
 
-	// Convert to file URL before import
-	const load = async (filePath: string) => {
-		const fileUrl = pathToFileURL(filePath).href;
-		return import(fileUrl);
-	};
+	if (await pathExists(fullPath)) {
+		const mod = await loadFile(fullPath);
 
-	if (await pathExists(moduleTs)) return await load(moduleTs);
-	if (await pathExists(moduleJs)) return await load(moduleJs);
-
-	console.log("⚠ No appinit.template.ts|js found");
+		if (mod && typeof mod === "object") {
+			return mod; // return loaded module
+		}
+	}
+	console.warn(`⚠ No appinit.template.{js,mjs,cjs,ts} found in ${tempDir}`);
 	return null;
 }

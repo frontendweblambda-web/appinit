@@ -24,10 +24,10 @@
 		"test": "vitest"
 	},
 	"dependencies": {
-		"fs-extra": "latest"
+		"fs-extra": "latest",
+		"@appinit/types": "workspace:*"
 	},
 	"devDependencies": {
-		"deepmerge": "latest",
 		"tsup": "latest",
 		"typescript": "latest",
 		"vitest": "latest"

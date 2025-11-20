@@ -14,12 +14,13 @@ export async function buildContext(cmd: {
 }): Promise<PromptContext> {
 	const saved = await loadUserConfig();
 	const cwd = process.cwd();
-	// console.log("SAVED CONFIG", saved);
+
 	const ctx: PromptContext = {
-		// from PromptBaseContext
+		// Basic CLI invocation details
 		command: cmd.name,
 		flags: cmd.flags ?? {},
 		cwd,
+
 		// cli metadata
 		cliName: getCliName(),
 		cliVersion: process.env.APPINIT_CLI_VERSION ?? null,
@@ -36,8 +37,7 @@ export async function buildContext(cmd: {
 		outputMode: cmd.flags.json ? "json" : "text",
 
 		// template info (will be filled later)
-		templateId: cmd.flags.template ?? null,
-		templateName: null,
+		templateName: cmd.flags.template,
 		templateMeta: null,
 		templateDir: null,
 		template: undefined,

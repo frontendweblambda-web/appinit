@@ -1,5 +1,5 @@
 import path from "path";
-import { readFileUtf8 } from "../file";
+import { readFileUtf8 } from "../filesystem";
 
 export async function readPackageJson(folder: string) {
 	const p = path.join(folder, "package.json");

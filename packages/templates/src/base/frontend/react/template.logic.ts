@@ -1,7 +1,7 @@
 export default {
-  async transform(ctx:any) {
+  async transform(ctx) {
     if (!ctx.answers.useTailwind) {
-      ctx.remove("files/config/tailwind.config.ts__tmpl");
+      ctx.files.delete("src/styles/tailwind.css");
     }
   }
-}
+};

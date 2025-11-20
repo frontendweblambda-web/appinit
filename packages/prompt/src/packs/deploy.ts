@@ -1,11 +1,10 @@
-import { askAnswers } from "../prompt";
 import type {
-	PromptPack,
-	PromptContext,
-	PromptQuestion,
-	PromptResult,
 	ChoiceOption,
+	PromptContext,
+	PromptPack,
+	PromptQuestion,
 } from "@appinit/types";
+import { askAnswers } from "../prompt";
 
 // -------------------------------------------------------------
 // Hosting options by project type
@@ -183,16 +182,16 @@ export const deployPack: PromptPack = {
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
 		const prev = ctx.config ?? {};
-
-		const projectType = accum.type ?? flags.type;
+		const nonInteractive = flags.nonInteractive;
+		const projectType = accum.type ?? flags.projectType;
 
 		// --------------------------
 		// Non-interactive mode
 		// --------------------------
-		if (flags["non-interactive"]) {
+		if (nonInteractive) {
 			return {
-				deployTarget: flags.deployTarget ?? "none",
-				deployConfig: flags.deployConfig ?? undefined,
+				// deployTarget: flags.deployTarget ?? "none",
+				// deployConfig: flags.deployConfig ?? undefined,
 			};
 		}
 

@@ -1,11 +1,13 @@
 import {
-	TextOptions,
-	SelectOptions,
 	ConfirmOptions,
 	MultiSelectOptions,
+	SelectOptions,
+	TextOptions,
 } from "@clack/prompts";
-import { ResolvedTemplate, TemplateMeta } from "./template";
+import { PackageManager, ProjectType } from "./common";
 import { Flags } from "./flags";
+import { Framework } from "./frontend";
+import { ResolvedTemplate, TemplateMeta } from "./template";
 
 // -------------------------------------------------
 // Choice Option
@@ -97,8 +99,8 @@ export type PromptResult = Record<string, any> & {
 	packageScope?: string | null;
 
 	// ─────────────── AppInit dynamic answer fields ───────────────
-	projectType?: string;
-	framework?: string;
+	projectType?: ProjectType;
+	framework?: Framework;
 	architecture?: string;
 
 	form?: string;
@@ -113,6 +115,9 @@ export type PromptResult = Record<string, any> & {
 	orm?: string;
 	authStrategy?: string;
 	deployTarget?: string;
+	autoInstall?: true;
+
+	packageManager?: PackageManager;
 };
 
 // -------------------------------------------------
@@ -174,40 +179,48 @@ export type PromptPackDefinition =
 // -------------------------------------------------
 // Prompt Context
 // -------------------------------------------------
-export interface PromptBaseContext {
-	command: string;
-	flags: Flags;
-	cwd: string;
-	targetDir?: string | null;
-	answers: PromptResult;
-}
 
-export interface PromptContext extends PromptBaseContext {
+export interface PromptContext {
+	// where cli has executed
+	cwd: string;
+
 	// 💻 CLI & OS Environment
+	command: string;
 	cliName?: string | null;
 	cliVersion?: string | null;
 	nodeVersion?: string;
 	os?: NodeJS.Platform;
-	// 🔄 Execution Mode
-	interactive?: boolean;
-	debug?: boolean;
-	runtime?: "cli" | "api" | "web" | "vscode";
-	outputMode?: "text" | "rich" | "minimal" | "json";
 	// 🌐 Environment Variables
 	env?: {
-		platform?: string;
-		nodeVersion?: string;
 		ci?: boolean;
 		docker?: boolean;
 		tty?: boolean;
 		npmLifecycle?: boolean;
 	};
 
+	// args + flags
+	flags: Flags;
+	args?: string[];
+
+	// execution mode
+	interactive?: boolean;
+	debug?: boolean;
+
+	// prompt answers
+	answers: PromptResult;
+
+	// User config (optional future feature)
 	// ⚙️ Configuration & History
 	config?: Record<string, unknown> | null;
 	previousConfigLoaded?: boolean;
 
+	// package manager
 	packageManager?: string | null;
+
+	targetDir?: string | null;
+	// 🔄 Execution Mode
+	runtime?: "cli" | "api" | "web" | "vscode";
+	outputMode?: "text" | "rich" | "minimal" | "json";
 
 	sourceId?: string;
 	templateId?: string | null;

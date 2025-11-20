@@ -1,6 +1,6 @@
-import { githubRequest } from "./github";
+import { logger } from "@appinit/core";
 import type { ReleaseOptions } from "@appinit/types";
-import { logger } from "@appinit/utils";
+import { githubRequest } from "./github";
 
 export async function createRelease(repo: string, opts: ReleaseOptions) {
 	logger.step(`Creating release: ${opts.tag}`);

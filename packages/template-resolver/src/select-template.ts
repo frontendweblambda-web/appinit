@@ -1,39 +1,47 @@
-import { Answers } from "@appinit/types";
+import { PromptResult } from "@appinit/types";
 
-export function selectBaseTemplate(answers: Answers) {
-	if (answers.projectType === "frontend") {
-		switch (answers.framework) {
-			case "react":
-				return "appinit:react";
-			case "vue":
-				return "appinit:vue";
-			case "next":
-				return "appinit:next";
-			case "svelte":
-				return "appinit:svelte";
-		}
+export function selectBaseTemplate(answers: PromptResult) {
+	const { framework, backend, projectType } = answers;
+	if (projectType === "frontend") {
+		const map: Record<string, string> = {
+			react: "appinit:react",
+			"react-router": "appinit:react-router",
+			next: "appinit:next",
+			vue: "appinit:vue",
+			svelte: "appinit:svelte",
+			angular: "appinit:angular",
+			astro: "appinit:astro",
+			qwik: "appinit:qwik",
+			solid: "appinit:solid",
+			framer: "appinit:framer",
+			none: "appinit:minimal",
+		};
+
+		if (framework && map[framework]) return map[framework];
 	}
 
-	if (answers.projectType === "backend") {
-		switch (answers.backend) {
-			case "express":
-				return "appinit:express";
-			case "fastify":
-				return "appinit:fastify";
-			case "nestjs":
-				return "appinit:nest";
-		}
+	if (projectType === "backend") {
+		const map: Record<string, string> = {
+			express: "appinit:express",
+			fastify: "appinit:fastify",
+			nestjs: "appinit:nest",
+			hono: "appinit:hono",
+			"cloudflare-worker": "appinit:cf-worker",
+		};
+
+		if (backend && map[backend]) return map[backend];
 	}
 
-	if (answers.projectType === "fullstack") {
-		switch (answers.framework) {
-			case "framer":
-				return "appinit:framer";
-			case "nuxt":
-				return "appinit:nuxt";
-			case "next":
-				return "appinit:next";
-		}
+	if (projectType === "fullstack") {
+		const map: Record<string, string> = {
+			next: "appinit:next-fullstack",
+			framer: "appinit:framer-fullstack",
+			nuxt: "appinit:nuxt-fullstack",
+			svelte: "appinit:svelte-fullstack",
+			astro: "appinit:astro-fullstack",
+		};
+
+		if (framework && map[framework]) return map[framework];
 	}
 
 	if (answers.projectType === "library") {

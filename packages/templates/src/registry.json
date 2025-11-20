@@ -1,0 +1,11 @@
+{
+  "base": {
+    "frontend": ["react", "next","vue","svelte","react-router"],
+    "backend": ["express", "nest"],
+    "fullstack": ["turbo-next", "next","nux","framer"],
+    "library": ["ts-lib"]
+  },
+  "official": ["next-14", "advanced-react", "ai-saas"],
+  "market": [],
+  "ai": ["react-starter", "next-starter"]
+}

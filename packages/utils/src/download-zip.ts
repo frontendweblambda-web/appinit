@@ -3,7 +3,6 @@
 import fs from "fs";
 import path from "path";
 import zlib from "zlib";
-import { pipeline } from "stream/promises";
 
 /**
  * Download a ZIP file using native fetch and return the raw buffer.

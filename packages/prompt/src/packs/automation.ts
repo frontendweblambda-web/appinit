@@ -1,5 +1,5 @@
+import type { PromptContext, PromptPack, PromptQuestion } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
 
 export const automationPack: PromptPack = {
 	name: "automation",
@@ -7,15 +7,15 @@ export const automationPack: PromptPack = {
 
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
-
+		const nonInteractive = flags.nonInteractive;
 		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
-		if (flags["non-interactive"]) {
+		if (nonInteractive) {
 			return {
-				autoInstall: flags.autoInstall ?? true,
-				autoStart: flags.autoStart ?? false,
-				useAI: flags.useAI ?? false,
+				autoInstall: flags.install ?? true,
+				// autoStart: flags.autoStart ?? false,
+				useAI: flags.ai ?? false,
 			};
 		}
 
@@ -27,19 +27,19 @@ export const automationPack: PromptPack = {
 				type: "confirm",
 				name: "autoInstall",
 				message: "⚙️ Install dependencies after generation?",
-				initial: flags.autoInstall ?? true,
+				initial: flags.install ?? true,
 			},
 			{
 				type: "confirm",
 				name: "autoStart",
 				message: "▶️ Start dev server after install?",
-				initial: flags.autoStart ?? false,
+				initial: false,
 			},
 			{
 				type: "confirm",
 				name: "useAI",
 				message: "🤖 Let AI optimize setup?",
-				initial: flags.useAI ?? false,
+				initial: flags.ai ?? false,
 			},
 		];
 

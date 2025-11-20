@@ -1,10 +1,14 @@
 // packages/template-resolver/src/utils/templateSources/local.ts
 
 import path from "path";
-import { copySafe } from "./file";
+import { copySafe } from "./filesystem";
 
-export async function resolveLocalTemplate(source: string, tempDir: string) {
+export async function resolveLocalTemplate(
+	type: string,
+	source: string,
+	tempDir: string,
+) {
 	const abs = path.resolve(source);
 	await copySafe(abs, tempDir);
-	return { ok: true, type: "appinit", tempDir };
+	return { ok: true, type: type, tempDir };
 }

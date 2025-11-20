@@ -13,7 +13,7 @@ import { printHelp } from "./utils/print-help";
 export async function router(argv: string[]) {
 	const cmd = parseFlags(argv);
 
-	// Always show header only once per process
+	// Always  show header only once per process
 	await printHeader({ version: pkg.version ?? cmd.flags?.version! });
 
 	logger.debug("Parsed command", cmd);

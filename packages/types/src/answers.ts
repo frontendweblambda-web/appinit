@@ -4,10 +4,8 @@
    Fully typed & framework-specific
 ────────────────────────────────────────────────── */
 
-import type { FrontendOptions } from "./frontend";
-import type { BackendOptions } from "./backend";
 import type { AuthOptions } from "./auth.js";
-import type { DeployOptions } from "./deploy";
+import type { BackendOptions } from "./backend";
 import {
 	Architecture,
 	CIProvider,
@@ -23,6 +21,8 @@ import {
 	TestRunner,
 	WorkspaceTool,
 } from "./common";
+import type { DeployOptions } from "./deploy";
+import type { FrontendOptions } from "./frontend";
 
 export interface BaseAnswers {
 	// 🏷️ Project Identity & Metadata

@@ -1,12 +1,12 @@
+import { shouldAskPackageScope } from "@appinit/core";
 import type {
-	PromptPack,
 	PromptContext,
+	PromptPack,
 	PromptQuestion,
 	PromptResult,
 } from "@appinit/types";
 import { formatName, normalizeScope, validateName } from "@appinit/utils";
 import { askAnswers } from "../prompt";
-import { shouldAskPackageScope } from "@appinit/core";
 import { licenseChoices } from "../static/license";
 
 export const metaPack: PromptPack = {
@@ -22,7 +22,7 @@ export const metaPack: PromptPack = {
 
 		// LOCAL UTILITY: get value in correct priority order
 		const get = (flagKey: string, fallback: any, format?: (v: any) => any) => {
-			let raw = flags[flagKey] ?? fallback;
+			let raw = flags[flagKey as keyof typeof flags] ?? fallback;
 			return format ? format(raw) : raw;
 		};
 
@@ -86,8 +86,9 @@ export const metaPack: PromptPack = {
 				},
 			});
 		} else {
-			accum.projectName =
-				ctx.answers.projectName ?? flags.projectName ?? prev.projectName;
+			accum.projectName = (ctx.answers.projectName ??
+				flags.projectName ??
+				prev.projectName) as string;
 		}
 
 		// --------------------------
@@ -97,7 +98,8 @@ export const metaPack: PromptPack = {
 			type: "text",
 			name: "description",
 			message: "📝 Short description:",
-			initial: flags.description ?? accum.description ?? prev.description ?? "",
+			initial:
+				flags.description ?? accum.description! ?? prev.description ?? "",
 		});
 
 		// --------------------------
@@ -107,7 +109,7 @@ export const metaPack: PromptPack = {
 			type: "text",
 			name: "author",
 			message: "👤 Author (name/email):",
-			initial: flags.author ?? accum.author ?? prev.author ?? "",
+			initial: flags.author ?? accum.author! ?? prev.author ?? "",
 		});
 
 		// --------------------------

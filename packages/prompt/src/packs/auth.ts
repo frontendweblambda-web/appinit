@@ -1,11 +1,10 @@
-import { askAnswers } from "../prompt";
 import type {
-	PromptPack,
-	PromptContext,
-	PromptQuestion,
 	ChoiceOption,
-	PromptResult,
+	PromptContext,
+	PromptPack,
+	PromptQuestion,
 } from "@appinit/types";
+import { askAnswers } from "../prompt";
 
 // -------------------------------------------------------------
 // Mapped providers by project type
@@ -201,15 +200,16 @@ export const authPack: PromptPack = {
 	async handler(ctx: PromptContext, accum) {
 		const flags = ctx.flags ?? {};
 		const prev = ctx.config ?? {};
-		const projectType = accum.type ?? flags.type;
+		const projectType = accum.projectType ?? flags.projectType;
+		const nonInteractive = flags.nonInteractive;
 
 		// ---------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ---------------------------------------------
-		if (flags["non-interactive"]) {
+		if (nonInteractive) {
 			return {
 				auth: flags.auth ?? "none",
-				authConfig: flags.authConfig ?? undefined,
+				authConfig: flags.auth ?? undefined,
 			};
 		}
 

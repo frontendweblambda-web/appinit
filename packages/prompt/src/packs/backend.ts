@@ -1,9 +1,4 @@
-import {
-	PromptContext,
-	PromptPack,
-	ChoiceOption,
-	PromptResult,
-} from "@appinit/types";
+import { ChoiceOption, PromptContext, PromptPack } from "@appinit/types";
 import { askAnswers } from "../prompt";
 
 export const backendPack: PromptPack = {
@@ -31,10 +26,9 @@ export const backendPack: PromptPack = {
 		// ===================================================================================
 		if (nonInteractive) {
 			return {
-				backendFramework: flags.backendFramework ?? defaults.backendFramework,
+				backendFramework: flags.backend ?? defaults.backendFramework,
 				apiStyle: flags.apiStyle ?? defaults.apiStyle,
-
-				backendMode: flags.backendMode ?? defaults.backendMode,
+				backendMode: flags.backend ?? defaults.backendMode,
 			};
 		}
 
@@ -90,7 +84,7 @@ export const backendPack: PromptPack = {
 						},
 					] satisfies ChoiceOption[],
 					initial:
-						flags.backendFramework ??
+						flags.backend ??
 						accum.backendFramework ??
 						defaults.backendFramework,
 				},
@@ -138,8 +132,7 @@ export const backendPack: PromptPack = {
 							hint: "**Independent, specialized services.** Each feature runs as its own separate application with its own database, communicating via APIs. **Highly scalable and fault-tolerant**.",
 						},
 					] satisfies ChoiceOption[],
-					initial:
-						flags.backendMode ?? accum.backendMode ?? defaults.backendMode,
+					initial: flags.backend ?? accum.backendMode ?? defaults.backendMode,
 				},
 			] as const,
 			accum,

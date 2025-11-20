@@ -1,9 +1,7 @@
+import { logger } from "@appinit/core";
+import { GitInitOptions } from "@appinit/types";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import path from "node:path";
-import fs from "node:fs/promises";
-import { logger } from "@appinit/utils";
-import { GitInitOptions } from "@appinit/types";
 import { hasGitIgnore, isGitInstalled, isInsideGitRepo } from "./detect";
 import { createGitIgnore } from "./ignore";
 

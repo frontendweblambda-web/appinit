@@ -1,7 +1,6 @@
 // packages/template-resolver/src/utils/templateSources/npm.ts
 
 import { extractTarGz } from "./download-tar";
-import { downloadZip } from "./download-zip"; // reuse fetch
 
 export async function downloadNpmTemplate(pkg: string, tempDir: string) {
 	const metadataUrl = `https://registry.npmjs.org/${pkg}`;

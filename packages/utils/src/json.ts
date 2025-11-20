@@ -1,8 +1,8 @@
 // packages/@appinit/utils/json.ts
 
-import { isArray, isObject } from "./helpers";
 import { JsonArray, JsonObject, JsonValue } from "@appinit/types";
-import { move, pathExists, readJson, writeFileUtf8 } from "./file";
+import { move, pathExists, readJson, writeFileUtf8 } from "./filesystem";
+import { isArray, isObject } from "./helpers";
 
 /**
  * Read JSON safely.
@@ -30,7 +30,7 @@ export async function writeJsonSafe(filePath: string, data: any, spaces = 2) {
 	await writeFileUtf8(tmpPath, JSON.stringify(data, null, spaces));
 
 	// Move over existing file (atomic on most OS)
-	await move(tmpPath, filePath, { overwrite: true });
+	await move(tmpPath, filePath);
 }
 
 /**

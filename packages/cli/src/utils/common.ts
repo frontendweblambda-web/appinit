@@ -1,6 +1,6 @@
-import { Answers, PromptResult, TemplateMeta } from "@appinit/types";
+import { PromptResult, TemplateMeta } from "@appinit/types";
 
-export function normalizeAnswers(input: PromptResult): Answers {
+export function normalizeAnswers(input: PromptResult) {
 	const out: any = { ...input };
 
 	// Example normalizations:
@@ -9,7 +9,7 @@ export function normalizeAnswers(input: PromptResult): Answers {
 
 	if (!out.projectName) throw new Error("projectName is required");
 
-	return out as Answers;
+	return out;
 }
 
 export function extractDefaultsFromMeta(

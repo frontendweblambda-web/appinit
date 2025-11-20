@@ -7,24 +7,23 @@ import {
 	ensureDir,
 	joinPath,
 	pathExists,
+	readDirRecursive,
 	removeDir,
 	resolveLocalTemplate,
 } from "@appinit/utils";
-import fs from "fs-extra";
 import os from "node:os";
 import path from "path";
 
-import { readDirRecursive } from "./utils/read-dir-recursive";
+import type { ResolvedTemplate, ResolveOptions } from "@appinit/types";
 
-import type {
-	ResolvedTemplate,
-	ResolveOptions,
-	TemplateMeta,
-} from "@appinit/types";
-
+import fs from "node:fs/promises";
 import { resolveBuiltinTemplate } from "./utils/builtin-map";
+import { loadAppInitConfig } from "./utils/load-appinit-config";
+import { loadHooks } from "./utils/load-hooks";
 import { loadJsonIfExists } from "./utils/load-json-if-exists";
 import { loadTemplateModule } from "./utils/load-template-module";
+import { loadVariables } from "./utils/load-variable";
+import { loadFile } from "./utils/loader-file";
 import { VFS } from "./vfs";
 
 /**
@@ -43,10 +42,10 @@ import { VFS } from "./vfs";
  * NO RENAME/FILTER LOGIC
  */
 export async function templateResolver(
-	source: string, // appinit:react, appinit:vue, appinit:express etc
+	source: string,
 	options: ResolveOptions,
 ): Promise<ResolvedTemplate> {
-	const { cacheDir, projectName, answers } = options;
+	const { cacheDir, projectName, answers, targetDir } = options;
 
 	// Temp directory for unpacked template
 	const tempDir = path.join(
@@ -65,12 +64,16 @@ export async function templateResolver(
 	// DOWNLOAD / RESOLVE TEMPLATE
 	// ----------------------------------------------
 	switch (type) {
+		// copying base as it is here
+		// no renaming and no transforming
 		case "appinit":
 			const builtinPath = await resolveBuiltinTemplate(
 				source,
 				options.answers?.projectType!,
 			);
-			await resolveLocalTemplate(builtinPath, tempDir);
+
+			// copy in tempDir
+			await resolveLocalTemplate(type, builtinPath, tempDir);
 			break;
 
 		case "github":
@@ -104,58 +107,86 @@ export async function templateResolver(
 	// ----------------------------------------------
 	// LOAD TEMPLATE META
 	// ----------------------------------------------
-	const metaCandidates = [
-		joinPath(templateDir, "appinit.template.json"),
-		joinPath(templateDir, "template.meta.json"),
-	];
 
-	let meta: TemplateMeta | null = null;
-	for (const p of metaCandidates) {
-		meta = await loadJsonIfExists(p);
-		if (meta) break;
-	}
+	// ---- LOAD METADATA ----
+	const templateJson = await loadJsonIfExists(
+		joinPath(tempDir, "template.json"),
+	);
+	const registryJson = await loadJsonIfExists(
+		joinPath(tempDir, "registry.json"),
+	);
+	const loadDocs = await loadFile(joinPath(tempDir, "docs/usage.md"));
+	const packageJson = await loadJsonIfExists(
+		joinPath(templateDir, "package.json__tmpl"),
+	);
 
-	const packageJson = await loadJsonIfExists(joinPath(tempDir, "package.json"));
+	// ---- LOAD MODULES ----
+	const hooks = await loadHooks(tempDir);
+	const variables = await loadVariables(tempDir);
+	const appInitConfig = await loadAppInitConfig(templateDir);
+	const templateModule = await loadTemplateModule(tempDir);
 
-	// LOAD TEMPLATE MODULE
-	const templateModule = await loadTemplateModule(templateDir);
-
+	// const templateModule = loadedModule?.default ?? null;
 	// ----------------------------------------------
 	// BUILD VIRTUAL FILE SYSTEM
 	// ----------------------------------------------
 	const vfs = new VFS();
-	const entries = await readDirRecursive(tempDir);
+	const entries = await readDirRecursive(templateDir);
 
-	for (const relPath of entries) {
-		if (relPath.startsWith("node_modules")) continue;
-
-		const fullPath = joinPath(tempDir, relPath);
-		const stat = await fs.stat(fullPath);
-
+	for (const rel of entries) {
+		const full = joinPath(templateDir, rel);
+		const stat = await fs.stat(full);
 		if (!stat.isFile()) continue;
 
-		const content = await fs.readFile(fullPath, "utf8");
+		const content = await fs.readFile(full, "utf8");
 
-		vfs.write(relPath, content);
+		// normalize
+		const cleanPath = normalizeTemplatePath(rel);
+
+		vfs.write(cleanPath, content);
 	}
 
 	// ---------------------------------
 	// RETURN PURE RESOLVED TEMPLATE
 	// ---------------------------------
-	return {
-		source: type,
+
+	const result = {
+		sourceType: type,
 		sourceLocator: source,
-
 		tempDir,
-		templateDir, // IMPORTANT: now correct
-
-		files: vfs.files,
-
-		meta,
-		packageJson,
+		templateDir,
+		targetDir: targetDir!,
+		registry: registryJson,
+		templateJson,
+		packageJson: {}, // tmpl => not load JSON
 		templateModule,
-
-		language: options.language,
-		variables: {}, // engine will fill this later
+		appInitConfig,
+		hooks,
+		variables,
+		loadDocs,
+		files: vfs.files,
 	};
+
+	return result;
+}
+
+function normalizeTemplatePath(rel: string): string {
+	// remove template/ prefix
+	rel = rel.replace(/^template[\\/]/, "");
+
+	// remove config/ folder (if needed)
+	if (rel.startsWith("config/")) {
+		rel = rel.replace(/^config[\\/]/, "");
+	}
+	// common suffixes added to template files
+	// examples: file.ts__tmpl, file.ts_tmpl, index.html.tmpl, config.json.tmpl, readme.md.tpl
+	rel = rel.replace(
+		/(\.([a-z0-9]+))?(?:__tmpl|_tmpl|\.tmpl|\.tpl|\.hbs)$/,
+		"$1",
+	);
+
+	// normalize windows slashes
+	rel = rel.replace(/\\/g, "/");
+
+	return rel;
 }

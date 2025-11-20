@@ -1,4 +1,4 @@
-import { Answers, PromptContext, PromptResult } from "@appinit/types";
+import { PromptContext, PromptResult } from "@appinit/types";
 
 import { isInteractive } from "@appinit/core";
 import { runPromptEngine } from "@appinit/prompt";
@@ -12,7 +12,9 @@ import { getValuesFromFlags } from "../utils/value-from-flags";
  * @param ctx
  * @returns
  */
-export async function resolveAnswers(ctx: PromptContext): Promise<Answers> {
+export async function resolveAnswers(
+	ctx: PromptContext,
+): Promise<PromptResult> {
 	const interactive = await isInteractive(ctx.flags);
 
 	// console.log("RESOLVE ANSWERS START", ctx);
@@ -39,11 +41,10 @@ export async function resolveAnswers(ctx: PromptContext): Promise<Answers> {
 	// console.log("MERGE CTX AND RESULT", ctx);
 	// 5️⃣ Validate answers (non-interactive must error)
 	validateRequiredAnswers(ctx.answers!, interactive);
-	const finalAnswers = normalizeAnswers(ctx.answers!) as Answers;
+	const finalAnswers = normalizeAnswers(ctx.answers!);
 
 	// Store back to ctx so other systems use normalized values
 	ctx.answers = finalAnswers;
-	console.log("RESOLVE ANSWERS END", finalAnswers);
 	// 6️⃣ Normalize final shape
 	return finalAnswers;
 }

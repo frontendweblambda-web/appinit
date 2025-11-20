@@ -2,8 +2,8 @@
 import { ProjectType } from "@appinit/types";
 import { pathExists } from "@appinit/utils";
 
-import path from "path";
 import { fileURLToPath } from "node:url";
+import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +44,7 @@ export async function resolveBuiltinTemplate(
 		}
 		return distPath;
 	} catch {
+		console.log("HI-----", distPath);
 		return distPath;
 	}
 }

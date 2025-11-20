@@ -1,5 +1,5 @@
+import { logger } from "@appinit/core";
 import { githubRequest } from "./github";
-import { logger } from "@appinit/utils";
 
 export async function createPR(repo: string, title: string, body?: string) {
 	logger.step(`Creating PR: ${title}`);

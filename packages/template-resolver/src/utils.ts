@@ -1,7 +1,7 @@
+import { registerTemp } from "@appinit/cleanup";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { registerTemp } from "@appinit/cleanup";
 
 export async function makeTempDir(prefix = "appinit-tpl-") {
 	const p = await fs.mkdtemp(path.join(os.tmpdir(), prefix));

@@ -1,6 +1,6 @@
 // appinit.config.ts
 
-// import { defineAppInitConfig } from "@appinit/config";
+
 
 export default defineAppInitConfig({
   projectName: "my-app",

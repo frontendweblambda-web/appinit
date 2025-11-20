@@ -1,11 +1,11 @@
-import { askAnswers } from "../prompt";
 import type {
-	PromptPack,
-	PromptContext,
-	PromptQuestion,
 	ChoiceOption,
+	PromptContext,
+	PromptPack,
+	PromptQuestion,
 	PromptResult,
 } from "@appinit/types";
+import { askAnswers } from "../prompt";
 
 export const gitPack: PromptPack = {
 	name: "git",
@@ -16,14 +16,14 @@ export const gitPack: PromptPack = {
 		const prev = ctx.config ?? {};
 		const ai = ctx.hooks;
 
-		const nonInteractive = flags["non-interactive"] || ctx.runtime === "api";
+		const nonInteractive = flags.nonInteractive || ctx.runtime === "api";
 
 		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
 		if (nonInteractive) {
 			return {
-				initGit: flags.initGit ?? prev.initGit ?? accum.initGit ?? true,
+				initGit: flags.git ?? prev.initGit ?? accum.initGit ?? true,
 				createRemote:
 					flags.createRemote ??
 					prev.createRemote ??
@@ -51,7 +51,7 @@ export const gitPack: PromptPack = {
 		const questions: PromptQuestion[] = [];
 
 		// → initGit
-		if (flags.initGit === undefined) {
+		if (flags.git === undefined) {
 			questions.push({
 				type: "confirm",
 				name: "initGit",
@@ -59,7 +59,7 @@ export const gitPack: PromptPack = {
 				initial: accum.initGit ?? prev.initGit ?? true,
 			});
 		} else {
-			accum.initGit = flags.initGit;
+			accum.initGit = flags.git;
 		}
 
 		// → createRemote

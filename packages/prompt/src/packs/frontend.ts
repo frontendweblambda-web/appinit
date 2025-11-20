@@ -1,4 +1,4 @@
-import { Answers, PromptContext, PromptPack } from "@appinit/types";
+import { PromptContext, PromptPack } from "@appinit/types";
 
 import { askAnswers } from "../prompt";
 import {
@@ -44,7 +44,7 @@ export const frontendPack: PromptPack = {
 		if (nonInteractive) {
 			return {
 				ui: flags.ui,
-				form: flags.form,
+				form: flags.forms,
 				store: flags.store,
 				// fullstack might already have routing, so reuse
 				routing: accum.routing ?? flags.routing,
