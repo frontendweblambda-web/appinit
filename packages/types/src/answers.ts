@@ -63,7 +63,7 @@ export interface BaseAnswers {
 	setupCD?: boolean;
 	ciProvider?: CIProvider;
 
-	autoInstall: boolean;
+	autoInstall?: boolean;
 	autoStart: boolean;
 	autoOpen?: boolean;
 

@@ -31,8 +31,6 @@ export async function startEngine(
 	const projectName = answers.projectName;
 	const projectDir = targetDir ?? path.resolve(process.cwd(), projectName!);
 
-	console.log("CTX", eCtx);
-
 	// Template pipeline
 	applyFilters(eCtx);
 	await applyVariable(eCtx);
@@ -59,6 +57,4 @@ export async function startEngine(
 
 	// Run final hooks
 	await runAfterHooks(eCtx);
-
-	console.log("ENGINE", projectDir, projectName, answers, rest);
 }

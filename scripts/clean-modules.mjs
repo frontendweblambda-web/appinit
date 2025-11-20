@@ -28,7 +28,6 @@ async function cleanModules() {
 			modules.push(match);
 		}
 	}
-	console.log("modules--------", modules);
 
 	if (modules.length === 0) {
 		console.log("✔ Nothing to remove.");

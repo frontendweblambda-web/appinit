@@ -44,7 +44,6 @@ export async function resolveBuiltinTemplate(
 		}
 		return distPath;
 	} catch {
-		console.log("HI-----", distPath);
 		return distPath;
 	}
 }

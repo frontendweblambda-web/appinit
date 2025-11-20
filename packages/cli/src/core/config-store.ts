@@ -1,16 +1,8 @@
-import { runPromptEngine } from "@appinit/prompt";
-import {
-	Answers,
-	AppInitSavedUserConfig,
-	Flags,
-	PromptContext,
-	PromptResult,
-} from "@appinit/types";
+import { Answers, AppInitSavedUserConfig } from "@appinit/types";
 import {
 	ensureDir,
 	pathExists,
 	readJson,
-	remove,
 	removeDir,
 	writeJsonSafe,
 } from "@appinit/utils";
@@ -24,7 +16,6 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
 export async function loadUserConfig(): Promise<AppInitSavedUserConfig | null> {
 	try {
-		console.log("CONFIG_FILE", CONFIG_DIR);
 		if (await pathExists(CONFIG_FILE)) {
 			const data = await readJson(CONFIG_FILE);
 			console.log("Data", data, data.projectName && data.framework && data.ui);

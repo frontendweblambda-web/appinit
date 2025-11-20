@@ -1,7 +1,6 @@
 import { EngineContext } from "@appinit/types";
 
 export function applyRename(ctx: EngineContext) {
-	console.log("____START____renaming");
 	const rename =
 		ctx.template.templateModule?.rename ?? ctx.template.meta?.rename ?? {};
 
@@ -20,6 +19,4 @@ export function applyRename(ctx: EngineContext) {
 			}
 		}
 	}
-
-	console.log("ctx-----------", ctx.files);
 }

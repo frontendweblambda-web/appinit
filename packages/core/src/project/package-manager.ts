@@ -8,12 +8,14 @@ export function runCommand(
 	args: string[] = [],
 	opts: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
 ) {
+	const executable = process.platform === "win32" ? `${cmd}.cmd` : cmd;
 	return new Promise((resolve, reject) => {
+		const isWin = process.platform === "win32";
 		const child = spawn(cmd, args, {
 			cwd: opts.cwd,
 			env: { ...process.env, ...opts.env },
 			stdio: "inherit",
-			shell: false,
+			shell: isWin,
 		});
 
 		child.on("error", reject);
@@ -50,12 +52,19 @@ export async function getPackageManager(
 	pm: PackageManager = "npm",
 	cwd: string,
 ): Promise<PackageManagerAPI> {
+	pm = pm.trim().toLowerCase() as PackageManager;
+
 	const bin = {
 		npm: "npm",
 		yarn: "yarn",
 		pnpm: "pnpm",
 		bun: "bun",
 	}[pm];
+
+	console.log("PACKAGEMANAGER", pm, bin, cwd);
+	if (!bin) {
+		throw new Error(`❌ Unknown package manager: "${pm}"`);
+	}
 
 	return {
 		name: pm,

@@ -146,7 +146,6 @@ export const metaPack: PromptPack = {
 			res.packageScope = normalizeScope(res.packageScope);
 		}
 
-		console.log("META: RESPONSE: ", res);
 		return res;
 	},
 };
