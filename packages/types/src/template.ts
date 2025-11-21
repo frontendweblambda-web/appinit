@@ -3,9 +3,9 @@
    Supports: Local, GitHub, NPM, URL, Marketplace
    With Hooks, Template Logic Modules, Variables, FS
 ────────────────────────────────────────────────── */
-import { Language, TemplateSource, Variables } from "./common";
+import { Framework, Language, TemplateSource, Variables } from "./common";
 import { EngineContext } from "./engine";
-import { Framework } from "./frontend";
+
 import { PromptResult } from "./prompt";
 
 // ================================================

@@ -1,9 +1,9 @@
-import { askText, askSelect, askConfirm, askMulti } from "./helpers";
+import { askConfirm, askMulti, askSelect, askText } from "./helpers";
 
 import type {
+	PromptContext,
 	PromptQuestion,
 	PromptResult,
-	PromptContext,
 } from "@appinit/types";
 
 /**
@@ -62,7 +62,7 @@ export async function askAnswers(
 		}
 
 		// SAFE ASSIGNMENT
-		result[q.name] = value;
+		result[q.name as keyof typeof result] = value;
 	}
 
 	return result;

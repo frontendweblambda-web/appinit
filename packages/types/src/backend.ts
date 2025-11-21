@@ -1,17 +1,12 @@
+import { BackendFramework } from "./common";
+
 /* ────────────────────────────────────────────────
    AppInit Backend Types
    Fully typed, framework-scoped, future-proof
 ────────────────────────────────────────────────── */
-type BackendRuntime = "node" | "bun" | "deno" | "edge";
-type BackendFramework =
-	| "express"
-	| "fastify"
-	| "nestjs"
-	| "hono"
-	| "koa"
-	| "elysia"
-	| "none";
-type ApiStyle = "rest" | "graphql" | "trpc" | "none";
+export type BackendRuntime = "node" | "bun" | "deno" | "edge" | "none";
+export type BackendMode = "monolith" | "modular" | "microservices" | "none";
+export type ApiStyle = "rest" | "graphql" | "trpc" | "none";
 type Database =
 	| "postgres"
 	| "mysql"
@@ -32,9 +27,9 @@ type ServerlessPlatform =
 	| "none";
 
 // ORMs (Runtime Specific - CRUCIAL FOR SYNC)
-type NodeOrm = "prisma" | "drizzle" | "mongoose" | "typeorm" | "none";
-type DenoOrm = "nessie" | "prisma" | "none";
-type BunOrm = "prisma" | "drizzle" | "none";
+export type NodeOrm = "prisma" | "drizzle" | "mongoose" | "typeorm" | "none";
+export type DenoOrm = "nessie" | "prisma" | "none";
+export type BunOrm = "prisma" | "drizzle" | "none";
 
 export interface BackendFeatureFlags {
 	docker?: boolean;

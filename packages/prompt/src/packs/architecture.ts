@@ -1,5 +1,5 @@
+import type { ChoiceOption, PromptPack } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, ChoiceOption } from "@appinit/types";
 
 const architectureChoices: ChoiceOption<
 	"clean" | "mvc" | "mvvm" | "modular" | "none"
@@ -41,14 +41,13 @@ export const architecturePack: PromptPack = {
 		return supported.includes(accum.projectType ?? "");
 	},
 
-	async handler(ctx: PromptContext, accum) {
-		const flags = ctx.flags ?? {};
-		const nonInteractive = flags.nonInteractive;
+	async handler(config, ctx, accum) {
+		const interactive = config.interactive;
 
 		// Non-interactive mode
-		if (nonInteractive) {
+		if (!interactive) {
 			return {
-				architecture: flags.architecture ?? "none",
+				architecture: "none",
 			};
 		}
 
@@ -60,7 +59,7 @@ export const architecturePack: PromptPack = {
 					name: "architecture",
 					message: "🧩 Choose application architecture:",
 					choices: architectureChoices,
-					initial: flags.architecture ?? accum.architecture ?? "none",
+					initial: accum.architecture ?? "none",
 				},
 			],
 			accum,

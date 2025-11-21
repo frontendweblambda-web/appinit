@@ -1,4 +1,4 @@
-import { ChoiceOption, PromptContext, PromptPack } from "@appinit/types";
+import { ChoiceOption, PromptPack, PromptResult } from "@appinit/types";
 import { askAnswers } from "../prompt";
 
 export const backendPack: PromptPack = {
@@ -9,27 +9,24 @@ export const backendPack: PromptPack = {
 	condition: (_, accum) =>
 		["backend", "fullstack"].includes(accum.projectType ?? ""),
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
-		const nonInteractive = flags.nonInteractive;
+	handler: async (config, ctx, accum) => {
+		const interactive = config.interactive;
 
 		const defaults = {
 			backendFramework: "express",
 			apiStyle: "rest",
-			database: "postgresql",
-			orm: "prisma",
-			backendMode: "monolith",
+			backendMode: "none",
 		};
 
 		// ===================================================================================
 		// NON-INTERACTIVE MODE: return flags (no questions)
 		// ===================================================================================
-		if (nonInteractive) {
+		if (!interactive) {
 			return {
-				backendFramework: flags.backend ?? defaults.backendFramework,
-				apiStyle: flags.apiStyle ?? defaults.apiStyle,
-				backendMode: flags.backend ?? defaults.backendMode,
-			};
+				backendFramework: defaults.backendFramework,
+				apiStyle: defaults.apiStyle,
+				backendMode: defaults.backendMode,
+			} as PromptResult;
 		}
 
 		// ===================================================================================
@@ -83,10 +80,8 @@ export const backendPack: PromptPack = {
 							hint: "Choose this if you intend to use a different framework or build your server from scratch.",
 						},
 					] satisfies ChoiceOption[],
-					initial:
-						flags.backend ??
-						accum.backendFramework ??
-						defaults.backendFramework,
+					initialValue:
+						accum.backendFramework ?? defaults.backendFramework ?? "express",
 				},
 				{
 					type: "select",
@@ -109,7 +104,7 @@ export const backendPack: PromptPack = {
 							hint: "**Flexible querying.** Best for complex relational or mobile apps.",
 						},
 					] satisfies ChoiceOption[],
-					initial: flags.apiStyle ?? accum.apiStyle ?? "rest",
+					initialValue: accum.apiStyle ?? "rest",
 				},
 				{
 					type: "select",
@@ -131,8 +126,13 @@ export const backendPack: PromptPack = {
 							value: "microservices",
 							hint: "**Independent, specialized services.** Each feature runs as its own separate application with its own database, communicating via APIs. **Highly scalable and fault-tolerant**.",
 						},
+						{
+							label: "None",
+							value: "none",
+							hint: "No default architecture",
+						},
 					] satisfies ChoiceOption[],
-					initial: flags.backend ?? accum.backendMode ?? defaults.backendMode,
+					initialValue: accum.backendMode ?? defaults.backendMode,
 				},
 			] as const,
 			accum,

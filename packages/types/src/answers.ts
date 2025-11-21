@@ -12,7 +12,6 @@ import {
 	Editor,
 	Formatter,
 	Language,
-	LicenseType,
 	Linter,
 	PackageManager,
 	ProjectStructure,
@@ -25,17 +24,10 @@ import type { DeployOptions } from "./deploy";
 import type { FrontendOptions } from "./frontend";
 
 export interface BaseAnswers {
-	// 🏷️ Project Identity & Metadata
-	projectName: string;
-	targetDir: string; // Made required for clarity in final answers
-	description?: string;
-	author?: string;
-	licenseType: LicenseType; // Made required for configuration completeness
-	packageScope?: string | null; // e.g., @myorg
-
 	projectType: ProjectType;
-	language: Language;
 	packageManager: PackageManager;
+	language: Language;
+	targetDir: string;
 	projectStructure: ProjectStructure;
 	workspaceTool: WorkspaceTool;
 

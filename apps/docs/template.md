@@ -1,8 +1,19 @@
-🔥 **Yes — I will generate the full official**
+# AppInit Template System — Final Specification & Architecture (ATS v1.0+)
 
-# **AppInit Template Standard (ATS)**
+Version: 1.0.0
+module: @appinit/templates
+Scope: Complete authoritative standard for AppInit Templates, Packs, Plugins, Marketplace Items, Template Resolution System, Template Doctor, Performance System, and Metadata Cache.
+
+## 🎯 **1. Overview**
+
+## Vision
+
+##
 
 **Version 1.0 — Production Specification**
+
+**AppInit Template Standard (ATS)**
+
 that defines how every template, pack, plugin, marketplace item, resolver, and scaffold must be structured inside AppInit OS.
 
 This is the _core specification_ your entire ecosystem will depend on.
@@ -31,25 +42,6 @@ Everything standardized.
 
 ---
 
-# 🚀 **AppInit Template Standard (ATS) v1.0**
-
-**The official specification for templates, packs, plugins, and marketplace items.**
-
----
-
-# 🎯 **1. Overview**
-
-AppInit OS uses a **modular, layered, composable template system**.
-
-Templates are:
-
-- **Static base templates**
-- **Dynamic layers (feature packs)**
-- **Plugins (automation, CI/CD, auth, AI, etc.)**
-- **Marketplace templates**
-- **Registry templates**
-- **Organization internal templates**
-
 The system is designed to enable:
 
 - extensibility
@@ -67,15 +59,30 @@ The system is designed to enable:
 Every template must follow:
 
 ```
-template-root/
-├─ template.meta.json          ← required metadata
-├─ appinit.template.js         ← logic (optional)
-├─ package.json.fragment        ← optional
-├─ template/                    ← files copied to project
-├─ hooks/                       ← before & after hooks
-│   ├─ before.js
-│   └─ after.js
-└─ assets/                      ← preview images, icons (optional)
+my-template/
+│
+├── template/               # All scaffold files (required)
+│   ├── ...                 # Folder structure of final project
+│   └── ...                 # Supports templating, renaming, filtering
+│
+├── appinit.template.ts     # Template logic module (optional but recommended)
+├── appinit.config.ts       # Template metadata & configuration (optional)
+│
+├── variables/
+│   ├── default.ts          # Default computed variables (optional)
+│   ├── schema.ts           # Validation rules for variables/answers (optional)
+│   └── transform.ts        # Transform variables before injection (optional)
+│
+├── hooks/
+│   ├── before.ts           # Runs BEFORE writing files to disk (optional)
+│   └── after.ts            # Runs AFTER dependencies installed (optional)
+│
+├── template.json           # Basic template metadata (optional)
+├── registry.json           # Marketplace metadata (optional)
+│
+└── docs/
+    └── usage.md            # Instructions shown to users (optional)
+
 ```
 
 ### ✔ Meaning of each file:
@@ -105,7 +112,7 @@ Defines template identity, version, compatibility.
 
 Contains the **actual project files**.
 
-- these are plain `.ts`, `.jsx`, `.tsx` files
+- these are plain `.ts`, `.jsx`, `.tsx` ,`.css` and `.scss` files
 - no EJS required for base templates
 - EJS allowed for packs
 
@@ -194,13 +201,13 @@ There are **5 template types**:
 Required official templates:
 
 ```
-react/typescript
-react/javascript
-next/typescript
-node/express
-node/fastify
-svelte/typescript
-vue/typescript
+react
+vue
+next
+express
+fastify
+svelte
+etc
 ```
 
 Base templates = pure files.
@@ -448,19 +455,3 @@ This is your official foundation.
 This is the specification your entire OS + marketplace will follow.
 
 ---
-
-# 🚀 NEXT STEP
-
-Choose what's next:
-
-### **A. Generate template-resolver implementation (ATS-compliant)**
-
-### **B. Generate CLI create flow (ATS-compliant)**
-
-### **C. Generate react/javascript template**
-
-### **D. Generate ui/tailwind pack (ATS-compliant)**
-
-### **E. Generate marketplace publishing commands**
-
-Reply with **A**, **B**, **C**, **D**, or **E**.

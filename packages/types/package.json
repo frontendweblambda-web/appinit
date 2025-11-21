@@ -23,6 +23,10 @@
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest"
 	},
+	"dependencies": {
+		"@appinit/utils": "workspace:*",
+		"@appinit/types": "workspace:*"
+	},
 	"devDependencies": {
 		"tsup": "latest",
 		"typescript": "latest",

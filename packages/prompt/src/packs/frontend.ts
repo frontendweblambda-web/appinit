@@ -1,4 +1,4 @@
-import { PromptContext, PromptPack } from "@appinit/types";
+import { PromptPack } from "@appinit/types";
 
 import { askAnswers } from "../prompt";
 import {
@@ -19,16 +19,16 @@ export const frontendPack: PromptPack = {
 	condition: (_, accum) =>
 		accum.projectType === "frontend" || accum.projectType === "fullstack",
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
-		const projectType = accum.projectType ?? flags.projectType;
-		const nonInteractive = flags.nonInteractive;
-		const framework = accum.framework ?? ctx.answers.framework;
+	handler: async (config, ctx, accum) => {
+		const flags = config.cliCommand?.flags ?? {};
+		const projectType = accum.projectType;
+		const interactive = config.interactive;
+		const frontendFramework = accum.frontendFramework;
 
 		// -------------------------------------------------
 		// If no frontend framework → skip UI stack
 		// -------------------------------------------------
-		if (!framework || framework === "none") {
+		if (!frontendFramework || frontendFramework === "none" || !interactive) {
 			return {
 				ui: "none",
 				form: "none",
@@ -38,24 +38,13 @@ export const frontendPack: PromptPack = {
 			};
 		}
 
-		// -------------------------------------------------
-		// NON-INTERACTIVE MODE
-		// -------------------------------------------------
-		if (nonInteractive) {
-			return {
-				ui: flags.ui,
-				form: flags.forms,
-				store: flags.store,
-				// fullstack might already have routing, so reuse
-				routing: accum.routing ?? flags.routing,
-			};
-		}
-
-		const storeChoices = getStoreChoices(framework);
-		const uiChoices = getUIChoices(framework);
-		const formChoices = getFormChoices(framework);
+		const storeChoices = getStoreChoices(frontendFramework);
+		const uiChoices = getUIChoices(frontendFramework);
+		const formChoices = getFormChoices(frontendFramework);
 		const askRouting = projectType === "frontend";
-		const routingChoices = askRouting ? getRoutingChoices(framework) : null;
+		const routingChoices = askRouting
+			? getRoutingChoices(frontendFramework)
+			: null;
 
 		return await askAnswers(
 			[

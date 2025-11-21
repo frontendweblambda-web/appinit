@@ -1,9 +1,4 @@
-import {
-	ChoiceOption,
-	PromptContext,
-	PromptPack,
-	PromptResult,
-} from "@appinit/types";
+import { ChoiceOption, PromptPack, PromptResult } from "@appinit/types";
 import { askAnswers } from "../prompt";
 
 export const database: PromptPack = {
@@ -13,24 +8,23 @@ export const database: PromptPack = {
 	condition: (_, accum) =>
 		["backend", "fullstack"].includes(accum.projectType ?? ""),
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
-		const nonInteractive = flags.nonInteractive;
+	handler: async (config, ctx, accum) => {
+		const interactive = config.interactive;
 
 		const defaults = {
 			database: "postgresql",
 			orm: "primsa",
 		};
 
-		if (nonInteractive) {
+		if (!interactive) {
 			return {
-				database: flags.database ?? defaults.database,
-				orm: flags.orm ?? defaults.orm,
+				database: defaults.database,
+				orm: defaults.orm,
 			};
 		}
 
 		const isEdgeRuntime = ["hono", "elysia"].includes(
-			ctx.answers.backendFramework as string,
+			ctx.backendFramework as string,
 		);
 		let dbPart: Partial<PromptResult> = { database: "none" as string };
 		let ormPart: Partial<PromptResult> = { orm: "none" };
@@ -74,7 +68,7 @@ export const database: PromptPack = {
 								hint: "**Managed Postgres + Auth + Storage.** Best for indie/SaaS teams.",
 							},
 						] satisfies ChoiceOption[],
-						initial: flags.database ?? accum.database ?? "none",
+						initial: ctx.database ?? "none",
 					},
 				] as const,
 				accum,
@@ -132,7 +126,7 @@ export const database: PromptPack = {
 						name: "orm",
 						message: "🧭 ORM / DB Client:",
 						choices: ormChoices,
-						initial: flags.orm ?? accum.orm ?? "none",
+						initial: ctx.orm ?? "none",
 					},
 				] as const,
 				{ ...accum, ...dbPart },

@@ -1,67 +1,60 @@
-import { PromptContext, PromptResult } from "@appinit/types";
+import { AppinitConfig } from "@appinit/types";
 
-import { isInteractive } from "@appinit/core";
 import { runPromptEngine } from "@appinit/prompt";
-import { merge } from "@appinit/utils";
-import { REQUIRED_BY_TYPE } from "../data";
-import { extractDefaultsFromMeta, normalizeAnswers } from "../utils/common";
-import { getValuesFromFlags } from "../utils/value-from-flags";
+import { normalizeAnswers } from "../utils/common";
 
 /**
  * resolve answers
- * @param ctx
+ * @param config
  * @returns
  */
 export async function resolveAnswers(
-	ctx: PromptContext,
-): Promise<PromptResult> {
-	const interactive = await isInteractive(ctx.flags);
-
-	// console.log("RESOLVE ANSWERS START", ctx);
-	// 1️⃣ Apply flags directly
-	merge(ctx.answers!, getValuesFromFlags(ctx.flags));
-
+	config: AppinitConfig,
+): Promise<AppinitConfig> {
+	const interactive = config.interactive;
 	// 2️⃣ Apply previous config (if enabled)
-	if (!ctx.flags.ignoreConfig && ctx.config) {
-		merge(ctx.answers!, ctx.config);
-	}
+	// if (!ctx.flags.ignoreConfig && ctx.config) {
+	// 	merge(ctx.answers!, ctx.config);
+	// }
 
 	// 3️⃣ Apply template defaults
-	if (ctx.templateMeta?.prompts) {
-		merge(ctx.answers!, extractDefaultsFromMeta(ctx.templateMeta));
-	}
+	// if (ctx.templateMeta?.prompts) {
+	// 	merge(ctx.answers!, extractDefaultsFromMeta(ctx.templateMeta));
+	// }
 
 	// 4️⃣ Prompt only missing values
 	if (interactive) {
-		const result = await runPromptEngine(ctx);
+		const result = await runPromptEngine(config);
 		// console.log("RE", ctx, result);
-		ctx.answers = { ...ctx.answers, ...result };
+		config.promptResult = { ...config.promptResult, ...result };
 	}
 
 	// console.log("MERGE CTX AND RESULT", ctx);
 	// 5️⃣ Validate answers (non-interactive must error)
-	validateRequiredAnswers(ctx.answers!, interactive);
-	const finalAnswers = normalizeAnswers(ctx.answers!);
+	// validateRequiredAnswers(ctx, interactive);
+	console.log("CONFIG", config);
+	config.promptResult = normalizeAnswers(config.promptResult!);
 
 	// Store back to ctx so other systems use normalized values
-	ctx.answers = finalAnswers;
+
 	// 6️⃣ Normalize final shape
-	return finalAnswers;
+	return config;
 }
 
-function validateRequiredAnswers(answers: PromptResult, interactive: boolean) {
-	// console.log("VALIDATION", answers, interactive);
-	const type = (answers.projectName &&
-		answers.projectType) as keyof typeof REQUIRED_BY_TYPE;
-	if (!type) {
-		throw new Error(`projectType is required but missing`);
-	}
-	const required = REQUIRED_BY_TYPE[type];
-	const missing = required.filter((key) => answers[key] === undefined);
-	if (!interactive && missing.length > 0) {
-		throw new Error(
-			`Missing required values: ${missing.join(", ")}\n` +
-				`Provide them via flags or run in interactive mode.`,
-		);
-	}
-}
+// function validateRequiredAnswers(config: AppinitConfig, interactive: boolean) {
+// 	const type = (config.projectMeta.projectName &&
+// 		config.promptResult?.projectType) as keyof typeof REQUIRED_BY_TYPE;
+// 	if (!type) {
+// 		throw new Error(`projectType is required but missing`);
+// 	}
+// 	const required = REQUIRED_BY_TYPE[type];
+// 	const missing = required.filter(
+// 		(key) => config.promptResult?.projectType![key] === undefined,
+// 	);
+// 	if (!interactive && missing.length > 0) {
+// 		throw new Error(
+// 			`Missing required values: ${missing.join(", ")}\n` +
+// 				`Provide them via flags or run in interactive mode.`,
+// 		);
+// 	}
+// }

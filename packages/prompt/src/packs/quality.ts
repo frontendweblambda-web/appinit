@@ -1,10 +1,5 @@
+import type { ChoiceOption, PromptPack, PromptQuestion } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type {
-	PromptPack,
-	PromptContext,
-	PromptQuestion,
-	ChoiceOption,
-} from "@appinit/types";
 import {
 	editorChoices,
 	formatterChoices,
@@ -22,11 +17,10 @@ export const qualityPack: PromptPack = {
 		return codeProjects.includes(accum.projectType ?? "");
 	},
 
-	async handler(ctx: PromptContext, accum) {
-		const flags = ctx.flags ?? {};
-		const prev = ctx.config ?? {};
+	async handler(config, ctx, accum) {
+		const prev = config.config ?? {};
 
-		const nonInteractive = flags.nonInteractive === true;
+		const interactive = config.interactive;
 
 		// ---------------------------------------------------------
 		// Smart defaults based on project type
@@ -64,29 +58,20 @@ export const qualityPack: PromptPack = {
 			}
 		};
 
-		const smartDefault = determineDefaults(accum.projectType);
+		const smartDefault = determineDefaults(ctx.projectType);
 
-		const editorDefault =
-			flags.editor ?? accum.editor ?? prev.editor ?? smartDefault.editor;
-		const testingDefault =
-			flags.testing ?? accum.testing ?? prev.testing ?? smartDefault.testing;
-		const lintingDefault =
-			flags.linting ?? accum.linting ?? prev.linting ?? smartDefault.linting;
+		const editorDefault = ctx.editor ?? prev.editor ?? smartDefault.editor;
+		const testingDefault = ctx.testing ?? prev.testing ?? smartDefault.testing;
+		const lintingDefault = ctx.linting ?? prev.linting ?? smartDefault.linting;
 		const formattingDefault =
-			flags.formatting ??
-			accum.formatting ??
-			prev.formatting ??
-			smartDefault.formatting;
+			ctx.formatting ?? prev.formatting ?? smartDefault.formatting;
 		const commitDefault =
-			flags.commitConventions ??
-			accum.commitConventions ??
-			prev.commitConventions ??
-			true;
+			ctx.commitConventions ?? prev.commitConventions ?? true;
 
 		// ---------------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ---------------------------------------------------------
-		if (nonInteractive) {
+		if (!interactive) {
 			return {
 				editor: editorDefault,
 				testing: testingDefault,

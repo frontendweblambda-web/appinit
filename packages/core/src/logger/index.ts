@@ -1,7 +1,7 @@
 // @appinit/core/logger/index.ts
-import util from "node:util";
 import process from "node:process";
-import { color, theme } from "../theme"; // ★ unified theme system
+import util from "node:util";
+import { appStyle, theme } from "../theme"; // ★ unified theme system
 
 export type LogLevel = "debug" | "info" | "warn" | "error" | "silent";
 
@@ -55,7 +55,7 @@ function format(level: LogLevel, message: string, meta?: any) {
 	const metaStr = meta ? " " + safeMeta(meta) : "";
 	const tsStr = colorEnabled ? theme.dim(ts) : ts;
 
-	return `${tsStr} ${lvl} ${color.bold(message)}${metaStr}`;
+	return `${tsStr} ${lvl} ${appStyle.bold(message)}${metaStr}`;
 }
 
 export const logger = {
@@ -83,12 +83,12 @@ export const logger = {
 
 	title(msg: string) {
 		console.log(
-			"\n" + theme.brand(color.bold(`🚀 ${msg.toUpperCase()}`)) + "\n",
+			"\n" + theme.brand(appStyle.bold(`🚀 ${msg.toUpperCase()}`)) + "\n",
 		);
 	},
 
 	success(msg: string) {
-		console.log("\n" + theme.success(color.bold(`🚀 ${msg}`)) + "\n");
+		console.log("\n" + theme.success(appStyle.bold(`🚀 ${msg}`)) + "\n");
 	},
 };
 

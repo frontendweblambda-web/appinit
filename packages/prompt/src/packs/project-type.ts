@@ -1,5 +1,5 @@
+import type { PromptPack, PromptQuestion } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
 import { PROJECT_TYPES } from "../static/project-type.data";
 
 /**
@@ -10,17 +10,16 @@ export const projectTypePack: PromptPack = {
 	name: "project-type",
 	priority: 15,
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
+	handler: async (config, ctx, accum) => {
+		const flags = config.cliCommand?.flags ?? {};
 		const fallback = flags?.projectType ?? "frontend";
-		const nonInteractive = flags.nonInteractive;
-		const interactive = ctx.interactive;
+		const interactive = config.interactive;
 
 		// -----------------------------------------
 		// NON-INTERACTIVE MODE
 		// -----------------------------------------
-		if (nonInteractive || interactive === false) {
-			const projectType = String(flags.projectType ?? fallback).toLowerCase();
+		if (!interactive) {
+			const projectType = fallback;
 			const valid = PROJECT_TYPES.some((t) => t.value === projectType);
 			if (!valid) {
 				throw new Error(
@@ -41,7 +40,7 @@ export const projectTypePack: PromptPack = {
 				name: "projectType",
 				message: "📦 Project type:",
 				choices: PROJECT_TYPES,
-				initial: accum.type ?? "frontend",
+				initial: accum?.projectType ?? "frontend",
 			},
 		];
 

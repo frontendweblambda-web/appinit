@@ -1,73 +1,38 @@
-import {
-	isCI,
-	isRunningInNpmLifecycle,
-	shouldUseInteractiveUI,
-} from "@appinit/core";
-import type { Flags, PromptContext } from "@appinit/types";
-import { getCliName } from "../utils/cli-name.js";
-import { loadUserConfig } from "./config-store.js";
+import { createSpinner } from "@appinit/core";
+import type { AppinitConfig, CLICommand } from "@appinit/types";
+import { joinPath } from "@appinit/utils";
+import { log } from "@clack/prompts";
+import os from "os";
+import { getCliName, getCliVersion } from "../utils/cli-info.js";
 
-export async function buildContext(cmd: {
-	name: string;
-	args: string[];
-	flags: Flags;
-}): Promise<PromptContext> {
-	const saved = await loadUserConfig();
-	const cwd = process.cwd();
+/**
+ * Appinit configuration
+ * @param cmd
+ * @returns
+ */
 
-	const ctx: PromptContext = {
-		// Basic CLI invocation details
+export async function buildContext(cmd: CLICommand): Promise<AppinitConfig> {
+	// const saved = await loadUserConfig(); // load existing configuration
+	const cwd = process.cwd(); // user current directory
+	const cacheDir = joinPath(os.homedir(), ".appinit/cache");
+	const sp = createSpinner({
+		color: "brand",
+		text: `Running ${cmd.name}...`,
+	});
+	const ctx: AppinitConfig = {
+		cliCommand: cmd ?? {},
 		command: cmd.name,
-		flags: cmd.flags ?? {},
 		cwd,
-
-		// cli metadata
+		cacheDir: cacheDir,
 		cliName: getCliName(),
-		cliVersion: process.env.APPINIT_CLI_VERSION ?? null,
-		nodeVersion: process.version,
-		os: process.platform,
-		debug: Boolean(cmd.flags.debug),
-
-		// config & runtime
-		config: saved ?? null,
-		previousConfigLoaded: !!saved,
-		skipDefaultPacks: false,
-
+		cliVersion: process.env.APPINIT_CLI_VERSION ?? getCliVersion(),
 		runtime: "cli",
 		outputMode: cmd.flags.json ? "json" : "text",
-
-		// template info (will be filled later)
-		templateName: cmd.flags.template,
-		templateMeta: null,
-		templateDir: null,
-		template: undefined,
-		templateResolved: false,
-		templatePromptPacks: [],
-		pluginPromptPacks: [],
-
-		// environment snapshot
-		env: {
-			ci: isCI(),
-			docker: false, // can be set async later if you want
-			tty: !!(process.stdin.isTTY && process.stdout.isTTY),
-			npmLifecycle: isRunningInNpmLifecycle(),
-		},
-
-		answers: {},
-		hooks: undefined,
-		extra: {},
+		skipDefaultPacks: cmd.flags.skipDefaultPacks,
+		interactive: !cmd.flags.nonInteractive,
+		sp: sp,
+		log: log,
 	};
-
-	// Seed projectName from positional args: `appinit create my-app`
-	if (cmd.args[0]) {
-		ctx.answers!.projectName = cmd.args[0];
-	}
-
-	// Package manager detection (flag wins, else auto-detect)
-	ctx.packageManager = cmd.flags.packageManager ?? null;
-
-	// Determine interactive mode once
-	ctx.interactive = await shouldUseInteractiveUI(cmd.flags);
 
 	return ctx;
 }

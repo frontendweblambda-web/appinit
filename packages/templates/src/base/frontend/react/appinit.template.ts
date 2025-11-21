@@ -54,9 +54,9 @@ filters: {
   // 4. FILE RENAMES (before writing)
   // --------------------------------------------------------
   rename: {
-    "_gitignore__tmpl": ".gitignore",
-    ".env.example__tmpl": ".env.example",
-    "appinit.config.ts__tmpl": "appinit.config.ts",
+    "_gitignore": ".gitignore",
+    ".env.example": ".env",
+    "appinit.config.ts.ejs": "appinit.config.ts",
     "package.json__tmpl": "package.json",
     "README.md__tmpl": "README.md",
     "template.meta.json__tmpl": "template.meta.json",

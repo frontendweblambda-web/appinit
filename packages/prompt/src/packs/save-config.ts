@@ -8,12 +8,12 @@ export const saveConfigPack: PromptPack = {
 
 	handler: async (ctx: PromptContext, accum) => {
 		const flags = ctx.flags ?? {};
-		const nonInteractive = flags.nonInteractive;
+		const interactive = ctx.interactive;
 		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
-		if (nonInteractive) {
-			return { saveConfig: Boolean(flags.saveConfig) };
+		if (!interactive) {
+			return { config: null };
 		}
 
 		// ----------------------------------------------------
@@ -22,7 +22,7 @@ export const saveConfigPack: PromptPack = {
 		const questions: PromptQuestion[] = [
 			{
 				type: "confirm",
-				name: "saveConfig",
+				name: "config",
 				message: "💾 Do you want to save this configuration for future use?",
 				initial: false, // default to not saving
 			},

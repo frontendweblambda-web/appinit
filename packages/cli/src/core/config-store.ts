@@ -12,14 +12,13 @@ import os from "os";
 import path from "path";
 
 const CONFIG_DIR = path.join(os.homedir(), ".appinit");
-const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
+const configPath = path.join(CONFIG_DIR, "config.json");
 
 export async function loadUserConfig(): Promise<AppInitSavedUserConfig | null> {
 	try {
-		if (await pathExists(CONFIG_FILE)) {
-			const data = await readJson(CONFIG_FILE);
-			console.log("Data", data, data.projectName && data.framework && data.ui);
-			if (data.projectName && data.framework && data.ui) {
+		if (await pathExists(configPath)) {
+			const data = await readJson<AppInitSavedUserConfig>(configPath);
+			if (data?.projectName && data.framework && data.ui) {
 				return data;
 			} else {
 				console.warn(
@@ -44,7 +43,7 @@ export async function saveUserConfig(data: Answers) {
 			ipAddress: getLocalIpAddress(), // We'll define this function below
 		};
 		await ensureDir(CONFIG_DIR);
-		await writeJsonSafe(CONFIG_FILE, data);
+		await writeJsonSafe(configPath, data);
 	} catch (err) {
 		console.warn("Failed to save Appinit config:", err);
 	}
@@ -54,8 +53,8 @@ export async function saveUserConfig(data: Answers) {
  * Clear saved configuration
  */
 export const clearUserConfig = async (): Promise<void> => {
-	if (await pathExists(CONFIG_FILE)) {
-		await removeDir(CONFIG_FILE);
+	if (await pathExists(configPath)) {
+		await removeDir(configPath);
 		console.log(k.yellow("🧹 Cleared saved Codex config."));
 	} else {
 		console.log(k.gray("No saved config found."));

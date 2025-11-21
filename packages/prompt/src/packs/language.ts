@@ -1,12 +1,7 @@
+import type { PromptPack } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type {
-	PromptContext,
-	PromptPack,
-	ChoiceOption,
-	Answers,
-} from "@appinit/types";
-import { languageChoices } from "../static/language";
 import { folderStructureChoices } from "../static/framework.data";
+import { languageChoices } from "../static/language";
 
 export const languagePack: PromptPack = {
 	name: "language",
@@ -20,27 +15,26 @@ export const languagePack: PromptPack = {
 		return codeProjects.includes(accum.projectType ?? "");
 	},
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
-		const prev = ctx.config ?? {};
-		const nonInteractive = flags.nonInteractive === true;
+	handler: async (config, ctx, accum) => {
+		const prev = config.config ?? {};
+		const interactive = config.interactive;
 
-		const defaultLanguage = flags.language ?? prev.language ?? "typescript";
+		const defaultLanguage = prev.language ?? accum.language ?? "typescript";
+
 		const defaultStructure =
-			flags.structure ??
 			prev.structure ??
 			(defaultLanguage === "typescript" ? "src-folder" : "flat");
 		// ----------------------------------------------------
 		// NON-INTERACTIVE MODE
 		// ----------------------------------------------------
-		if (nonInteractive) {
+		if (!interactive) {
 			return {
 				language: defaultLanguage,
 				structure: defaultStructure,
 			};
 		}
 
-		console.log("DEFAULT", defaultLanguage);
+		console.log("defaultLanguage", defaultLanguage);
 		// ----------------------------------------------------
 		// INTERACTIVE MODE
 		// ----------------------------------------------------
@@ -58,10 +52,7 @@ export const languagePack: PromptPack = {
 					name: "structure",
 					message: "📁 Project structure:",
 					choices: folderStructureChoices,
-					initial: (answers: Answers, ctxState: PromptContext) => {
-						const lang = answers?.language ?? defaultLanguage;
-						return lang === "typescript" ? "src-folder" : "flat";
-					},
+					initial: defaultStructure,
 				},
 			],
 			accum,

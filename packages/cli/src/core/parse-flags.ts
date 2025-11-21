@@ -1,201 +1,53 @@
-import { CLICommand, FlagOption } from "@appinit/types";
+import { CLICommand } from "@appinit/types";
+import { kebabToCamelCase } from "@appinit/utils";
 import mri from "mri";
 
 // -------------- FLAG DEFINITIONS -------------------
 const BOOLEAN_FLAGS = [
 	"help",
 	"version",
-	"verbose",
-	"quiet",
-	"json",
-	"debug",
 	"nonInteractive",
-	"noConsole",
-	"install",
 	"skipInstall",
-	"git",
-	"noGit",
-	"pwa",
-	"i18n",
-	"docker",
-	"logging",
-	"monitoring",
-	"strict",
-	"ci",
-	"monitor",
-	"analytics",
-	"ai",
-	"aiEnhance",
-	"aiScaffold",
-	"ignoreConfig",
-	"commit",
-	"market",
-	"registryAuth",
-	"multiTenant",
-	"mfa",
+	"skipGit",
+	"skipDefaultPacks",
 ];
-
-const STRING_FLAGS = [
-	"projectName",
-	"targetDir",
-	"projectType",
-	"workspace",
-	"lang",
-	"architecture",
-	"packageManager",
-	"template",
-
-	"framework",
-	"ui",
-	"routing",
-	"store",
-	"forms",
-	"animation",
-	"validation",
-
-	"runtime",
-	"backend",
-	"apiStyle",
-	"database",
-	"orm",
-	"cache",
-	"queue",
-	"serverless",
-
-	"auth",
-
-	"deployStrategy",
-	"deployFrontend",
-	"deployBackend",
-
-	"formatter",
-	"linter",
-	"test",
-	"buildTool",
-	"editor",
-
-	"features",
-
-	"aiMode",
-
-	"plugin",
-	"removePlugin",
-	"authProvider",
-
-	"modules",
-
-	"registry",
-	"source",
-
-	"env",
-	"upgrade",
-	"machine",
-	"prompt",
-];
-
+const STRING_FLAGS = ["template", "json", "projectType"];
 const MULTI_FLAGS = new Set(["modules", "plugin", "authProvider"]);
 
-export const ALIASES: Record<string, keyof FlagOption> = {
+export const ALIASES = {
 	// Core
 	help: "help",
 	h: "help",
 	version: "version",
 	v: "version",
 	json: "json",
-	verbose: "verbose",
-	q: "quiet",
-	quiet: "quiet",
-	debug: "debug",
-	d: "debug",
 
 	"non-interactive": "nonInteractive",
-	"no-console": "noConsole",
-	"ignore-config": "ignoreConfig",
-
-	// Project
-	"project-name": "projectName",
-	"target-dir": "targetDir",
-	"project-type": "projectType",
-	"package-manager": "packageManager",
-
-	// Frontend
-	pwa: "pwa",
-	i18n: "i18n",
-
-	// Backend
-	docker: "docker",
-	logging: "logging",
-	monitoring: "monitoring",
-	strict: "strict",
-
-	// Auth
-	auth: "auth",
-
-	// Deploy
-	"deploy-strategy": "deployStrategy",
-	"deploy-frontend": "deployFrontend",
-	"deploy-backend": "deployBackend",
-
-	ci: "ci",
-	monitor: "monitor",
-	analytics: "analytics",
-
-	// AI
-	"ai-mode": "aiMode",
-	"ai-enhance": "aiEnhance",
-	"ai-scaffold": "aiScaffold",
-
-	// Install / Git
 	"skip-install": "skipInstall",
-	"no-git": "noGit",
-
-	// Plugins
-	"remove-plugin": "removePlugin",
-	"auth-provider": "authProvider",
-	"multi-tenant": "multiTenant",
-
-	// Marketplace
-	"registry-auth": "registryAuth",
-};
+	"skip-git": "skipGit",
+	"project-type": "projectType",
+} as const;
 
 // Map normalized camelCase <-> dashed form
 const NORMALIZE_MAP = {
 	"non-interactive": "nonInteractive",
-	"package-manager": "packageManager",
 	"skip-install": "skipInstall",
-	"no-console": "noConsole",
-	"no-git": "noGit",
-	"ai-mode": "aiMode",
-	"ai-enhance": "aiEnhance",
-	"ai-scaffold": "aiScaffold",
+	"skip-git": "skipGit",
+	"project-type": "projectType",
+	"skip-default-packs": "skipDefaultPacks",
 } as const;
 
 const DEFAULTS = {
-	install: true,
-	git: true,
-	noGit: false,
-	noConsole: false,
 	quiet: false,
 	verbose: false,
 	debug: false,
 	nonInteractive: false,
 	skipInstall: false,
-	json: false,
-	ci: false,
-	market: false,
+	skipGit: false,
+	json: "",
+	projectType: "frontend",
+	skipDefaultPacks: false,
 };
-
-// ------------------ KEY NORMALIZER ------------------
-function normalizeKey(key: string): string {
-	key = key.replace(/^--?/, "").toLowerCase();
-
-	if (ALIASES[key]) return ALIASES[key];
-	if (NORMALIZE_MAP[key as keyof typeof NORMALIZE_MAP])
-		return NORMALIZE_MAP[key as keyof typeof NORMALIZE_MAP];
-
-	// kebab → camelCase
-	return key.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-}
 
 export function parseFlags(argv: string[]): CLICommand {
 	const args = argv.slice(2);
@@ -207,88 +59,80 @@ export function parseFlags(argv: string[]): CLICommand {
 	});
 
 	const commandName = String(raw._?.[0] ?? "help");
-	const positional = raw._.slice(1).map(String);
-
 	const flags = normalizeFlags(raw);
 
-	return { name: commandName, args: positional, flags };
+	return { name: commandName, args: args, flags };
 }
 
-function normalizeFlags(parsed: Record<string, any>): FlagOption {
+/**
+ * Normalize
+ * @param parsed
+ * @returns
+ */
+function normalizeFlags(parsed: Record<string, any>) {
 	const out: any = { ...DEFAULTS };
 
 	for (const [rawKey, rawValue] of Object.entries(parsed)) {
 		if (rawKey === "_" || typeof rawKey !== "string") continue;
 
-		// Determine canonical flag key
-		const key = getCanonicalKey(rawKey);
+		const canonical = getCanonicalKey(rawKey);
+		if (!canonical) continue;
 
-		// ❌ Unknown / non-canonical flags MUST be ignored
-		if (
-			!key ||
-			!(
-				key in DEFAULTS ||
-				STRING_FLAGS.includes(key) ||
-				BOOLEAN_FLAGS.includes(key)
-			)
-		) {
+		// -----------------------------
+		// NEGATION FLAG: --no-*
+		// -----------------------------
+		if (rawKey.startsWith("no-")) {
+			out[canonical] = false;
 			continue;
 		}
 
 		// -----------------------------
-		// NEGATED FLAG HANDLING --no-*
+		// MULTI-FLAGS
 		// -----------------------------
-		if (rawKey.startsWith("no-") && typeof rawValue === "boolean") {
-			out[key] = rawValue;
-			continue;
-		}
-
-		// -----------------------------
-		// MULTI-FLAG HANDLING
-		// -----------------------------
-		if (MULTI_FLAGS.has(key)) {
-			if (!out[key]) out[key] = [];
+		if (MULTI_FLAGS.has(canonical)) {
+			if (!out[canonical]) out[canonical] = [];
 			const arr = Array.isArray(rawValue) ? rawValue : [rawValue];
-			out[key].push(...arr);
+			for (const v of arr) {
+				if (v !== "" && v != null) out[canonical].push(v);
+			}
 			continue;
 		}
 
-		// Standard assignment
-		out[key] = rawValue;
+		// -----------------------------
+		// STANDARD ASSIGNMENT
+		// -----------------------------
+		out[canonical] = rawValue;
 	}
 
-	return out as FlagOption;
+	return out;
 }
 
 function getCanonicalKey(rawKey: string): string {
-	if (!rawKey || typeof rawKey !== "string") return "";
+	if (!rawKey) return "";
 
-	// strip -- or -
+	// mri lowercases and strips "--"
 	rawKey = rawKey.replace(/^--?/, "").toLowerCase();
 
-	// 1) If rawKey is an alias → canonical
-	if (ALIASES[rawKey]) {
-		return ALIASES[rawKey];
-	}
+	// 1) Aliases
+	if (ALIASES[rawKey as keyof typeof ALIASES])
+		return ALIASES[rawKey as keyof typeof ALIASES];
 
-	// 2) If rawKey is in normalize map → canonical
-	if (NORMALIZE_MAP[rawKey as keyof typeof NORMALIZE_MAP]) {
+	// 2) Normalize map
+	if (rawKey in NORMALIZE_MAP)
 		return NORMALIZE_MAP[rawKey as keyof typeof NORMALIZE_MAP];
-	}
 
-	// 3) Convert kebab-case → camelCase
-	const camel = rawKey.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+	// 3) Convert kebab → camel
+	const camel = kebabToCamelCase(rawKey);
 
-	// 4) Only accept if camelCase is a known flag
+	// 4) Only allow known flags
 	if (
+		camel in DEFAULTS ||
 		BOOLEAN_FLAGS.includes(camel) ||
 		STRING_FLAGS.includes(camel) ||
-		camel in DEFAULTS ||
 		MULTI_FLAGS.has(camel)
 	) {
 		return camel;
 	}
 
-	// 5) Otherwise → ignore the raw key
 	return "";
 }

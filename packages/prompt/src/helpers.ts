@@ -1,17 +1,17 @@
 import {
-	text,
-	select,
-	confirm,
-	multiselect,
-	isCancel,
 	cancel,
+	confirm,
+	isCancel,
+	multiselect,
+	select,
+	text,
 } from "@clack/prompts";
 
 import type {
-	PromptQuestion,
 	ChoiceOption,
-	PromptText,
+	PromptQuestion,
 	PromptSelect,
+	PromptText,
 } from "@appinit/types";
 
 function handleCancel(value: unknown) {
@@ -59,6 +59,7 @@ export async function askSelect<Value = any>(
 
 	const result = await select({
 		...q,
+		initialValue: q.initialValue as string,
 		options: mapped,
 	});
 

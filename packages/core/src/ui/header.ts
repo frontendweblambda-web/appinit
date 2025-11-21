@@ -2,10 +2,8 @@
 import { Flags } from "@appinit/types";
 import { isCI, isInteractive, isTTY, termWidth } from "../env";
 import { theme } from "../theme/index";
-import { printAnimatedLogo } from "./logo";
-import { center } from "./center";
-import { gradient } from "../theme/gradient";
 import { checkUpdate } from "../utils/update-check";
+import { printAnimatedLogo } from "./logo";
 
 const APP_NAME = "AppInit OS";
 const DEFAULT_SUBTITLE = "Developer Operating System";
@@ -33,8 +31,8 @@ export async function printHeader(options: HeaderOptions) {
 	}
 
 	// Centered title block
-	console.log("AppInit OS — Developer Operating System");
-	console.log(theme.dim(`v${options.version}`));
+	console.log(theme.brand(`${APP_NAME} — ${DEFAULT_SUBTITLE}`));
+	console.log(theme.primary(theme.dim(`v${options.version}`)));
 
 	// Update check
 	const latest = checkUpdate(options.version!);

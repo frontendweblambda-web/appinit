@@ -73,7 +73,8 @@ export type Architecture =
 	| "modular" // Feature-based modular design
 	| "hexagonal" // Ports & adapters
 	| "ddd" // Domain Driven Design
-	| "layered";
+	| "layered"
+	| "none";
 export type SQLDatabase =
 	| "postgres"
 	| "mysql"
@@ -99,3 +100,28 @@ export type TemplateSource =
 	| "npm"
 	| "url"
 	| "market";
+export type runtime = "cli" | "api" | "web" | "vscode";
+export type outputMode = "text" | "rich" | "minimal" | "json";
+export type FrontendFramework =
+	| "react"
+	| "vue"
+	| "svelte"
+	| "angular"
+	| "solid"
+	| "qwik"
+	| "astro"
+	| "react-router"
+	| "next"
+	| "nux"
+	| "framer"
+	| "none";
+export type BackendFramework =
+	| "express"
+	| "fastify"
+	| "nestjs"
+	| "hono"
+	| "koa"
+	| "elysia"
+	| "none";
+
+export type Framework = FrontendFramework | BackendFramework;

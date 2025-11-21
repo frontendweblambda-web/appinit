@@ -1,5 +1,5 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["src"],
+	"include": ["src", "../core/src/ui/spinner.ts"],
 	"exclude": ["dist", "node_modules"]
 }

@@ -3,8 +3,8 @@
 
 import type { Answers } from "./answers.js";
 import type { EngineContext } from "./engine/context.js";
-import type { ResolvedTemplate } from "./template.js";
 import { TemplateFile, TransformContext } from "./file.js";
+import type { ResolvedTemplate } from "./template.js";
 /* -----------------------------------------------------------
  * Shared Context
  * -------------------------------------------------------- */
@@ -12,7 +12,6 @@ import { TemplateFile, TransformContext } from "./file.js";
 /** Context passed to plugin.apply() and lifecycle hooks */
 export interface PluginContext extends EngineContext {
 	cwd: string;
-	answers: Answers;
 	engine: EngineContext;
 	logger: Console;
 }

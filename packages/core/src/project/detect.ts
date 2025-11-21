@@ -1,16 +1,18 @@
-import { PromptContext, PromptResult, Answers } from "@appinit/types";
+import {
+	AppinitConfig,
+	PromptContext,
+	PromptResult,
+	WorkspaceTool,
+} from "@appinit/types";
 import { pathExists, readFileSync } from "@appinit/utils";
 
-export const isMonorepo = (answers: Partial<Answers>): boolean =>
-	["turborepo", "nx", "monorepo"].includes(answers.workspaceTool as string);
+export const isMonorepo = (tool: WorkspaceTool) =>
+	["turborepo", "nx", "monorepo"].includes(tool);
 
-export function isRunningInNpmLifecycle(): boolean {
-	return Boolean(process.env.npm_lifecycle_event);
-}
+export const isRunningInNpmLifecycle = () =>
+	Boolean(process.env.npm_lifecycle_event);
 
-export function isRunningViaNpm(): boolean {
-	return Boolean(process.env.npm_execpath);
-}
+export const isRunningViaNpm = () => Boolean(process.env.npm_execpath);
 
 export async function isRunningInDocker(): Promise<boolean> {
 	try {
@@ -28,17 +30,13 @@ export async function isRunningInDocker(): Promise<boolean> {
 }
 
 export function shouldAskPackageScope(
+	config: AppinitConfig,
 	ctx: PromptContext,
 	accum: PromptResult,
 ): boolean {
-	const type = (accum.projectType ?? ctx.flags?.projectType) as
-		| string
-		| undefined;
+	const type = accum.projectType ?? config.promptResult?.projectType;
 
 	return (
-		type === "library" ||
-		type === "cli" ||
-		type === "plugin" ||
-		isMonorepo(ctx?.answers as Answers)
+		type === "library" || type === "cli" || isMonorepo(ctx?.workspaceTool!)
 	);
 }

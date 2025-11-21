@@ -4,10 +4,23 @@ import {
 	SelectOptions,
 	TextOptions,
 } from "@clack/prompts";
-import { PackageManager, ProjectType } from "./common";
-import { Flags } from "./flags";
-import { Framework } from "./frontend";
-import { ResolvedTemplate, TemplateMeta } from "./template";
+import { ApiStyle, BackendMode, NodeOrm } from "./backend";
+import {
+	Architecture,
+	BackendFramework,
+	Database,
+	Editor,
+	Formatter,
+	Framework,
+	FrontendFramework,
+	Language,
+	Linter,
+	PackageManager,
+	ProjectType,
+	TestRunner,
+	WorkspaceTool,
+} from "./common";
+import { AppinitConfig, ProjectMeta } from "./config";
 
 // -------------------------------------------------
 // Choice Option
@@ -55,7 +68,7 @@ export interface PromptSelect<
 	Value = unknown,
 	Accum extends Record<string, unknown> = Record<string, unknown>,
 > extends PromptBase<Value, Accum>,
-		Omit<SelectOptions<Value>, "options" | "initialValue"> {
+		Omit<SelectOptions<Value>, "options"> {
 	type: "select";
 	choices?: ChoiceUnion<Value, Accum>;
 }
@@ -71,7 +84,7 @@ export interface PromptMulti<
 	Value = unknown,
 	Accum extends Record<string, unknown> = Record<string, unknown>,
 > extends PromptBase<Value[], Accum>,
-		Omit<MultiSelectOptions<Value>, "options" | "initialValues"> {
+		Omit<MultiSelectOptions<Value>, "options"> {
 	type: "multiselect";
 	choices?: ChoiceUnion<Value, Accum>;
 }
@@ -91,39 +104,13 @@ export type PromptResultFromQuestions<Q extends readonly PromptQuestion[]> = {
 	[K in Q[number] as K["name"]]: K extends PromptBase<infer T> ? T : unknown;
 };
 
-export type PromptResult = Record<string, any> & {
-	projectName?: string;
-	description?: string;
-	author?: string;
-	license?: string;
-	packageScope?: string | null;
-
-	// ─────────────── AppInit dynamic answer fields ───────────────
-	projectType?: ProjectType;
-	framework?: Framework;
-	architecture?: string;
-
-	form?: string;
-	store?: string;
-	routing?: string;
-
-	// Backend-specific
-	backend?: string;
-	backendMode?: string;
-	apiStyle?: string;
-	database?: string;
-	orm?: string;
-	authStrategy?: string;
-	deployTarget?: string;
-	autoInstall?: true;
-
-	packageManager?: PackageManager;
-};
+export type PromptResult = Record<string, any>;
 
 // -------------------------------------------------
 // Prompt Pack / Hooks
 // -------------------------------------------------
 export type PromptPackHandler = (
+	config: AppinitConfig,
 	ctx: PromptContext,
 	accum: PromptResult,
 ) => Promise<PromptResult | null>;
@@ -164,9 +151,19 @@ export interface PromptPack {
 	// ✅ OPTIONAL: pack dependencies by name (for future)
 	dependsOn?: string[];
 
+	validation?: (ctx: PromptContext) => boolean;
+
 	// Local hooks – scoped only to this pack
-	before?: (ctx: PromptContext, accum: PromptResult) => void | Promise<void>;
-	after?: (ctx: PromptContext, result: PromptResult) => void | Promise<void>;
+	before?: (
+		config: AppinitConfig,
+		ctx: PromptContext,
+		accum: PromptResult,
+	) => void | Promise<void>;
+	after?: (
+		config: AppinitConfig,
+		ctx: PromptContext,
+		result: PromptResult,
+	) => void | Promise<void>;
 
 	handler: PromptPackHandler;
 }
@@ -180,61 +177,32 @@ export type PromptPackDefinition =
 // Prompt Context
 // -------------------------------------------------
 
-export interface PromptContext {
-	// where cli has executed
-	cwd: string;
+export type PromptContext = ProjectMeta & {
+	projectType?: ProjectType;
+	framework?: Framework;
+	frontendFramework?: FrontendFramework;
+	backendFramework?: BackendFramework;
+	architecture?: Architecture;
 
-	// 💻 CLI & OS Environment
-	command: string;
-	cliName?: string | null;
-	cliVersion?: string | null;
-	nodeVersion?: string;
-	os?: NodeJS.Platform;
-	// 🌐 Environment Variables
-	env?: {
-		ci?: boolean;
-		docker?: boolean;
-		tty?: boolean;
-		npmLifecycle?: boolean;
-	};
+	form?: string;
+	store?: string;
+	routing?: string;
+	language?: Language;
 
-	// args + flags
-	flags: Flags;
-	args?: string[];
+	// Backend-specific
+	backendMode?: BackendMode;
+	apiStyle?: ApiStyle;
+	database?: Database;
+	orm?: NodeOrm;
+	reusePrevious?: boolean;
 
-	// execution mode
-	interactive?: boolean;
-	debug?: boolean;
-
-	// prompt answers
-	answers: PromptResult;
-
-	// User config (optional future feature)
-	// ⚙️ Configuration & History
-	config?: Record<string, unknown> | null;
-	previousConfigLoaded?: boolean;
-
-	// package manager
-	packageManager?: string | null;
-
-	targetDir?: string | null;
-	// 🔄 Execution Mode
-	runtime?: "cli" | "api" | "web" | "vscode";
-	outputMode?: "text" | "rich" | "minimal" | "json";
-
-	sourceId?: string;
-	templateId?: string | null;
-	templateName?: string | null;
-	templateMeta?: TemplateMeta | null;
-	templateDir?: string | null;
-	template?: ResolvedTemplate;
-	templateResolved?: boolean;
-
-	templatePromptPacks?: (string | PromptPackDefinition)[];
-	pluginPromptPacks?: PromptPackDefinition[];
-
-	skipDefaultPacks?: boolean;
-
+	packageManager?: PackageManager;
 	hooks?: PromptHooks;
-	extra?: Record<string, unknown>;
-}
+	workspaceTool?: WorkspaceTool;
+
+	commitConventions?: boolean;
+	formatting?: Formatter;
+	linting?: Linter;
+	testing?: TestRunner;
+	editor?: Editor;
+};

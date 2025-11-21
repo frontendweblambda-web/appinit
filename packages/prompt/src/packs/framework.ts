@@ -1,5 +1,5 @@
+import type { PromptPack } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext } from "@appinit/types";
 import {
 	FRONTEND_FRAMEWORK_CHOICES,
 	FULLSTACK_META_FRAMEWORKS,
@@ -15,17 +15,16 @@ export const frameworkPack: PromptPack = {
 	condition: (_, accum) =>
 		accum.projectType === "frontend" || accum.projectType === "fullstack",
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
-		const nonInteractive = flags.nonInteractive;
+	handler: async (config, ctx, accum) => {
+		const interactive = config.interactive;
 		const projectType = accum.projectType;
-		const selectedFramework = accum.framework ?? flags.framework;
+		const frontendFramework = accum.frontendFramework;
 
 		const isFullstack = projectType === "fullstack";
 		// non-interactive mode
-		if (nonInteractive) {
+		if (!interactive) {
 			return {
-				framework: flags.framework,
+				frontendFramework,
 			};
 		}
 
@@ -34,12 +33,12 @@ export const frameworkPack: PromptPack = {
 			[
 				{
 					type: "select",
-					name: "framework",
+					name: "frontendFramework",
 					message: `⚙️ ${isFullstack ? "Fullstack" : "Frontend"} Framework:`,
 					choices: isFullstack
 						? FULLSTACK_META_FRAMEWORKS
 						: FRONTEND_FRAMEWORK_CHOICES,
-					initial: selectedFramework ?? (isFullstack ? "next" : "react"),
+					initial: frontendFramework ?? (isFullstack ? "next" : "react"),
 				},
 			],
 			accum,

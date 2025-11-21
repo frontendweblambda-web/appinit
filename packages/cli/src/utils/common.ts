@@ -1,11 +1,11 @@
 import { PromptResult, TemplateMeta } from "@appinit/types";
 
 export function normalizeAnswers(input: PromptResult) {
-	const out: any = { ...input };
+	const out: PromptResult = { ...input };
 
 	// Example normalizations:
-	if (out.language === "ts") out.language = "typescript";
-	if (out.language === "js") out.language = "javascript";
+	if (out.language === "typescript") out.language = "typescript";
+	if (out.language === "javascript") out.language = "javascript";
 
 	if (!out.projectName) throw new Error("projectName is required");
 

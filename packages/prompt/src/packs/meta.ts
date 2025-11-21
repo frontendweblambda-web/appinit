@@ -1,10 +1,5 @@
 import { shouldAskPackageScope } from "@appinit/core";
-import type {
-	PromptContext,
-	PromptPack,
-	PromptQuestion,
-	PromptResult,
-} from "@appinit/types";
+import type { PromptPack, PromptQuestion, PromptResult } from "@appinit/types";
 import { formatName, normalizeScope, validateName } from "@appinit/utils";
 import { askAnswers } from "../prompt";
 import { licenseChoices } from "../static/license";
@@ -13,12 +8,11 @@ export const metaPack: PromptPack = {
 	name: "meta",
 	priority: 10,
 
-	async handler(ctx: PromptContext, accum) {
-		const flags = ctx.flags ?? {};
-		const prev = ctx.config ?? {};
-		const nonInteractive = ctx.flags.nonInteractive;
-		const api = ctx.runtime === "api";
-		const interactive = ctx.interactive;
+	async handler(config, ctx, accum) {
+		const flags = config.flags ?? {};
+		const prev = config.config ?? {};
+		const api = config.runtime === "api";
+		const interactive = config.interactive;
 
 		// LOCAL UTILITY: get value in correct priority order
 		const get = (flagKey: string, fallback: any, format?: (v: any) => any) => {
@@ -26,11 +20,13 @@ export const metaPack: PromptPack = {
 			return format ? format(raw) : raw;
 		};
 
-		if (nonInteractive || api || interactive === false) {
+		console.log("CTC", ctx, accum, interactive);
+
+		if (!interactive || api) {
 			const result: PromptResult = {
 				projectName: get(
 					"projectName",
-					ctx.cliName ?? prev.projectName ?? accum.projectName ?? "my-app",
+					config.cliName ?? prev.projectName ?? accum.projectName ?? "my-app",
 					(v) => String(v),
 				),
 
@@ -44,13 +40,13 @@ export const metaPack: PromptPack = {
 					String(v ?? ""),
 				),
 
-				license: get("license", prev.license ?? accum.license ?? "MIT", (v) =>
-					String(v ?? "MIT"),
+				projectType: get(
+					"license",
+					prev.license ?? accum.projectType ?? "MIT",
+					(v) => String(v ?? "MIT"),
 				),
 
-				packageScope: normalizeScope(
-					flags.packageScope ?? prev.packageScope ?? accum.packageScope,
-				),
+				packageScope: normalizeScope(prev.packageScope ?? accum.packageScope),
 			};
 
 			return result;
@@ -62,15 +58,14 @@ export const metaPack: PromptPack = {
 		// Project Name
 		// --------------------------
 		// Project Name
-		if (!flags.projectName && !ctx.answers?.projectName) {
+		if (!ctx.projectName) {
 			questions.push({
 				type: "text",
 				name: "projectName",
 				message: "🧱 Project name:",
 				initial: (accum.projectName ??
 					prev.projectName ??
-					ctx.cliName ??
-					"my-app") as string,
+					"my-appinit-app") as string,
 				format: (v) => {
 					if (!v) return null;
 					return formatName(v);
@@ -86,9 +81,7 @@ export const metaPack: PromptPack = {
 				},
 			});
 		} else {
-			accum.projectName = (ctx.answers.projectName ??
-				flags.projectName ??
-				prev.projectName) as string;
+			accum.projectName = (ctx.projectName ?? prev.projectName) as string;
 		}
 
 		// --------------------------
@@ -98,8 +91,8 @@ export const metaPack: PromptPack = {
 			type: "text",
 			name: "description",
 			message: "📝 Short description:",
-			initial:
-				flags.description ?? accum.description! ?? prev.description ?? "",
+			initial: accum.description! ?? prev.description ?? "",
+			defaultValue: "",
 		});
 
 		// --------------------------
@@ -109,7 +102,8 @@ export const metaPack: PromptPack = {
 			type: "text",
 			name: "author",
 			message: "👤 Author (name/email):",
-			initial: flags.author ?? accum.author! ?? prev.author ?? "",
+			initial: accum.author! ?? prev.author ?? "",
+			defaultValue: "appinit",
 		});
 
 		// --------------------------
@@ -120,21 +114,19 @@ export const metaPack: PromptPack = {
 			name: "license",
 			message: "📜 License:",
 			choices: licenseChoices,
-			initial: flags.license ?? accum.license ?? prev.license ?? "MIT",
+			initial: accum.licenseType ?? prev.license ?? "MIT",
 		});
 
 		// --------------------------
 		// Package Scope
 		// --------------------------
-		if (shouldAskPackageScope(ctx, accum)) {
+		console.log("HI-----", shouldAskPackageScope(config, ctx, accum));
+		if (shouldAskPackageScope(config, ctx, accum)) {
 			questions.push({
 				type: "text",
 				name: "packageScope",
 				message: "📦 Package scope (optional, without @):",
-				initial:
-					(flags.packageScope as string)?.replace(/^@/, "") ??
-					(prev.packageScope as string)?.replace?.(/^@/, "") ??
-					"",
+				initial: (prev.packageScope as string)?.replace?.(/^@/, "") ?? "",
 				format: (v) => (v ? normalizeScope(v) : null),
 			});
 		}

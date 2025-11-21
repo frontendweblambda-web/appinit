@@ -5,19 +5,6 @@
 
 import { CommonFrontendOptions } from "./common";
 
-export type Framework =
-	| "react"
-	| "next"
-	| "vue"
-	| "svelte"
-	| "angular"
-	| "solid"
-	| "qwik"
-	| "astro"
-	| "framer"
-	| "react-router"
-	| "none";
-
 // UI Kits: A universal union of all possibilities
 export type TailwindUI = "tailwind";
 export type MinimalUI = TailwindUI | "none";
