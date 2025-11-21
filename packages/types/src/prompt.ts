@@ -104,7 +104,11 @@ export type PromptResultFromQuestions<Q extends readonly PromptQuestion[]> = {
 	[K in Q[number] as K["name"]]: K extends PromptBase<infer T> ? T : unknown;
 };
 
-export type PromptResult = Record<string, any>;
+export type PromptResult = Record<string, any> & {
+	projectType?: ProjectType;
+	frontendFramework?: FrontendFramework;
+	backendFramework?: BackendFramework;
+};
 
 // -------------------------------------------------
 // Prompt Pack / Hooks

@@ -26,14 +26,14 @@ export async function resolveAnswers(
 	if (interactive) {
 		const result = await runPromptEngine(config);
 		// console.log("RE", ctx, result);
-		config.promptResult = { ...config.promptResult, ...result };
+		config.answers = { ...config.answers, ...result };
 	}
 
 	// console.log("MERGE CTX AND RESULT", ctx);
 	// 5️⃣ Validate answers (non-interactive must error)
 	// validateRequiredAnswers(ctx, interactive);
 	console.log("CONFIG", config);
-	config.promptResult = normalizeAnswers(config.promptResult!);
+	config.answers = normalizeAnswers(config.answers!);
 
 	// Store back to ctx so other systems use normalized values
 

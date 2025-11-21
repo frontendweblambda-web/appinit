@@ -34,7 +34,7 @@ export function shouldAskPackageScope(
 	ctx: PromptContext,
 	accum: PromptResult,
 ): boolean {
-	const type = accum.projectType ?? config.promptResult?.projectType;
+	const type = accum.projectType ?? config.answers?.projectType;
 
 	return (
 		type === "library" || type === "cli" || isMonorepo(ctx?.workspaceTool!)

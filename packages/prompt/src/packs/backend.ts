@@ -6,8 +6,11 @@ export const backendPack: PromptPack = {
 	priority: 40,
 
 	// Only runs when backend functionality is required
-	condition: (_, accum) =>
-		["backend", "fullstack"].includes(accum.projectType ?? ""),
+	condition: (_, accum) => {
+		if (["next", "framer", "nuxt"].includes(accum.frontendFramework!))
+			return false;
+		return ["backend", "fullstack"].includes(accum.projectType ?? "");
+	},
 
 	handler: async (config, ctx, accum) => {
 		const interactive = config.interactive;

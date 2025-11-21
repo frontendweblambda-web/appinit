@@ -40,5 +40,5 @@ export async function createProject(cmd: CLICommand) {
 	console.log("  npm install");
 	console.log("  npm run dev\n");
 
-	printFooter(answers.promptResult?.projectName!);
+	printFooter(cmd.args[1]);
 }

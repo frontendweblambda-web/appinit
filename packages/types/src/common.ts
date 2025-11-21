@@ -112,7 +112,7 @@ export type FrontendFramework =
 	| "astro"
 	| "react-router"
 	| "next"
-	| "nux"
+	| "nuxt"
 	| "framer"
 	| "none";
 export type BackendFramework =

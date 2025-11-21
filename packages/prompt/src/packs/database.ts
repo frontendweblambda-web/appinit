@@ -5,8 +5,12 @@ export const database: PromptPack = {
 	name: "database",
 	priority: 45,
 
-	condition: (_, accum) =>
-		["backend", "fullstack"].includes(accum.projectType ?? ""),
+	// Only runs when backend functionality is required
+	condition: (_, accum) => {
+		if (["next", "framer", "nuxt"].includes(accum.frontendFramework!))
+			return false;
+		return ["backend", "fullstack"].includes(accum.projectType ?? "");
+	},
 
 	handler: async (config, ctx, accum) => {
 		const interactive = config.interactive;
