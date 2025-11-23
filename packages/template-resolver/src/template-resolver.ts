@@ -1,31 +1,34 @@
 import {
-	detectSourceType,
-	downloadGithubTemplate,
-	downloadMarketTemplate,
-	downloadNpmTemplate,
-	downloadUrlTemplate,
+	AppinitConfig,
+	ResolvedTemplate,
+	TemplateConfig,
+	TemplateMetaJson,
+} from "@appinit/types";
+import {
 	ensureDir,
 	joinPath,
 	pathExists,
 	readDirRecursive,
+	readFileUtf8,
+	readJson,
 	removeDir,
-	resolveLocalTemplate,
 } from "@appinit/utils";
-import os from "node:os";
-import path from "path";
-
-import type { ResolvedTemplate, ResolveOptions } from "@appinit/types";
-
 import fs from "node:fs/promises";
-import { resolveBuiltinTemplate } from "./utils/builtin-map";
-import { loadAppInitConfig } from "./utils/load-appinit-config";
-import { loadHooks } from "./utils/load-hooks";
-import { loadJsonIfExists } from "./utils/load-json-if-exists";
+import path from "node:path";
+import { loadHooks } from "./core/load-hooks";
+import { loadVariables } from "./core/load-variable";
+import { resolveLocalTemplate } from "./core/resolve-local-template";
+import { templateSource } from "./core/template-source-type";
+import { resolveVariables } from "./resolver/resolve-variables";
+import { selectBaseTemplate } from "./select-template";
+import { shouldIgnore } from "./utils/ignore";
 import { loadTemplateModule } from "./utils/load-template-module";
-import { loadVariables } from "./utils/load-variable";
-import { loadFile } from "./utils/loader-file";
+import { normalizeTemplateFilePath } from "./utils/normalize-file-path";
+import { normalizePath } from "./utils/normalize-path";
+import { applyRename } from "./utils/rename-file";
+import { renderTemplate } from "./utils/render-template";
+import { shouldIncludeByFilters } from "./utils/should-include-by-filter";
 import { VFS } from "./vfs";
-
 /**
  * Template Resolver — PURE FUNCTION
  * --------------------------------
@@ -41,62 +44,54 @@ import { VFS } from "./vfs";
  * NO FILE WRITING
  * NO RENAME/FILTER LOGIC
  */
-export async function templateResolver(
-	source: string,
-	options: ResolveOptions,
-): Promise<ResolvedTemplate> {
-	const { cacheDir, projectName, answers, targetDir } = options;
+export async function templateResolver(config: AppinitConfig) {
+	const { cacheDir, answers, targetDir } = config;
 
-	// Temp directory for unpacked template
+	// selecte template source
+	const source = selectBaseTemplate(answers!);
+
+	// 1. Template dir
 	const tempDir = path.join(
-		cacheDir ?? path.join(os.homedir(), ".appinit/cache"),
+		cacheDir,
 		"temp",
 		answers?.projectType ?? "frontend",
-		projectName,
+		answers?.projectName!,
 	);
+
 	await removeDir(tempDir);
 	await ensureDir(tempDir);
 
-	// source type: [appinit, github, npm, market, https,http], default appinit
-	const type = detectSourceType(source);
-
-	// ----------------------------------------------
-	// DOWNLOAD / RESOLVE TEMPLATE
-	// ----------------------------------------------
+	// 2. Detect source type
+	const type = templateSource(source);
 	switch (type) {
-		// copying base as it is here
-		// no renaming and no transforming
 		case "appinit":
-			const builtinPath = await resolveBuiltinTemplate(
+			await resolveLocalTemplate(
 				source,
-				options.answers?.projectType!,
+				answers?.projectType ?? "frontend",
+				tempDir,
 			);
-
-			// copy in tempDir
-			await resolveLocalTemplate(type, builtinPath, tempDir);
 			break;
-
 		case "github":
-			await downloadGithubTemplate(source.replace(/^github:/, ""), tempDir);
+			//	await downloadGithubTemplate(source.replace(/^github:/, ""), tempDir);
 			break;
 
 		case "npm":
-			await downloadNpmTemplate(source.replace(/^npm:/, ""), tempDir);
+			//await downloadNpmTemplate(source.replace(/^npm:/, ""), tempDir);
 			break;
 
 		case "url":
-			await downloadUrlTemplate(source, tempDir);
+			//await downloadUrlTemplate(source, tempDir);
 			break;
 
 		case "market":
-			await downloadMarketTemplate(source.replace(/^market:/, ""), tempDir);
+			//await downloadMarketTemplate(source.replace(/^market:/, ""), tempDir);
 			break;
-
 		default:
 			throw new Error(`Unsupported template source: ${source}`);
 	}
 
-	const templateDir = path.join(tempDir, "template");
+	// 3. Template directory
+	const templateDir = joinPath(tempDir, "template");
 	if (!(await pathExists(templateDir))) {
 		throw new Error(
 			`❌ Template folder not found: ${templateDir}\n` +
@@ -104,89 +99,127 @@ export async function templateResolver(
 		);
 	}
 
-	// ----------------------------------------------
-	// LOAD TEMPLATE META
-	// ----------------------------------------------
+	// 4.1 appinit.template.json → static template metadata
+	const templateJson: Record<string, any> =
+		(await readJson(joinPath(templateDir, "appinit.template.json"))) ?? null;
 
-	// ---- LOAD METADATA ----
-	const templateJson = await loadJsonIfExists(
-		joinPath(tempDir, "template.json"),
-	);
-	const registryJson = await loadJsonIfExists(
-		joinPath(tempDir, "registry.json"),
-	);
-	const loadDocs = await loadFile(joinPath(tempDir, "docs/usage.md"));
-	const packageJson = await loadJsonIfExists(
-		joinPath(templateDir, "package.json__tmpl"),
-	);
+	// 4.2 template.meta.json → root folder, rename rules, ignore
+	const templateMeta: TemplateMetaJson =
+		(await readJson(joinPath(templateDir, "template.meta.json"))) ?? {};
 
-	// ---- LOAD MODULES ----
-	const hooks = await loadHooks(tempDir);
-	const variables = await loadVariables(tempDir);
-	const appInitConfig = await loadAppInitConfig(templateDir);
-	const templateModule = await loadTemplateModule(tempDir);
+	//  root folder
+	const rootFolder = templateMeta.root || "base"; // support both
+	const renameRules: Record<string, string> = templateMeta.rename ?? {};
+	const ignorePatterns: string[] = templateMeta.ignore ?? [];
 
-	// const templateModule = loadedModule?.default ?? null;
-	// ----------------------------------------------
-	// BUILD VIRTUAL FILE SYSTEM
-	// ----------------------------------------------
+	// 4.3 Load template logic module (appinit.template.ts)
+	const templateModules = await loadTemplateModule(templateDir); // module object
+	const templateConfig: TemplateConfig =
+		templateModules?.default ?? templateModules ?? {};
+
+	// 4.4 Load variables modules (defaults, schema, transform)
+	const variables = await loadVariables(templateDir);
+	// 4.5 Load hooks (before/after) — but DO NOT RUN them here
+	const hooks = await loadHooks(templateDir);
+
+	// 4.6 Optional docs (docs/usage.md)
+	const docsPath = joinPath(tempDir, "docs/usage.md");
+	const docs = (await pathExists(docsPath))
+		? await readFileUtf8(docsPath)
+		: null;
+
+	const resolvedVariables = await resolveVariables(variables, answers ?? {}, {
+		templateDir,
+		tempDir,
+		targetDir,
+		templateJson,
+	});
+
+	// Context passed to filters/injection/etc
+	const ctx = {
+		variables: resolvedVariables,
+		answers: answers ?? {},
+		templateDir,
+		tempDir,
+		targetDir,
+		templateJson,
+	};
+
 	const vfs = new VFS();
-	const entries = await readDirRecursive(templateDir);
+	const baseDir = joinPath(templateDir, rootFolder);
 
-	for (const rel of entries) {
-		const full = joinPath(templateDir, rel);
-		const stat = await fs.stat(full);
-		if (!stat.isFile()) continue;
-
-		const content = await fs.readFile(full, "utf8");
-
-		// normalize
-		const cleanPath = normalizeTemplatePath(rel);
-
-		vfs.write(cleanPath, content);
+	if (!(await pathExists(baseDir))) {
+		throw new Error(
+			`❌ rootFolder "${rootFolder}" not found inside template. Expected at: ${baseDir}`,
+		);
 	}
 
-	// ---------------------------------
-	// RETURN PURE RESOLVED TEMPLATE
-	// ---------------------------------
+	// Read all files inside rootFolder (e.g. base/)
+	const entries = await readDirRecursive(baseDir);
 
-	const result = {
-		sourceType: type,
-		sourceLocator: source,
+	for (const rel of entries) {
+		const absPath = joinPath(baseDir, rel);
+
+		const stat = await fs.stat(absPath);
+		if (!stat.isFile()) continue;
+
+		const relNormalized = normalizePath(rel); // unix-style: src/App.tsx__tmpl
+
+		// 6.1 Ignore patterns from template.meta.json
+		if (shouldIgnore(relNormalized, ignorePatterns)) continue;
+
+		const filters = templateConfig.filters ?? {};
+
+		// 6.2 Filters from appinit.template.ts (optional)
+		if (!shouldIncludeByFilters(relNormalized, filters, ctx)) {
+			continue;
+		}
+
+		// Read raw content
+		let content: string = await readFileUtf8(absPath);
+
+		// 6.3 Handle __tmpl / _tmpl / .tmpl / .tpl / .hbs suffixes
+		const { outputPath, isTemplateFile } =
+			normalizeTemplateFilePath(relNormalized);
+
+		if (isTemplateFile) {
+			content = renderTemplate(content, resolvedVariables);
+		}
+
+		// 6.4 Apply rename rules (_gitignore → .gitignore, etc.)
+		const finalPath = applyRename(outputPath, renameRules);
+
+		// Write to VFS
+		vfs.write(finalPath, content);
+	}
+
+	const result: ResolvedTemplate = {
 		tempDir,
 		templateDir,
-		targetDir: targetDir!,
-		registry: registryJson,
+		targetDir,
 		templateJson,
-		packageJson: {}, // tmpl => not load JSON
-		templateModule,
-		appInitConfig,
+		templateMeta,
+		templateConfig: templateConfig,
+		variables: resolvedVariables,
 		hooks,
-		variables,
-		loadDocs,
+		docs: docs!,
 		files: vfs.files,
 	};
 
 	return result;
 }
 
-function normalizeTemplatePath(rel: string): string {
-	// remove template/ prefix
-	rel = rel.replace(/^template[\\/]/, "");
+/**
+ * Very small, safe template engine:
+ * Replaces {{ path.to.value }} with value from the variables object.
+ *
+ * - supports dot notation: {{ projectName }}, {{ features.example }}
+ * - no logic, no loops, no conditionals → deterministic & safe
+ */
 
-	// remove config/ folder (if needed)
-	if (rel.startsWith("config/")) {
-		rel = rel.replace(/^config[\\/]/, "");
-	}
-	// common suffixes added to template files
-	// examples: file.ts__tmpl, file.ts_tmpl, index.html.tmpl, config.json.tmpl, readme.md.tpl
-	rel = rel.replace(
-		/(\.([a-z0-9]+))?(?:__tmpl|_tmpl|\.tmpl|\.tpl|\.hbs)$/,
-		"$1",
-	);
-
-	// normalize windows slashes
-	rel = rel.replace(/\\/g, "/");
-
-	return rel;
-}
+/**
+ * Apply rename rules from template.meta.json:
+ *   { "_gitignore": ".gitignore" }
+ *
+ * Only applies to the last path segment.
+ */

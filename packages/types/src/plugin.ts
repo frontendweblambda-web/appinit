@@ -4,7 +4,7 @@
 import type { Answers } from "./answers.js";
 import type { EngineContext } from "./engine/context.js";
 import { TemplateFile, TransformContext } from "./file.js";
-import type { ResolvedTemplate } from "./template.js";
+import type { ResolvedTemplate } from "./template/template.js";
 /* -----------------------------------------------------------
  * Shared Context
  * -------------------------------------------------------- */

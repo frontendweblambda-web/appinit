@@ -8,18 +8,13 @@ import type {
 
 import { logger, theme } from "@appinit/core";
 import {
-	authPack,
 	backendPack,
-	deployPack,
 	environmentPack,
 	frameworkPack,
-	gitPack,
-	infraPack,
 	languagePack,
 	metaPack,
 	previousConfigPack,
 	projectTypePack,
-	qualityPack,
 } from "./packs";
 import { architecturePack } from "./packs/architecture";
 import { database } from "./packs/database";
@@ -38,12 +33,12 @@ const DEFAULT_PIPELINE: PromptPack[] = [
 	frontendPack,
 	backendPack,
 	database,
-	authPack,
+	// authPack,
 	environmentPack,
-	qualityPack,
-	infraPack,
-	deployPack,
-	gitPack,
+	// qualityPack,
+	// infraPack,
+	// deployPack,
+	// gitPack,
 ];
 
 // --------------------------------------------------------
@@ -54,7 +49,7 @@ export async function runPromptEngine(
 	packs?: PromptPack[],
 ): Promise<PromptResult> {
 	// intro("create-appinit-app");
-	logger.step("Starting prompt engine...");
+	// logger.step("Starting prompt engine...");
 
 	const promptConfig: PromptContext = {
 		projectName: config.cliCommand?.args[1],
@@ -71,14 +66,14 @@ export async function runPromptEngine(
 	pipeline.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
 	Object.freeze(pipeline);
 
-	logger.info(`📦 Pipeline Loaded (${pipeline.length} packs)`);
+	// logger.info(`📦 Pipeline Loaded (${pipeline.length} packs)`);
 
 	// 2️⃣ Global beforeAll hook
 	if (promptConfig.hooks?.beforeAll)
 		await promptConfig.hooks.beforeAll(promptConfig, final);
 
 	for (const pack of pipeline) {
-		logger.info(`➡️  Running pack: ${pack.name}`);
+		// logger.info(`➡️  Running pack: ${pack.name}`);
 		try {
 			// 🚫 Skip if conditional function returns false
 			if (pack.condition && !(await pack.condition(promptConfig, final))) {
@@ -100,7 +95,6 @@ export async function runPromptEngine(
 			if (promptConfig.hooks?.afterEach)
 				await promptConfig.hooks.afterEach(pack, promptConfig, final);
 		} catch (err) {
-			console.log("E", err);
 			logger.error(`❌ Pack failed: "${pack.name}"`);
 			logger.error(`Reason: ${(err as Error).message}`);
 			throw err;

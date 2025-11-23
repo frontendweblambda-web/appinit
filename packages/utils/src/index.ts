@@ -23,6 +23,5 @@ export * from "./remove";
 export * from "./render";
 export * from "./semver";
 export * from "./sleep";
-export * from "./template-helper";
 export * from "./url";
 export * from "./validate";

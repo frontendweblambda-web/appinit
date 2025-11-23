@@ -1,10 +1,11 @@
+export * from "./config";
+
 export * from "./agent";
 export * from "./answers";
 export * from "./auth";
 export * from "./backend";
 export * from "./command";
 export * from "./common";
-export * from "./config";
 export * from "./deploy";
 export * from "./engine";
 export * from "./error";
@@ -27,5 +28,6 @@ export * from "./provider";
 export * from "./registry";
 export * from "./saved-config";
 export * from "./spinner";
+// export * from "./template";
 export * from "./template";
 export * from "./workspace";

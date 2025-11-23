@@ -1,5 +1,5 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["src", "bin/cli.js"],
+	"include": ["src", "bin/cli.js", "../core/src/utils/format-error.ts"],
 	"exclude": ["dist", "node_modules", "bin"]
 }

@@ -61,6 +61,11 @@ export type SvelteBasedForms =
 	| "felte"
 	| "svelte-use-form"
 	| "none";
+export type Form =
+	| ReactBasedForms
+	| VueBasedForms
+	| AngularBasedForms
+	| SvelteBasedForms;
 export type ReactBasedAnimation = "framer-motion" | "gsap" | "none";
 
 export type CommonAnimation = "gsap" | "none";

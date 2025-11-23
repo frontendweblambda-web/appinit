@@ -11,16 +11,17 @@ import {
 	Database,
 	Editor,
 	Formatter,
-	Framework,
 	FrontendFramework,
 	Language,
 	Linter,
 	PackageManager,
+	ProjectStructure,
 	ProjectType,
 	TestRunner,
 	WorkspaceTool,
 } from "./common";
 import { AppinitConfig, ProjectMeta } from "./config";
+import { Form } from "./frontend";
 
 // -------------------------------------------------
 // Choice Option
@@ -104,12 +105,6 @@ export type PromptResultFromQuestions<Q extends readonly PromptQuestion[]> = {
 	[K in Q[number] as K["name"]]: K extends PromptBase<infer T> ? T : unknown;
 };
 
-export type PromptResult = Record<string, any> & {
-	projectType?: ProjectType;
-	frontendFramework?: FrontendFramework;
-	backendFramework?: BackendFramework;
-};
-
 // -------------------------------------------------
 // Prompt Pack / Hooks
 // -------------------------------------------------
@@ -120,24 +115,19 @@ export type PromptPackHandler = (
 ) => Promise<PromptResult | null>;
 
 export interface PromptHooks {
-	// Called once before **any** pack starts
 	beforeAll?: (ctx: PromptContext, accum: PromptResult) => void | Promise<void>;
-
-	// Called before **each** pack runs
 	beforeEach?: (
 		pack: PromptPack,
 		ctx: PromptContext,
 		accum: PromptResult,
 	) => void | Promise<void>;
 
-	// Called after **each** pack completes
 	afterEach?: (
 		pack: PromptPack,
 		ctx: PromptContext,
 		result: PromptResult,
 	) => void | Promise<void>;
 
-	// Called once after **all packs** are finished
 	afterAll?: (ctx: PromptContext, final: PromptResult) => void | Promise<void>;
 }
 
@@ -181,14 +171,15 @@ export type PromptPackDefinition =
 // Prompt Context
 // -------------------------------------------------
 
-export type PromptContext = ProjectMeta & {
+type BasePrompt = {
 	projectType?: ProjectType;
-	framework?: Framework;
+	packageManager?: PackageManager;
 	frontendFramework?: FrontendFramework;
 	backendFramework?: BackendFramework;
 	architecture?: Architecture;
+	projectStructure?: ProjectStructure;
 
-	form?: string;
+	form?: Form;
 	store?: string;
 	routing?: string;
 	language?: Language;
@@ -200,7 +191,6 @@ export type PromptContext = ProjectMeta & {
 	orm?: NodeOrm;
 	reusePrevious?: boolean;
 
-	packageManager?: PackageManager;
 	hooks?: PromptHooks;
 	workspaceTool?: WorkspaceTool;
 
@@ -210,3 +200,12 @@ export type PromptContext = ProjectMeta & {
 	testing?: TestRunner;
 	editor?: Editor;
 };
+export type PromptContext = ProjectMeta & BasePrompt & {};
+
+export type PromptResult = Record<string, any> &
+	BasePrompt &
+	ProjectMeta & {
+		projectType?: ProjectType;
+		frontendFramework?: FrontendFramework;
+		backendFramework?: BackendFramework;
+	};

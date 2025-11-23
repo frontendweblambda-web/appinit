@@ -1,0 +1,15 @@
+{
+  "root": "base",
+  "ignore": [
+      "**/*.md__tmpl",
+    "**/*.test__tmpl",
+    "**/*.spec__tmpl",
+    "**/tests/**",
+    ".DS_Store",
+    "*.log",
+    "template.meta.json__tmpl"
+  ],
+  "rename": {
+    "_gitignore": ".gitignore"
+  }
+}

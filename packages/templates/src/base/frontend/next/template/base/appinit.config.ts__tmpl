@@ -1,0 +1,54 @@
+// template/base/appinit.config.ts__tmpl
+
+export default defineAppInitConfig({
+  //
+  // Basic project metadata
+  //
+  projectName: "{{ projectName }}",
+  projectSlug: "{{ projectSlug }}",
+
+  //
+  // Project classification
+  //
+  projectType: "{{ projectType }}",         // frontend | backend | fullstack
+  framework: "{{ framework }}",             // react | next | vue | svelte | ...
+  language: "{{ language }}",               // ts | js
+  ui: "{{ ui }}",                           // tailwind | shadcn | none
+
+  //
+  // Feature flags for template behavior
+  //
+  features: {
+    example: {{ features.example ? "true" : "false" }}
+  },
+
+  //
+  // AI Section – optional but future-proof
+  //
+  ai: {
+    enabled: {{ ai.enabled ? "true" : "false" }},
+    model: "{{ ai.model }}",
+    autoGenerateComponents: {{ ai.autoGenerateComponents ? "true" : "false" }}
+  },
+
+  //
+  // Deployment configuration
+  //
+  deploy: {
+    provider: "{{ deploy.provider }}",      // vercel | netlify | aws | docker
+    region: "{{ deploy.region }}"
+  },
+
+  //
+  // Upgrades & sync
+  //
+  upgrades: {
+    enabled: {{ upgrades.enabled ? "true" : "false" }}
+  },
+
+  //
+  // Plugins and packs (installed later via CLI)
+  //
+  plugins: [],
+  packs: []
+});

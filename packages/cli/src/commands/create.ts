@@ -1,44 +1,32 @@
-import { printFooter } from "@appinit/core";
-import { buildContext } from "../core/context.js";
-
+import { printFooter, printHeader } from "@appinit/core";
+import { startEngine } from "@appinit/engine";
+import { templateResolver } from "@appinit/template-resolver";
 import { CLICommand } from "@appinit/types";
+import { buildContext } from "../core/context.js";
 import { resolveAnswers } from "../core/resolve-answers";
+import { getCliVersion } from "../utils/cli-info";
 /**
  * Start creating project
  * @param cmd
  */
 export async function createProject(cmd: CLICommand) {
 	console.clear();
-	console.log("\n🚀 Appinit — Create a project\n");
-
 	// 1. if user provided --template template-name
+	await printHeader({ version: getCliVersion() });
 
 	// 2. Build initial context
-	const config = await buildContext(cmd);
+	const ctx = await buildContext(cmd);
 
 	// 2. Resolve answers (prompt engine inside this)
-	const answers = await resolveAnswers(config);
-	// ctx.answers = answers;
+	const config = await resolveAnswers(ctx);
 
-	// // 3. Resolve template
-	// const templateId = selectBaseTemplate(answers);
-	// const cacheDir = path.join(os.homedir(), ".appinit/cache");
-	// const targetDir = path.join(ctx.cwd, answers.projectName!);
-	// const resolvedTemplate = await templateResolver(templateId, {
-	// 	cwd: ctx.cwd,
-	// 	cacheDir,
-	// 	projectName: answers.projectName!,
-	// 	framework: isFrontend(answers.projectType!) ? answers.framework : "",
-	// 	language: answers.language!,
-	// 	answers,
-	// 	targetDir,
-	// });
+	const resolvedTemplate = await templateResolver(config);
 
-	// await startEngine(targetDir, ctx, resolvedTemplate);
+	await startEngine(config, resolvedTemplate);
 
-	console.log("\n✅ Project created. Next steps:", config);
+	console.log("\n✅ Project created. Next steps:");
 	console.log("  npm install");
 	console.log("  npm run dev\n");
 
-	printFooter(cmd.args[1]);
+	printFooter(config.answers?.projectName!);
 }

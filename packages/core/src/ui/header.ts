@@ -35,7 +35,7 @@ export async function printHeader(options: HeaderOptions) {
 	console.log(theme.primary(theme.dim(`v${options.version}`)));
 
 	// Update check
-	const latest = checkUpdate(options.version!);
+	const latest = await checkUpdate(options.version!);
 	if (latest) {
 		console.log("");
 		console.log(

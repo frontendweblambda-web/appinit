@@ -9,7 +9,7 @@ export const metaPack: PromptPack = {
 	priority: 10,
 
 	async handler(config, ctx, accum) {
-		const flags = config.flags ?? {};
+		const flags = config.cliCommand?.flags ?? {};
 		const prev = config.config ?? {};
 		const api = config.runtime === "api";
 		const interactive = config.interactive;
@@ -19,8 +19,6 @@ export const metaPack: PromptPack = {
 			let raw = flags[flagKey as keyof typeof flags] ?? fallback;
 			return format ? format(raw) : raw;
 		};
-
-		console.log("CTC", ctx, accum, interactive);
 
 		if (!interactive || api) {
 			const result: PromptResult = {
@@ -120,7 +118,7 @@ export const metaPack: PromptPack = {
 		// --------------------------
 		// Package Scope
 		// --------------------------
-		console.log("HI-----", shouldAskPackageScope(config, ctx, accum));
+
 		if (shouldAskPackageScope(config, ctx, accum)) {
 			questions.push({
 				type: "text",

@@ -1,0 +1,14 @@
+{
+  "name": "@appinit/template-next",
+  "title": "Next.js App Router + TypeScript Base Template",
+  "version": "1.0.0",
+  "description": "A minimal, production-grade Next.js (App Router) + TypeScript starter template compliant with ATS 1.0.",
+  "tags": ["nextjs", "react", "typescript", "frontend", "app-router"],
+  "author": "AppInit",
+  "license": "MIT",
+  "compatibility": {
+    "node": ">=18.17.0",
+    "cli": ">=1.0.0"
+  },
+  "appinitSpec": "1.0"
+}

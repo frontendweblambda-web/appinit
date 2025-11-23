@@ -1,7 +1,10 @@
 import { AppinitConfig } from "@appinit/types";
 
 import { runPromptEngine } from "@appinit/prompt";
+import { joinPath } from "@appinit/utils";
+import { formatError } from "../../../core/src/utils/format-error";
 import { normalizeAnswers } from "../utils/common";
+import { projectMetaValidation } from "../validation/project-meta.validation";
 
 /**
  * resolve answers
@@ -31,11 +34,19 @@ export async function resolveAnswers(
 
 	// console.log("MERGE CTX AND RESULT", ctx);
 	// 5️⃣ Validate answers (non-interactive must error)
-	// validateRequiredAnswers(ctx, interactive);
-	console.log("CONFIG", config);
-	config.answers = normalizeAnswers(config.answers!);
+	const parsed = projectMetaValidation.safeParse({
+		projectName: config.answers?.projectName,
+		projectType: config.answers?.projectType,
+		template: config.answers?.template,
+	});
 
-	// Store back to ctx so other systems use normalized values
+	if (!parsed.success) {
+		config.log?.error(formatError(parsed.error));
+		process.exit(1);
+	}
+
+	config.answers = normalizeAnswers(config.answers!);
+	config.targetDir = joinPath(config.cwd, config.answers?.projectName!);
 
 	// 6️⃣ Normalize final shape
 	return config;

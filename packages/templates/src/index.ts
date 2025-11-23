@@ -1,1 +1,1 @@
-export async function Template(){}
+export async function Template() {}

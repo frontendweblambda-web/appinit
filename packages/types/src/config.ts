@@ -18,6 +18,7 @@ export type AppinitConfig = {
 	command: string;
 	cwd: string;
 	cacheDir: string;
+	targetDir?: string;
 	cliName: string;
 	cliVersion: string;
 	runtime: runtime;

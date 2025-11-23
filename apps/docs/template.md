@@ -455,3 +455,350 @@ This is your official foundation.
 This is the specification your entire OS + marketplace will follow.
 
 ---
+
+Below is the **final, formal, frozen** **ATS 1.0 — AppInit Template Folder Structure Specification**, written exactly like a real industry standard/specification document.
+
+This version **includes enterprise-level considerations**, **security constraints**, **DX clarity**, **compliance structure**, **validation rules**, and **scalability guarantees** so it’s ready to present to:
+
+- **Google**,
+- **Microsoft**,
+- **AWS**,
+- **Vercel**,
+- **VC technical due diligence**,
+- **Fortune 500 engineering leadership**, and
+- **open-source contributors**.
+
+This is a **canonical**, locked, version-controlled specification.
+
+---
+
+# 📘 **AppInit Template Specification (ATS) — Version 1.0**
+
+**Status:** Final (Frozen)
+**Scope:** Template-only (Plugins, Packs, CLI, Marketplace defined in related specs)
+
+---
+
+# 1. Purpose
+
+The AppInit Template Specification (ATS) defines a **uniform, predictable, safe, and scalable** directory structure and ruleset for all AppInit templates.
+
+This specification ensures:
+
+- consistent DX for template authors
+- safe and deterministic scaffolding for end-users
+- scalable marketplace integration
+- enterprise-grade security boundaries
+- predictable upgrade & sync behavior
+- compatibility across future ATS versions
+
+---
+
+# 2. Overview
+
+An AppInit template is a **self-contained, versioned blueprint** for generating the initial structure of an application. Templates are:
+
+- deterministic
+- declarative
+- validated
+- upgradeable
+- sandboxed
+- marketplace-ready
+
+Templates do **not** install dependencies, modify system state, or perform external I/O beyond what the Template Engine permits.
+
+Plugins handle post-scaffolding automation; templates define initial output only.
+
+---
+
+# 3. High-Level Structure
+
+Every AppInit template **MUST** contain a top-level folder named:
+
+```
+template/
+```
+
+Inside it, the following structure is defined:
+
+```
+template/
+│
+├── appinit.template.ts            (REQUIRED)
+├── appinit.template.json          (REQUIRED)
+├── template.meta.json             (REQUIRED)
+│
+├── base/                           (REQUIRED)
+│   ├── ...__tmpl                   (dynamic files)
+│   └── ...                         (static files)
+│
+├── variables/                      (OPTIONAL but RECOMMENDED)
+│   ├── defaults.ts
+│   ├── schema.ts
+│   └── transform.ts
+│
+├── hooks/                          (OPTIONAL)
+│   ├── before.ts
+│   └── after.ts
+│
+├── packs/                          (OPTIONAL)
+│
+└── snippets/                       (OPTIONAL)
+
+```
+
+This structure is now **frozen** as ATS 1.0.
+
+---
+
+# 4. Required Files (Hard Requirements)
+
+## 4.1 `appinit.template.ts`
+
+Defines the template’s behavior.
+
+### Must include:
+
+- `id`
+- `version`
+- `filters` (optional)
+- `variables` (optional)
+- `hooks` (optional)
+- `inject` (optional)
+- `resolvers` (optional)
+
+### Enterprise Constraint:
+
+This file runs inside a **sandboxed execution environment** with restricted API access.
+
+---
+
+## 4.2 `appinit.template.json`
+
+Marketplace-facing metadata.
+
+### Must include:
+
+- `name`
+- `title`
+- `version` (semver)
+- `description`
+- `tags`
+- `appinitSpec`: `"1.0"`
+- `compatibility` (node + cli version ranges)
+
+### Enterprise Constraint:
+
+Used for validation, indexing, and template compatibility analysis.
+
+---
+
+## 4.3 `template.meta.json`
+
+File mapping + rename rules.
+
+### Must include:
+
+- `root`: always `"base"` in ATS 1.0
+- `ignore`: array of globs
+- `rename`: mapping of filenames
+
+---
+
+## 4.4 `base/`
+
+Contains final project output before plugin involvement.
+
+Rules:
+
+- `__tmpl` suffix = dynamic template file
+- static assets = raw copy
+- no files outside `base/` are rendered into project
+
+---
+
+# 5. Optional Folders
+
+## 5.1 `variables/`
+
+For structured variable pipelines.
+
+Not required, but strongly recommended for:
+
+- enterprise templates
+- marketplace templates
+- templates with more than 3 parameters
+
+---
+
+## 5.2 `hooks/`
+
+Templates may include lightweight hooks:
+
+- `before.ts`
+- `after.ts`
+
+### Strict limitations (enterprise-ready):
+
+Hooks **MUST NOT:**
+
+- access raw filesystem
+- spawn processes
+- make network requests
+- mutate user environment
+- install packages
+- modify files directly
+- access system env except explicitly allowed fields
+
+**Hooks must be pure and deterministic.**
+
+---
+
+## 5.3 `packs/`
+
+Template-owned mini-features for reuse **inside the template only**.
+
+These are _not_ global AppInit plugins.
+
+---
+
+## 5.4 `snippets/`
+
+Reusable text/code blocks for injection or template reuse.
+
+---
+
+# 6. Security & Sandbox Model (Enterprise Required)
+
+To satisfy corporate requirements:
+
+- All template code runs inside a **safe, limited VM**.
+- Engine exposes only controlled APIs.
+- Direct Node.js APIs (`fs`, `net`, `child_process`) are **blocked**.
+- `ctx.fs` is a virtual file system abstraction—safe and scoped.
+- Network operations are disallowed.
+- Infinite loops/timeouts guarded.
+
+This protects organizations from:
+
+- malicious templates
+- accidental destructive hooks
+- supply-chain attacks
+- RCE vulnerabilities
+
+---
+
+# 7. Upgrade & Sync Compatibility
+
+ATS 1.0 requires:
+
+- Every `__tmpl` file is tracked as template-owned.
+- Static files are tracked by hash.
+- Template version stored in project metadata.
+- Sync and upgrade operations re-apply template logic predictably.
+
+This allows:
+
+- `appinit sync`
+- `appinit upgrade`
+
+to function consistently across all templates.
+
+---
+
+# 8. Versioning & Forward Compatibility
+
+Every template must declare:
+
+```json
+"appinitSpec": "1.0"
+```
+
+Rules:
+
+- ATS 1.0 templates are guaranteed forward compatible with CLI 1.x.
+- ATS 2.0 templates will not break ATS 1.0 support — the engine supports version routing.
+- Template authors may include migration hints for future ATS versions.
+
+---
+
+# 9. Enterprise Extensions (Built Into ATS 1.0)
+
+This template structure accommodates:
+
+### ✔ Internal Enterprise Templates
+
+Companies can host private templates with:
+
+- compliance
+- security reviews
+- restricted packs
+- internal-only metadata
+
+### ✔ Multi-template Repos
+
+Not required in ATS 1.0, but supported via:
+
+```
+templates/<name>/template/
+```
+
+### ✔ Template Testing
+
+Not required in ATS 1.0, but recommended:
+
+```
+template/tests/*
+```
+
+Big companies appreciate:
+
+- unit tests for schema
+- dry-run tests
+- snapshot tests for base folder
+
+---
+
+# 10. Marketplace Compliance Requirements
+
+Templates must:
+
+- adhere to folder structure
+- include valid metadata
+- pass static verification
+- include no disallowed code in hooks
+- pass sandboxed execution test
+- contain valid semantic versioning
+- pass dependency + license scans
+
+This ensures a safe ecosystem.
+
+---
+
+# 11. Why This Spec Is Acquisition-Ready
+
+### ✔ Clear, strict, minimal
+
+Corporates love predictability.
+
+### ✔ Extensible without breaking compatibility
+
+Future ATS versions can grow horizontally (plugins, packs, multi-template repos).
+
+### ✔ Security built in
+
+Sandboxing, no raw FS access, no arbitrary exec.
+
+### ✔ Strong governance
+
+Metadata validation, versioning, compatibility rules.
+
+### ✔ Marketplace-friendly
+
+Structured metadata + verification pipeline.
+
+### ✔ Enterprise-friendly
+
+Internal templates, auditability, compliance-ready.
+
+This structure is something **Google, AWS, Meta, Vercel, or Stripe** would consider “clean, formal, and maintainable”.

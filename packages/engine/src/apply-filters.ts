@@ -1,4 +1,4 @@
-import { EngineContext, TemplateContext } from "@appinit/types";
+import { EngineContext } from "@appinit/types";
 import { minimatch } from "minimatch";
 
 /**
@@ -7,12 +7,12 @@ import { minimatch } from "minimatch";
  * @returns
  */
 export function applyFilters(engine: EngineContext) {
-	const filters = engine.template.templateModule?.filters;
+	const filters = engine.template?.templateConfig?.filters;
 	if (!filters) return;
 
 	const tctx = toTemplateCtx(engine);
 
-	for (const [file] of engine.template.files!) {
+	for (const [file] of engine.files!) {
 		for (const pattern of Object.keys(filters)) {
 			if (minimatch(file, pattern)) {
 				const include = filters[pattern](tctx, file);
@@ -22,21 +22,17 @@ export function applyFilters(engine: EngineContext) {
 	}
 }
 
-export function toTemplateCtx(engine: EngineContext): TemplateContext {
+export function toTemplateCtx(engine: EngineContext) {
 	return {
 		targetDir: engine.targetDir,
 		projectName: engine.answers.projectName!,
 		language: engine.answers.language!,
 		answers: engine.answers,
-		variables: engine.variables,
 		files: engine.template.files!,
-		log: engine.log,
 		framework: engine.answers.framework!,
 		ui: engine.answers.ui,
 		inlineVariables: engine.template.inlineVariables ?? {},
 		tempDir: engine.template.tempDir,
 		templateDir: engine.template.templateDir,
-		meta: engine.template.meta!,
-		utils: engine.utils!,
 	};
 }

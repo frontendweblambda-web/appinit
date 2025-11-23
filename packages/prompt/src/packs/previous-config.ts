@@ -1,24 +1,22 @@
-import type { PromptPack, PromptContext, PromptQuestion } from "@appinit/types";
-import { askAnswers } from "../prompt";
+import type { PromptPack } from "@appinit/types";
 import { validateName } from "@appinit/utils";
+import { askAnswers } from "../prompt";
 
 export const previousConfigPack: PromptPack = {
 	name: "previous-config",
 	priority: 5, // MUST run before metaPack
 
-	async handler(ctx: PromptContext, accum) {
-		const flags = ctx.flags ?? {};
-		const savedConfig = ctx.config ?? null;
-		const api = ctx.runtime === "api";
-		const nonInteractive = flags.nonInteractive;
+	async handler(config, ctx, accum) {
+		const savedConfig = config.config ?? null;
+		const api = config.runtime === "api";
+		const interactive = config.interactive;
 
 		// ---------------------------------------------
 		// 1) Non-interactive → skip reuse logic
 		// ---------------------------------------------
 		// Skip reuse prompts in non-interactive or API mode
-		if (nonInteractive || api) return {};
+		if (!interactive || api) return {};
 		if (!savedConfig) {
-			console.log("NO CONFIG FOUND");
 			return {};
 		}
 
@@ -45,7 +43,7 @@ export const previousConfigPack: PromptPack = {
 		// ---------------------------------------------
 		// 4) Ask only for projectName override
 		// ---------------------------------------------
-		const initialName = ctx.cliName ?? `${savedConfig.projectName}-2`;
+		const initialName = ctx.projectName ?? `${savedConfig.projectName}-2`;
 		const rename = await askAnswers(
 			[
 				{

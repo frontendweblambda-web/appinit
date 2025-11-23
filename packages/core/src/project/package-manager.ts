@@ -61,7 +61,6 @@ export async function getPackageManager(
 		bun: "bun",
 	}[pm];
 
-	console.log("PACKAGEMANAGER", pm, bin, cwd);
 	if (!bin) {
 		throw new Error(`❌ Unknown package manager: "${pm}"`);
 	}

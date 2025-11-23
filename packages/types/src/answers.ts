@@ -25,33 +25,33 @@ import type { FrontendOptions } from "./frontend";
 
 export interface BaseAnswers {
 	projectType: ProjectType;
-	packageManager: PackageManager;
-	language: Language;
+	packageManager?: PackageManager;
+	language?: Language;
 	targetDir: string;
-	projectStructure: ProjectStructure;
-	workspaceTool: WorkspaceTool;
+	projectStructure?: ProjectStructure;
+	workspaceTool?: WorkspaceTool;
 
 	// 🧩 Architecture — applies to any buildable app
 	architecture?: Architecture;
 
-	formattingTool: Formatter;
-	lintingTool: Linter;
-	testingTool: TestRunner;
+	formattingTool?: Formatter;
+	lintingTool?: Linter;
+	testingTool?: TestRunner;
 
 	// ⚙️ Build & Runtime Configuration
 	buildTool?: string; // e.g., webpack, esbuild, rollup, Rust cargo
 	runtimeEnvironment?: string; // e.g., Node.js, Deno, JVM, Browser, WASM
 
 	// 🤝 Collaboration & Quality
-	commitConventions: boolean;
-	editor: Editor; // Editor configuration (e.g., VSCode settings)
+	// commitConventions: boolean;
+	editor?: Editor; // Editor configuration (e.g., VSCode settings)
 
-	initGit: boolean;
-	createRemote: boolean;
+	initGit?: boolean;
+	createRemote?: boolean;
 	repoVisibility?: RepoVisibility;
 	remoteOrg?: string | null;
 
-	setupCI: boolean;
+	setupCI?: boolean;
 	setupCD?: boolean;
 	ciProvider?: CIProvider;
 

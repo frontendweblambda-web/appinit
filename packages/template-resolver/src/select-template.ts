@@ -1,7 +1,7 @@
 import { PromptResult } from "@appinit/types";
 
 export function selectBaseTemplate(answers: PromptResult) {
-	const { framework, backend, projectType } = answers;
+	const { frontendFramework, backendFramework, projectType } = answers;
 	if (projectType === "frontend") {
 		const map: Record<string, string> = {
 			react: "appinit:react",
@@ -17,7 +17,8 @@ export function selectBaseTemplate(answers: PromptResult) {
 			none: "appinit:minimal",
 		};
 
-		if (framework && map[framework]) return map[framework];
+		if (frontendFramework && map[frontendFramework])
+			return map[frontendFramework];
 	}
 
 	if (projectType === "backend") {
@@ -29,7 +30,7 @@ export function selectBaseTemplate(answers: PromptResult) {
 			"cloudflare-worker": "appinit:cf-worker",
 		};
 
-		if (backend && map[backend]) return map[backend];
+		if (backendFramework && map[backendFramework]) return map[backendFramework];
 	}
 
 	if (projectType === "fullstack") {
@@ -41,7 +42,8 @@ export function selectBaseTemplate(answers: PromptResult) {
 			astro: "appinit:astro-fullstack",
 		};
 
-		if (framework && map[framework]) return map[framework];
+		if (frontendFramework && map[frontendFramework])
+			return map[frontendFramework];
 	}
 
 	if (answers.projectType === "library") {
