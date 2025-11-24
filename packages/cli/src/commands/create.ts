@@ -2,7 +2,7 @@ import { printFooter, printHeader } from "@appinit/core";
 import { runTemplateEngine } from "@appinit/engine";
 import { templateResolver } from "@appinit/template-resolver";
 import { CLICommand } from "@appinit/types";
-import { validateProjectPath } from "@appinit/utils";
+import { removeDir, validateProjectPath } from "@appinit/utils";
 import { buildContext } from "../core/context.js";
 import { resolveAnswers } from "../core/resolve-answers";
 import { getCliVersion } from "../utils/cli-info";
@@ -43,5 +43,7 @@ export async function createProject(cmd: CLICommand) {
 	console.log("  npm install");
 	console.log("  npm run dev\n");
 
+	// remove directry after successfull
+	await removeDir(resolvedTemplate.tempDir);
 	printFooter(config.answers?.projectName!);
 }

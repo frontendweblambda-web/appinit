@@ -1,21 +1,31 @@
-import ejs from "ejs";
-
-/**
- * Very small fast EJS-based renderer
- */
 export function renderTemplate(
 	content: string,
-	variables: Record<string, any>,
-) {
-	if (!content) return content;
+	vars: Record<string, any>,
+): string {
+	return content.replace(/%%\s*([a-zA-Z0-9_.-]+)\s*%%/g, (match, expr) => {
+		const path = String(expr).trim();
+		if (!path) return match;
 
-	try {
-		return ejs.render(content, variables, {
-			async: false,
-			rmWhitespace: false,
-		});
-	} catch (err) {
-		console.error("❌ Template render error:", err);
-		return content; // fail-safe
-	}
+		const parts = path.split(".");
+		let current: any = vars;
+
+		for (const part of parts) {
+			if (
+				current &&
+				typeof current === "object" &&
+				Object.prototype.hasOwnProperty.call(current, part)
+			) {
+				current = current[part];
+			} else {
+				current = undefined;
+				break;
+			}
+		}
+
+		if (current === undefined || current === null) {
+			return "";
+		}
+
+		return String(current);
+	});
 }

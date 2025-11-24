@@ -1,0 +1,9 @@
+{
+  "name": "@appinit/pack-tailwind",
+  "title": "Tailwind CSS Pack",
+  "description": "Add Tailwind, configs, index.css updates",
+  "version": "1.0.0",
+  "type": "ui",
+  "appinitSpec": "1.0",
+  "supports": ["react", "next"]
+}
