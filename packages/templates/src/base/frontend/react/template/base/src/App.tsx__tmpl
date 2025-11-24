@@ -1,7 +1,7 @@
 function App() {
   return (
     <main style={{ padding: "2rem", fontFamily: "system-ui" }}>
-      <h1>{{ projectName }}</h1>
+      <h1>%% projectName %%</h1>
       <p>Welcome! Your React + Vite + TypeScript app has been initialized using AppInit.</p>
     </main>
   );

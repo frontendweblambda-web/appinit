@@ -34,5 +34,6 @@ export function toTemplateCtx(engine: EngineContext) {
 		inlineVariables: engine.template.inlineVariables ?? {},
 		tempDir: engine.template.tempDir,
 		templateDir: engine.template.templateDir,
+		variables: engine.template.variables!,
 	};
 }

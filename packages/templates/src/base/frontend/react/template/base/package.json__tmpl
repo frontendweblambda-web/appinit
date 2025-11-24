@@ -1,0 +1,27 @@
+{
+  "name": "%% projectNameSlug %%",
+  "version": "1.0.0",
+  "private": true,
+  "description": "%% description %%",
+  "author": "%% author %%",
+  "license": "%% license %%",
+
+  "type": "module",
+
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

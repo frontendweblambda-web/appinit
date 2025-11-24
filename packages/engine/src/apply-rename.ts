@@ -2,7 +2,9 @@ import { EngineContext } from "@appinit/types";
 
 export function applyRename(ctx: EngineContext) {
 	const rename =
-		ctx.template.templateModule?.rename ?? ctx.template.meta?.rename ?? {};
+		ctx.template.templateConfig?.resolvers?.rename ??
+		ctx.template.templateMeta?.rename ??
+		{};
 
 	for (const [oldPath, newName] of Object.entries(rename)) {
 		for (const filePath of [...ctx.template.files!.keys()]) {

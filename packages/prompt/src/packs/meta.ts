@@ -14,6 +14,7 @@ export const metaPack: PromptPack = {
 		const api = config.runtime === "api";
 		const interactive = config.interactive;
 
+		console.log("META-PACK", config, ctx, accum);
 		// LOCAL UTILITY: get value in correct priority order
 		const get = (flagKey: string, fallback: any, format?: (v: any) => any) => {
 			let raw = flags[flagKey as keyof typeof flags] ?? fallback;
@@ -21,10 +22,14 @@ export const metaPack: PromptPack = {
 		};
 
 		if (!interactive || api) {
+			console.log("NOT-interactive-------");
 			const result: PromptResult = {
 				projectName: get(
 					"projectName",
-					config.cliName ?? prev.projectName ?? accum.projectName ?? "my-app",
+					config.cliCommand?.args[1] ??
+						prev.projectName ??
+						accum.projectName ??
+						"my-app",
 					(v) => String(v),
 				),
 
@@ -35,7 +40,7 @@ export const metaPack: PromptPack = {
 				),
 
 				author: get("author", prev.author ?? accum.author ?? "", (v) =>
-					String(v ?? ""),
+					String(v ?? "appinit"),
 				),
 
 				projectType: get(
@@ -56,7 +61,8 @@ export const metaPack: PromptPack = {
 		// Project Name
 		// --------------------------
 		// Project Name
-		if (!ctx.projectName) {
+		if (!ctx.projectName || ctx.projectName.trim() === "") {
+			console.log("Project name", ctx);
 			questions.push({
 				type: "text",
 				name: "projectName",

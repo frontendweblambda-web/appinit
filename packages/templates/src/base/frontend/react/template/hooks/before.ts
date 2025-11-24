@@ -1,7 +1,7 @@
 
 
 export async function beforeHook(ctx) {
-  ctx.log.info("🔧 Initializing React + Vite + TypeScript template…");
+  ctx.logger.info("🔧 Initializing React + Vite + TypeScript template…");
 
   //
   // 1. Validate Node version (enterprise requirement)
@@ -26,7 +26,7 @@ export async function beforeHook(ctx) {
 
   // 4. Debug mode support without types
   if (ctx.flags?.debug) {
-    ctx.logger.debug("Template variables:", ctx.variables);
+    ctx.logger.info("Template variables:", ctx.variables);
   }
 
 }

@@ -9,6 +9,7 @@ export interface Flags {
 	skipInstall?: boolean;
 	skipGit?: boolean;
 	skipDefaultPacks?: boolean;
+	force?: boolean;
 
 	// template
 	template?: string;

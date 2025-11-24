@@ -1,27 +1,26 @@
 export default defineAppInitConfig({
-  projectName: "{{ projectName }}",
-  projectType: "{{ projectType }}",       // frontend | backend | fullstack
-  framework: "{{ framework }}",           // react | next | vue | express | ...
-  language: "{{ language }}",             // typescript | javascript
-  ui: "{{ ui }}",                         // tailwind | shadcn | material | none
+  projectName: "%% projectName %%",
+  projectType: "%% projectType %%",       // frontend | backend | fullstack
+  framework: "%% framework %%",           // react | next | vue | express | ...
+  language: "%% language %%",             // typescript | javascript
+  ui: "%% ui %%",                          // tailwind | shadcn | material | none
 
   plugins: [
-    // These arrays always start empty — user installs plugins after scaffolding
-    // They will be updated by `appinit add plugin-name`
+    // Empty — user installs plugins after scaffolding
   ],
 
   ai: {
-    enabled: {{ ai.enabled ? "true" : "false" }},
-    model: "{{ ai.model }}",
-    autoGenerateComponents: {{ ai.autoGenerateComponents ? "true" : "false" }}
+    enabled: %% ai.enabled %%,                // boolean
+    model: "%% ai.model %%",
+    autoGenerateComponents: %% ai.autoGenerateComponents %%
   },
 
   deploy: {
-    provider: "{{ deploy.provider }}",   // vercel | netlify | aws | docker
-    region: "{{ deploy.region }}"
+    provider: "%% deploy.provider %%",       // vercel | netlify | aws | docker
+    region: "%% deploy.region %%"
   },
 
   upgrades: {
-    enabled: {{ upgrades.enabled ? "true" : "false" }}
+    enabled: %% upgrades.enabled %%
   }
 });

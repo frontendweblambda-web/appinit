@@ -1,17 +1,17 @@
+import type { ChoiceOption, PromptPack } from "@appinit/types";
 import { askAnswers } from "../prompt";
-import type { PromptPack, PromptContext, ChoiceOption } from "@appinit/types";
 
 export const environmentPack: PromptPack = {
 	name: "environment",
 	priority: 55,
 
-	handler: async (ctx: PromptContext, accum) => {
-		const flags = ctx.flags ?? {};
-		const nonInteractive = flags.nonInteractive;
-		if (nonInteractive) {
+	handler: async (config, ctx, accum) => {
+		const interactive = config.interactive;
+
+		if (!interactive) {
 			return {
-				packageManager: flags.packageManager ?? accum.packageManager ?? "pnpm",
-				workspace: flags.workspace ?? accum.workspace ?? "single",
+				packageManager: accum.packageManager ?? "pnpm",
+				workspace: accum.workspace ?? "single",
 			};
 		}
 
@@ -22,14 +22,14 @@ export const environmentPack: PromptPack = {
 					name: "packageManager",
 					message: "📦 Package manager:",
 					choices: PACKAGE_MANAGER,
-					initial: flags.packageManager ?? accum.packageManager ?? "pnpm",
+					initial: accum.packageManager ?? "pnpm",
 				},
 				{
 					type: "select",
 					name: "workspace",
 					message: "🧩 Workspace type:",
 					choices: PROJECT_STRUCTURE,
-					initial: flags.workspace ?? accum.workspace ?? "single",
+					initial: accum.workspace ?? "single",
 				},
 			],
 			accum,

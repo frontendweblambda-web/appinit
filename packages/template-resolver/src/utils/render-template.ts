@@ -2,7 +2,7 @@ export function renderTemplate(
 	content: string,
 	vars: Record<string, any>,
 ): string {
-	return content.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (match, expr) => {
+	return content.replace(/%%\s*([a-zA-Z0-9_.-]+)\s*%%/g, (match, expr) => {
 		const path = String(expr).trim();
 		if (!path) return match;
 
@@ -25,6 +25,7 @@ export function renderTemplate(
 		if (current === undefined || current === null) {
 			return "";
 		}
+
 		return String(current);
 	});
 }

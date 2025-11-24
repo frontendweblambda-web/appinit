@@ -157,6 +157,7 @@ export async function templateResolver(config: AppinitConfig) {
 	// Read all files inside rootFolder (e.g. base/)
 	const entries = await readDirRecursive(baseDir);
 
+	console.log("entries", entries);
 	for (const rel of entries) {
 		const absPath = joinPath(baseDir, rel);
 
@@ -208,18 +209,3 @@ export async function templateResolver(config: AppinitConfig) {
 
 	return result;
 }
-
-/**
- * Very small, safe template engine:
- * Replaces {{ path.to.value }} with value from the variables object.
- *
- * - supports dot notation: {{ projectName }}, {{ features.example }}
- * - no logic, no loops, no conditionals → deterministic & safe
- */
-
-/**
- * Apply rename rules from template.meta.json:
- *   { "_gitignore": ".gitignore" }
- *
- * Only applies to the last path segment.
- */

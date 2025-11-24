@@ -11,9 +11,7 @@ import { projectMetaValidation } from "../validation/project-meta.validation";
  * @param config
  * @returns
  */
-export async function resolveAnswers(
-	config: AppinitConfig,
-): Promise<AppinitConfig> {
+export async function resolveAnswers(config: AppinitConfig) {
 	const interactive = config.interactive;
 	// 2️⃣ Apply previous config (if enabled)
 	// if (!ctx.flags.ignoreConfig && ctx.config) {
@@ -28,7 +26,6 @@ export async function resolveAnswers(
 	// 4️⃣ Prompt only missing values
 	if (interactive) {
 		const result = await runPromptEngine(config);
-		// console.log("RE", ctx, result);
 		config.answers = { ...config.answers, ...result };
 	}
 

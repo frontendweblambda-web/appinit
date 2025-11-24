@@ -1,5 +1,6 @@
 import { EngineContext } from "@appinit/types";
 import { toTemplateCtx } from "./apply-filters";
+
 export async function applyVariable(engine: EngineContext) {
 	const { defaults, schema, transform } = engine.template.variables!;
 
@@ -10,11 +11,11 @@ export async function applyVariable(engine: EngineContext) {
 	vars = { ...vars, ...engine.answers };
 
 	// 3. template logic variables()
-	if (engine.template.templateModule?.variables) {
+	if (engine.template.templateConfig?.variables) {
 		const tctx = toTemplateCtx(engine);
 		vars = {
 			...vars,
-			...(await engine.template.templateModule.variables(tctx)),
+			...engine.template.templateConfig?.variables,
 		};
 	}
 

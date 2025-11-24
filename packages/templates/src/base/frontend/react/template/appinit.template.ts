@@ -27,11 +27,14 @@ const config = {
 	// 2. FILTERS — Must NOT use TS types
 	//
 	filters: {
-		// TS-only files
-		"**/*.ts__tmpl": (ctx) => ctx?.variables?.language === "ts",
-		"**/*.tsx__tmpl": (ctx) => ctx?.variables?.language === "ts",
-		// Conditional feature
-		"src/App.tsx__tmpl": (ctx) => !!ctx?.variables?.features?.example,
+filters: {
+  // Always include TS/TSX files in this template
+  "**/*.ts__tmpl": true,
+  "**/*.tsx__tmpl": true,
+
+  // Conditional feature example (optional)
+  "src/App.tsx__tmpl": (ctx) => !!ctx?.variables?.features?.example ?? true,
+},
 	},
 
 	//

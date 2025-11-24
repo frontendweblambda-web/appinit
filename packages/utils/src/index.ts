@@ -25,3 +25,4 @@ export * from "./semver";
 export * from "./sleep";
 export * from "./url";
 export * from "./validate";
+export * from "./validate-path";

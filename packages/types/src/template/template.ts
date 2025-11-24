@@ -6,6 +6,7 @@
 import { log } from "@clack/prompts";
 import { BackendFramework, FrontendFramework, Language } from "../common";
 
+import { AppEngineContext } from "../engine";
 import { PromptResult } from "../prompt";
 import { TemplateMetaJson } from "./template-meta-json";
 
@@ -16,8 +17,8 @@ export interface Variables {
 }
 
 export interface TemplateHooks {
-	before?: (ctx: TemplateContext) => Promise<void> | void;
-	after?: (ctx: TemplateContext) => Promise<void> | void;
+	before?: (ctx: AppEngineContext) => Promise<void> | void;
+	after?: (ctx: AppEngineContext) => Promise<void> | void;
 }
 
 export interface InjectionRule {

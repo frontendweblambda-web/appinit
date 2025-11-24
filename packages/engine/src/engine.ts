@@ -1,48 +1,68 @@
 // packages/engine
-import { setupGracefulExit } from "./common/exit";
 
-import { AppinitConfig, ResolvedTemplate } from "@appinit/types";
-import { applyFilters } from "./apply-filters";
-import { engineContext } from "./context";
+import { Flags, PromptResult, ResolvedTemplate } from "@appinit/types";
+import { log } from "@clack/prompts";
+import { runBeforeHook } from "./core";
+import { installDependencies } from "./core/install-deps";
+import { runAfterHook } from "./core/run-after-hook";
+import { writeFilesToDisk } from "./core/write-to-disk";
 
 /**
  * Start engine
  * @param answers
  */
-export async function startEngine(
-	config: AppinitConfig,
-	template: ResolvedTemplate,
-): Promise<void> {
-	setupGracefulExit();
-	const { answers, targetDir } = config;
 
-	const eCtx = await engineContext(targetDir!, answers!, template);
+export async function runTemplateEngine(
+	resolvedTemplate: ResolvedTemplate,
+	{
+		answers,
+		dryRun,
+		force,
+		flags,
+		logger,
+	}: {
+		dryRun?: boolean;
+		force?: boolean;
+		logger: typeof log;
+		flags?: Flags;
+		answers: PromptResult;
+	},
+) {
+	const scratch = new Map<string, any>();
 
-	// console.log("--------------", config, eCtx);
-	// // Template pipeline
-	applyFilters(eCtx);
-	// await applyVariable(eCtx);
-	// applyRename(eCtx);
-	// await transformFiles(eCtx);
-	// await renderTemplates(eCtx);
-	// await runBeforeHooks(eCtx);
+	const ctx = {
+		variables: resolvedTemplate.variables ?? {},
+		answers: answers ?? {},
 
-	// // ---------------------------
-	// // 🟦 SPINNER #1 – Writing Files
-	// // ---------------------------
-	// const writeSpin = spinner();
-	// writeSpin.start("Writing project files...");
-	// await writeFilesToDisk(eCtx);
-	// writeSpin.stop("Files written.");
+		paths: {
+			templateRoot: resolvedTemplate.templateDir!,
+			tempDir: resolvedTemplate.tempDir!,
+			targetRoot: resolvedTemplate.targetDir!,
+		},
 
-	// // -------------------------------
-	// // 🟩 SPINNER #2 – Installing Deps
-	// // -------------------------------
-	// const installSpin = spinner();
-	// installSpin.start("Installing dependencies...");
-	// await runPackageInstall(eCtx);
-	// installSpin.stop("Dependencies installed.");
+		flags: flags!,
 
-	// // Run final hooks
-	// await runAfterHooks(eCtx);
+		logger, // allow printing inside hooks
+
+		set: (key: string, value: any) => scratch.set(key, value),
+		get: (key: string) => scratch.get(key),
+	};
+
+	// For debugging:
+	logger.info("⚙️ Engine context created.");
+
+	if (resolvedTemplate.hooks?.before) {
+		await runBeforeHook(ctx, resolvedTemplate.hooks.before!);
+	}
+
+	await writeFilesToDisk(ctx, resolvedTemplate.files!);
+
+	if (resolvedTemplate.hooks?.after) {
+		await runAfterHook(ctx, resolvedTemplate.hooks?.after);
+	}
+
+	if (!ctx.flags.skipInstall) {
+		await installDependencies(ctx);
+	}
+	console.log("Scratch", scratch);
 }

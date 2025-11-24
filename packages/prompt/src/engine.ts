@@ -87,6 +87,8 @@ export async function runPromptEngine(
 			if (pack.before) await pack.before(config, promptConfig, final);
 
 			const res = await pack.handler(config, promptConfig, final);
+
+			console.log("PACK-", final, pack.name, res);
 			// Merge pack output safely
 			if (res && typeof res === "object") Object.assign(final, res);
 
@@ -112,5 +114,6 @@ export async function runPromptEngine(
 	// 🔥 Resolve Template (this is the missing final step!)
 	// --------------------------------------------------------
 
+	console.log("FINAL ANSWERS---", final);
 	return final;
 }
