@@ -2,6 +2,7 @@
 
 import { existsSync, readFileSync as readFileSyncNative } from "node:fs";
 import {
+	access,
 	appendFile,
 	cp,
 	lstat,
@@ -173,3 +174,5 @@ export async function copyDir(srcDir: string, destDir: string) {
 		}
 	}
 }
+
+export const checkAccess = access;

@@ -1,8 +1,11 @@
 {
-  "name": "@appinit/pack-tailwind",
-  "title": "Tailwind CSS Pack",
-  "description": "Add Tailwind, configs, index.css updates",
+  "id":"tailwind",
+  "name": "Tailwind css modle",
   "version": "1.0.0",
+  "description": "Add Tailwind, configs, index.css updates",
+  "author":"Appinit team",
+  "license":"MIT",
+  "spec":"ams-1.0",
   "category": "ui",
   "appinitSpec": "1.0",
   "compatible":{
@@ -11,7 +14,5 @@
   },
   "requires":{
     "projectType":["frontend","fullstack"]
-  },
-  "author":"Appinit team",
-  "source":"builtin:react-template"
+  }
 }

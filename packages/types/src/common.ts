@@ -18,7 +18,7 @@ export type Capability =
 	| "edge"
 	| "db"
 	| "cache";
-export type Variables = Record<string, any>;
+
 export type WorkspaceTool = "single" | "turborepo" | "nx" | "monorepo"; // Workspace toolchains
 export type Language = "typescript" | "javascript";
 export type ProjectType =

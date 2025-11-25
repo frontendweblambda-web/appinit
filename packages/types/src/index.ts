@@ -29,5 +29,6 @@ export * from "./registry";
 export * from "./saved-config";
 export * from "./spinner";
 // export * from "./template";
+export * from "./module";
 export * from "./template";
 export * from "./workspace";
