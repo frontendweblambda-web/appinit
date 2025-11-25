@@ -1,4 +1,22 @@
+
+/**
+ * ctx: PackContext
+ * @param ctx
+ */
 export default async function add(ctx){
+  const {log, fs, paths, project, pkg }= ctx;
+
+  log.info("📦 Installing Tailwind CSS...")
+
+
+  await pkg.installDev([
+    "tailwindcss",
+    "postcss",
+    "autoprefixer"
+  ])
+
+  log.success("✔ Dependencies installed");
+
   ctx.files.write("tailwind.config.ts","...");
   ctx.files.write("post.css.js")
 

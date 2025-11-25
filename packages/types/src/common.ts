@@ -1,3 +1,5 @@
+import { log } from "@clack/prompts";
+
 export type ID = string;
 export type Nullable<T> = T | null | undefined;
 export type Maybe<T> = T | null | undefined;
@@ -125,3 +127,4 @@ export type BackendFramework =
 	| "none";
 
 export type Framework = FrontendFramework | BackendFramework;
+export type Log = typeof log;

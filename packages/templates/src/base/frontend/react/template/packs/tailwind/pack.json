@@ -3,7 +3,15 @@
   "title": "Tailwind CSS Pack",
   "description": "Add Tailwind, configs, index.css updates",
   "version": "1.0.0",
-  "type": "ui",
+  "category": "ui",
   "appinitSpec": "1.0",
-  "supports": ["react", "next"]
+  "compatible":{
+    "framework":["react","next","vue"],
+    "language":["javascript","typescript"]
+  },
+  "requires":{
+    "projectType":["frontend","fullstack"]
+  },
+  "author":"Appinit team",
+  "source":"builtin:react-template"
 }
